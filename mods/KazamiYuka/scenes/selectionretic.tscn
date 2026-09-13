@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://clupltdc6dyqw"]
+
+[ext_resource type="Script" uid="uid://cvftkip83bcfd" path="res://Scripts/Nodes/KazamiYukaSelectionReticle.cs" id="1_u7pmi"]
+
+[node name="Selectionretic" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -147.36726
+offset_top = -399.99683
+offset_right = 171.05128
+offset_bottom = -142.10413
+script = ExtResource("1_u7pmi")

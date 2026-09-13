@@ -1,0 +1,40 @@
+{
+  "KAZAMI_YUKA_POWER_XIANG_YANG_POWER.title": "向阳",
+  "KAZAMI_YUKA_POWER_XIANG_YANG_POWER.smartDescription": "回合开始时，获得[blue]{Amount}[/blue]点[orange]阳光[/orange]。",
+
+  "KAZAMI_YUKA_POWER_SUNFLOWER_GUARD_POWER.title": "守护",
+  "KAZAMI_YUKA_POWER_SUNFLOWER_GUARD_POWER.smartDescription": "这朵向日葵将为你承受未被格挡的伤害。",
+
+  "KAZAMI_YUKA_POWER_HIGH_ILLUMINATION_POWER.title": "高照",
+  "KAZAMI_YUKA_POWER_HIGH_ILLUMINATION_POWER.smartDescription": "在回合结束时，对生命值最低的敌人造成 [blue]{Amount}[/blue] 点伤害。",
+
+  "KAZAMI_YUKA_POWER_FLOWER_GRATITUDE_POWER.title": "花的报恩",
+  "KAZAMI_YUKA_POWER_FLOWER_GRATITUDE_POWER.smartDescription": "每当有向日葵回复或者提升生命上限时，抽 [blue]{Amount}[/blue] 张卡。",
+
+  "KAZAMI_YUKA_POWER_INFINITE_SPIRAL_POWER.title": "无限螺旋",
+  "KAZAMI_YUKA_POWER_INFINITE_SPIRAL_POWER.smartDescription": "每次打出牌时，所有向日葵对生命最少的敌人造成等同于其生命值上限的伤害。\n回合结束时，您将面临灾厄并直接死亡。",
+
+  "KAZAMI_YUKA_POWER_AFTERNOON_TEA_RANDOM_POWER.title": "下午茶",
+  "KAZAMI_YUKA_POWER_AFTERNOON_TEA_RANDOM_POWER.smartDescription": "本回合内，每当你获得或失去阳光时，随机一朵向日葵增加 [blue]{Amount}[/blue] 点生命上限。",
+
+  "KAZAMI_YUKA_POWER_AFTERNOON_TEA_ALL_POWER.title": "下午茶",
+  "KAZAMI_YUKA_POWER_AFTERNOON_TEA_ALL_POWER.smartDescription": "本回合内，每当你获得或失去阳光时，所有向日葵增加 [blue]{Amount}[/blue] 点生命上限。",
+
+  "KAZAMI_YUKA_POWER_SCATTERED_LIGHT_POWER.title": "分散光",
+  "KAZAMI_YUKA_POWER_SCATTERED_LIGHT_POWER.smartDescription": "在你的回合开始时，获得{:sunlightIcons(4)}。",
+
+  "KAZAMI_YUKA_POWER_SURROUND_POWER.title": "围绕",
+  "KAZAMI_YUKA_POWER_SURROUND_POWER.smartDescription": "每当你[gold]召唤[/gold]向日葵时，为其额外提升 [blue]{Amount}[/blue] 点最大生命值，并获得守护。",
+
+  "KAZAMI_YUKA_POWER_CLEAR_SKY_POWER.title": "烈日晴空",
+  "KAZAMI_YUKA_POWER_CLEAR_SKY_POWER.smartDescription": "下 [blue]{Amount}[/blue] 次获得{:sunlightIcons(1)}时，额外获得{:sunlightIcons(4)}。",
+
+  "KAZAMI_YUKA_POWER_FLOWER_MOUND_POWER.title": "花冢",
+  "KAZAMI_YUKA_POWER_FLOWER_MOUND_POWER.smartDescription": "向日葵失去生命时，获得{Amount:sunlightIcons()}。",
+
+  "KAZAMI_YUKA_POWER_TYRANT_FORM_POWER.title": "暴君形态",
+  "KAZAMI_YUKA_POWER_TYRANT_FORM_POWER.smartDescription": "每次打出牌，所有向日葵扣除 4 点生命上限，并对所有敌人造成扣除生命上限的 {Amount} 倍伤害。",
+
+  "KAZAMI_YUKA_POWER_FACING_SUN_POWER.title": "迎光",
+  "KAZAMI_YUKA_POWER_FACING_SUN_POWER.smartDescription": "这朵向日葵受到的伤害减少 50%。"
+}

@@ -1,0 +1,8 @@
+# Local-only Markdown notes
+*.local.md
+
+# Godot generated metadata
+*.uid
+*.import
+.godot/
+

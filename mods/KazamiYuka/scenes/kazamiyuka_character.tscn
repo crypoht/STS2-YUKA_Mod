@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://dtk7o38ssjd46"]
+
+[ext_resource type="Texture2D" uid="uid://n5p0fd6meqja" path="res://mods/KazamiYuka/images/kazamiyuka_character.png" id="1_s0637"]
+
+[node name="Yuka" type="Node2D"]
+
+[node name="Visuals" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-1, -141.00002)
+scale = Vector2(0.229, 0.22766666)
+texture = ExtResource("1_s0637")
+
+[node name="Bounds" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_left = -106.0
+offset_top = -300.0
+offset_right = 108.0
+offset_bottom = 18.0
+
+[node name="IntentPos" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(9, -276)
+
+[node name="CenterPos" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(7, -186)

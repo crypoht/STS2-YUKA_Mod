@@ -1,0 +1,6 @@
+[gd_resource type="AtlasTexture" load_steps=2 format=3 uid="uid://dggomyexm3f3"]
+
+[ext_resource type="Texture2D" uid="uid://bfei5ijyymh0y" path="res://mods/KazamiYuka/images/sunlight_icon.png" id="1_oehys"]
+
+[resource]
+atlas = ExtResource("1_oehys")

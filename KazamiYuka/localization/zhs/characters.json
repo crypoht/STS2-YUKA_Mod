@@ -1,0 +1,17 @@
+{
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.aromaPrinciple": "[sine][blue]……等待……[/blue][/sine]",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.banter.alive.endTurnPing": "花的绽放也要等待",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.banter.dead.endTurnPing": "zzz",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.cardsModifierDescription": "风见幽香的卡牌现在会出现在奖励和商店中。",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.cardsModifierTitle": "风见幽香卡牌",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.description": "四季的鲜花之主,优雅的大妖怪",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.eventDeathPrevention": "你也要,去成为和谁的未来都有牵连的人呐",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.goldMonologue": "[sine]我的花店允许人类使用这些东西交换花朵,但其实没必要......[/sine]",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.possessiveAdjective": "她的",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.pronounObject": "她",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.pronounPossessive": "她的",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.pronounSubject": "她",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.title": "风见幽香",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.titleObject": "风见幽香",
+  "KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.unlockText": "用[pink]{Prerequisite}[/pink]进行一局游戏来解锁这个角色。"
+}

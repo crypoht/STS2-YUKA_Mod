@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://4y8fyjq55ap6"]
+
+[ext_resource type="Texture2D" uid="uid://ccd6bju6v6oxe" path="res://mods/KazamiYuka/images/icon_64.png" id="1_egqjq"]
+
+[node name="TextureRect" type="TextureRect"]
+offset_left = -2.0
+offset_top = -5.0
+offset_right = 62.0
+offset_bottom = 59.0
+texture = ExtResource("1_egqjq")
+stretch_mode = 4
+
+[node name="Node2D" type="Control" parent="."]
+anchors_preset = 0

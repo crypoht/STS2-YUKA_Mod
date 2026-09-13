@@ -1,0 +1,91 @@
+{
+  "KAZAMI_YUKA_CARD_STRIKE_YUKA.title": "打击",
+  "KAZAMI_YUKA_CARD_STRIKE_YUKA.description": "造成 {Damage:diff()} 点伤害。",
+
+  "KAZAMI_YUKA_CARD_DEFEND_YUKA.title": "防御",
+  "KAZAMI_YUKA_CARD_DEFEND_YUKA.description": "获得 {Block:diff()} 点格挡。",
+
+  "KAZAMI_YUKA_CARD_SOW_SEEDS_YUKA.title": "播下种子",
+  "KAZAMI_YUKA_CARD_SOW_SEEDS_YUKA.description": "[gold]成长[/gold]{Heal:diff()}",
+
+  "KAZAMI_YUKA_CARD_PHOTOSYNTHESIS_YUKA.title": "光合作用",
+  "KAZAMI_YUKA_CARD_PHOTOSYNTHESIS_YUKA.description": "为一朵[gold]向日葵[/gold]恢复 {Heal:diff()} 点生命值。",
+
+  "KAZAMI_YUKA_CARD_SUNLIGHT_STRIKE_YUKA.title": "阳光打击",
+  "KAZAMI_YUKA_CARD_SUNLIGHT_STRIKE_YUKA.description": "造成 {Damage:diff()} 点伤害。",
+
+  "KAZAMI_YUKA_CARD_FLOWER_BED_PROTECTION_YUKA.title": "花丛护身",
+  "KAZAMI_YUKA_CARD_FLOWER_BED_PROTECTION_YUKA.description": "选择一朵[gold]向日葵[/gold]，使其提升{MaxHpGain:diff()}点最大生命值，并为你格挡伤害",
+
+  "KAZAMI_YUKA_CARD_SUNSHINE_YUKA.title": "阳光照耀",
+  "KAZAMI_YUKA_CARD_SUNSHINE_YUKA.description": "[gold]烈阳[/gold]{MaxSunlight:diff()}。\n选择一朵[gold]向日葵[/gold]，每消耗 1 点{:sunlightIcons(1)}使其增加 1 点最大生命值。\n随后，对生命值最低的敌人造成等于向日葵生命值的伤害。",
+
+  "KAZAMI_YUKA_CARD_HIGH_ILLUMINATION_YUKA.title": "高照",
+  "KAZAMI_YUKA_CARD_HIGH_ILLUMINATION_YUKA.description": "使所有[gold]向日葵[/gold]在回合结束时对生命值最低的敌人造成 {DamageAmount:diff()} 点伤害。",
+
+  "KAZAMI_YUKA_CARD_SUNLIGHT_COLLECTION_YUKA.title": "阳光收集",
+  "KAZAMI_YUKA_CARD_SUNLIGHT_COLLECTION_YUKA.description": "获得{SunAmount:sunlightIcons()}",
+
+  "KAZAMI_YUKA_CARD_FLOWER_GRATITUDE_YUKA.title": "花的报恩",
+  "KAZAMI_YUKA_CARD_FLOWER_GRATITUDE_YUKA.description": "每当有[gold]向日葵[/gold]回复或者提升生命上限时，抽 {DrawAmount:diff()} 张卡。",
+
+  "KAZAMI_YUKA_CARD_UMBRELLA_PARRY_YUKA.title": "阳伞招架",
+  "KAZAMI_YUKA_CARD_UMBRELLA_PARRY_YUKA.description": "获得 {Block:diff()} 点格挡。\n获得 {SunlightGain:sunlightIcons()}。",
+
+  "KAZAMI_YUKA_CARD_INFINITE_SPIRAL_YUKA.title": "无限螺旋",
+  "KAZAMI_YUKA_CARD_INFINITE_SPIRAL_YUKA.description": "所有[gold]向日葵[/gold]的生命上限提高 {MaxHpGained:diff()} 点。\n抽 {Cards:diff()} 张牌。\n获得{Energy:energyIcons()}。\n每次打出牌时，所有[gold]向日葵[/gold]对生命最少的敌人造成等同于其生命值上限的伤害。\n本回合结束时，死亡。",
+
+  "KAZAMI_YUKA_CARD_SUNLIGHT_REPEATER_YUKA.title": "烈阳重发",
+  "KAZAMI_YUKA_CARD_SUNLIGHT_REPEATER_YUKA.description": "[gold]烈阳[/gold]{MaxSunConsume:diff()}。\n造成 {CalculatedDamage:diff()} 点伤害。\n每消耗 1 点 [sunlight] ，伤害增加 {ExtraDamage:diff()} 点。",
+
+  "KAZAMI_YUKA_CARD_AFTERNOON_TEA_YUKA.title": "下午茶",
+  "KAZAMI_YUKA_CARD_AFTERNOON_TEA_YUKA.description": "本回合内，每当你获得或失去[sunlight]时，{IfUpgraded:show:所有|随机一朵}[gold]向日葵[/gold]增加 1 点生命上限。",
+
+  "KAZAMI_YUKA_CARD_SCATTERED_LIGHT_YUKA.title": "分散光",
+  "KAZAMI_YUKA_CARD_SCATTERED_LIGHT_YUKA.description": "[gold]烈阳[/gold]{MaxConsume:diff()}。\n每消耗 1 [sunlight]接下来每几回合就获得{:sunlightIcons(4)}。",
+
+  "KAZAMI_YUKA_CARD_TYRANT_OBLITERATION_YUKA.title": "暴君抹杀",
+  "KAZAMI_YUKA_CARD_TYRANT_OBLITERATION_YUKA.description": "[gold]烈阳[/gold]{MaxConsume:diff()}。\n造成 {Damage:diff()} 点伤害 {HitCount:diff()} 次。\n每消耗 1 [sunlight] ，本场战斗中此牌的伤害次数增加 1 次。",
+
+  "KAZAMI_YUKA_CARD_UNITY_YUKA.title": "团结",
+  "KAZAMI_YUKA_CARD_UNITY_YUKA.description": "[gold]成长[/gold] {CalculatedGrow:diff()} 。\n场上每有一朵[gold]向日葵[/gold]，此数值翻一倍。",
+
+  "KAZAMI_YUKA_CARD_SHADING_YUKA.title": "遮挡",
+  "KAZAMI_YUKA_CARD_SHADING_YUKA.description": "[gold]烈阳[/gold] {MaxSunConsume:diff()}。\n每消耗 1 点 [sunlight]，获得 {Block:diff()} 点格挡。",
+
+  "KAZAMI_YUKA_CARD_SURROUND_YUKA.title": "围绕",
+  "KAZAMI_YUKA_CARD_SURROUND_YUKA.description": "每当你召唤[gold]向日葵[/gold]时，为其额外提升 {BonusMaxHp:diff()} 点最大生命值，其会为你[gold]抵挡伤害[/gold]。",
+
+  "KAZAMI_YUKA_CARD_UMBRELLA_TECHNIQUE_YUKA.title": "伞的技艺",
+  "KAZAMI_YUKA_CARD_UMBRELLA_TECHNIQUE_YUKA.description": "造成 {Damage:diff()} 点伤害。\n场上每有一朵[gold]向日葵[/gold]，就额外造成伤害一次。\n（一共造成 {HitCount:diff()} 次伤害。）",
+
+  "KAZAMI_YUKA_CARD_BREEZE_YUKA.title": "吹拂",
+  "KAZAMI_YUKA_CARD_BREEZE_YUKA.description": "[gold]烈阳[/gold] {MaxSunConsume:diff()}。\n每消耗 1 点{:sunlightIcons(1)}，所有[gold]向日葵[/gold]提升 1 点最大生命值。",
+
+  "KAZAMI_YUKA_CARD_CLEAR_SKY_YUKA.title": "烈日晴空",
+  "KAZAMI_YUKA_CARD_CLEAR_SKY_YUKA.description": "下 {TriggerCount:diff()} 次获得{:sunlightIcons(1)}时，额外获得{:sunlightIcons(4)}。",
+
+  "KAZAMI_YUKA_CARD_FLOWER_MOUND_YUKA.title": "花冢",
+  "KAZAMI_YUKA_CARD_FLOWER_MOUND_YUKA.description": "当有[gold]向日葵[/gold]失去生命时，获得 {SunlightGain:sunlightIcons()}。",
+
+  "KAZAMI_YUKA_CARD_BRUTALITY_YUKA.title": "残暴",
+  "KAZAMI_YUKA_CARD_BRUTALITY_YUKA.description": "所有[gold]向日葵[/gold]扣除当前生命值的一半。\n对所有敌人造成相当于扣除生命值的伤害。\n（一共 {CalculatedDamage:diff()} 点。）",
+
+  "KAZAMI_YUKA_CARD_GREAT_YOUKAI_ELEGANCE_YUKA.title": "大妖怪的优雅",
+  "KAZAMI_YUKA_CARD_GREAT_YOUKAI_ELEGANCE_YUKA.description": "获得 {CalculatedBlock:diff()} 点格挡。\n场上每有一朵[gold]向日葵[/gold]，则额外获得 {CalculationExtra:diff()} 点格挡。"
+  ,
+  "KAZAMI_YUKA_CARD_SELF_SUN_YUKA.title": "自我的太阳",
+  "KAZAMI_YUKA_CARD_SELF_SUN_YUKA.description": "获得{Energy:energyIcons()}点能量。",
+
+  "KAZAMI_YUKA_CARD_VIOLENT_ART_YUKA.title": "暴力的艺术",
+  "KAZAMI_YUKA_CARD_VIOLENT_ART_YUKA.description": "造成 {CalculatedDamage:diff()} 点伤害。\n每消耗 1 点{:sunlightIcons(1)}，本场战斗中此牌的伤害增加 {ExtraDamage:diff()} 点。",
+
+  "KAZAMI_YUKA_CARD_FLOWER_FIST_YUKA.title": "花的重拳",
+  "KAZAMI_YUKA_CARD_FLOWER_FIST_YUKA.description": "造成 {Damage:diff()} 点伤害。\n给予 {VulnerablePower:diff()} 层[gold]易伤[/gold]。\n给予 {WeakPower:diff()} 层[gold]虚弱[/gold]。",
+
+  "KAZAMI_YUKA_CARD_TYRANT_FORM_YUKA.title": "暴君形态",
+  "KAZAMI_YUKA_CARD_TYRANT_FORM_YUKA.description": "每次打出牌，所有[gold]向日葵[/gold]扣除 {MaxHpLoss:diff()} 点生命上限。\n对所有敌人造成扣除生命上限的 {Multiplier:diff()} 倍伤害。",
+
+  "KAZAMI_YUKA_CARD_FACING_SUN_YUKA.title": "迎光面",
+  "KAZAMI_YUKA_CARD_FACING_SUN_YUKA.description": "获得 {Block:diff()} 点格挡。\n本回合内，[gold]向日葵[/gold]受到的伤害减少 50%。"
+}

@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://eo4pf4348h23"]
+
+[ext_resource type="Script" uid="uid://dkllcqksowiif" path="res://Scripts/Nodes/SunflowerVisuals.cs" id="1_e8tmo"]
+[ext_resource type="Texture2D" uid="uid://bcephdnh3qhya" path="res://mods/KazamiYuka/images/SunFlower.png" id="1_glu1j"]
+
+[node name="SunFlower" type="Node2D"]
+script = ExtResource("1_e8tmo")
+
+[node name="Visuals" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-4, -112)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("1_glu1j")
+
+[node name="Bounds" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_left = -74.0
+offset_top = -232.0
+offset_right = 73.0
+offset_bottom = -5.0
+
+[node name="CenterPos" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(7, -192)
+
+[node name="IntentPos" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-4, -305)

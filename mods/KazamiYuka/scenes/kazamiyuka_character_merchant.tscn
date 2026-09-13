@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://wsekny15026"]
+
+[ext_resource type="Script" uid="uid://bc01s1f0ybdav" path="res://Scripts/Nodes/KazamiYukaMerchantCharacter.cs" id="1_kgrjb"]
+[ext_resource type="Texture2D" uid="uid://bwqm7fcyujn3w" path="res://mods/KazamiYuka/images/FUMOKAZAMIYUKA.png" id="2_wqrpt"]
+
+[node name="YukaMerchant" type="Node2D"]
+script = ExtResource("1_kgrjb")
+
+[node name="Visuals" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-4.999998, -64)
+scale = Vector2(0.21622138, 0.21188761)
+texture = ExtResource("2_wqrpt")

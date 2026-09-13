@@ -1,0 +1,17 @@
+{
+  "id": "KazamiYuka",           
+  "name": "KazamiYuka",
+  "author": "UINYA",
+  "description": "可恶的,我要急哭",
+  "version": "百合花",
+  "has_pck": true,
+  "has_dll": true,
+  "dependencies": [
+    {
+      "id": "STS2-RitsuLib",
+      "min_version": "0.5.14"
+    }
+  ],
+  "affects_gameplay": true,
+  "min_game_version": "0.111.0"
+}

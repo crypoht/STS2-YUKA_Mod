@@ -1,0 +1,102 @@
+[gd_scene load_steps=4 format=3 uid="uid://t1hqaupsi4d"]
+
+[ext_resource type="Script" uid="uid://ciopm6f1anenq" path="res://Scripts/Nodes/NSunlightCounter.cs" id="1_xhqkn"]
+[ext_resource type="Texture2D" uid="uid://c6fpw6ac14koy" path="res://mods/KazamiYuka/images/sunlight.png" id="2_wnrnj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_arupd"]
+
+[node name="SunlightCounter" type="Control"]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = -212.0
+offset_right = 192.0
+offset_bottom = -83.9999
+grow_vertical = 0
+scale = Vector2(0.8, 0.8)
+script = ExtResource("1_xhqkn")
+metadata/_edit_lock_ = true
+
+[node name="Icon" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_arupd")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_wnrnj")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RotationLayers" type="Control" parent="Icon"]
+unique_name_in_owner = true
+use_parent_material = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Layer1" type="TextureRect" parent="Icon/RotationLayers"]
+use_parent_material = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(64, 64)
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Layer2" type="TextureRect" parent="Icon/RotationLayers"]
+use_parent_material = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(64, 64)
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.9999995
+offset_right = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_top = 41
+
+[node name="CountLabel" type="RichTextLabel" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/default_color = Color(1, 0.964706, 0.886275, 1)
+theme_override_colors/font_outline_color = Color(0.2658462, 0.251476, 0.07049195, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.12549)
+theme_override_constants/shadow_offset_x = 5
+theme_override_constants/shadow_offset_y = 5
+theme_override_constants/outline_size = 14
+theme_override_font_sizes/normal_font_size = 36
+theme_override_font_sizes/bold_font_size = 36
+theme_override_font_sizes/bold_italics_font_size = 36
+theme_override_font_sizes/italics_font_size = 36
+theme_override_font_sizes/mono_font_size = 36
+bbcode_enabled = true
+text = "[center]0[/center]"
+scroll_active = false
+autowrap_mode = 0

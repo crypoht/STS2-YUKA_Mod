@@ -1,0 +1,20 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="KazamiYuka"
+run/main_scene="uid://bbw67f6yb0yr8"
+config/features=PackedStringArray("4.5", "C#", "Forward Plus")
+config/icon="uid://dt0ikxcbfa2iu"
+
+[dotnet]
+
+project/assembly_name="KazamiYuka"
