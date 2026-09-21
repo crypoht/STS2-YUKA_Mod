@@ -10,8 +10,8 @@ scale = Vector2(0.760006, 0.760006)
 script = ExtResource("1_a1u1y")
 
 [node name="Visual" type="Sprite2D" parent="."]
-position = Vector2(11.842011, -286.83984)
-scale = Vector2(0.91300845, 0.85677856)
+position = Vector2(11.8420105, -217.10358)
+scale = Vector2(0.6, 0.563)
 texture = ExtResource("1_evbp4")
 
 [node name="ControlRoot" type="Control" parent="."]
@@ -29,10 +29,10 @@ offset_bottom = 257.8927
 [node name="Hitbox" type="Control" parent="ControlRoot"]
 unique_name_in_owner = true
 anchors_preset = 0
-offset_left = -188.1564
-offset_top = -580.2586
-offset_right = 232.8436
-offset_bottom = -42.10492
+offset_left = -147.36725
+offset_top = -436.83865
+offset_right = 165.78815
+offset_bottom = -55.262726
 
 [node name="ThoughtBubbleRight" type="Control" parent="ControlRoot"]
 unique_name_in_owner = true

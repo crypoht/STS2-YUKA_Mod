@@ -10,13 +10,19 @@ namespace KazamiYuka.Scripts.Patches
     {
         public static void Prefix(ref string text)
         {
-            if (string.IsNullOrEmpty(text)) return;
+            CustomTextIconRenderHelpers.ReplaceSunlightIcons(ref text);
+        }
+    }
 
-            if (text.Contains("[sunlight]"))
-            {
+    public static class CustomTextIconRenderHelpers
+    {
+        public static void ReplaceSunlightIcons(ref string text)
+        {
+            if (string.IsNullOrEmpty(text) || !text.Contains("[sunlight]")) return;
 
-                text = text.Replace("[sunlight]", "[img width=16 height=16]res://mods/KazamiYuka/images/sunlight_icon.png[/img]");
-            }
+            text = text.Replace(
+                "[sunlight]",
+                "[img width=16 height=16]res://mods/KazamiYuka/images/sunlight_icon.png[/img]");
         }
     }
 }

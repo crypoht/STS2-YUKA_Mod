@@ -12,6 +12,8 @@ namespace KazamiYuka.Scripts.Powers;
 [RegisterPower]
 public sealed class FlowerGratitudePower : ModPowerTemplate
 {
+    private const decimal TriggerCount = 4m;
+
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
@@ -20,34 +22,52 @@ public sealed class FlowerGratitudePower : ModPowerTemplate
         BigIconPath: "res://mods/KazamiYuka/images/powers/FlowerGratitudePower.png"
     );
 
-    // 能力被触发时的抽卡逻辑
-    public async Task TriggerDraw(PlayerChoiceContext choiceContext)
+    public async Task RegisterSunflowerHealthChange(PlayerChoiceContext choiceContext)
     {
-        if (base.Owner.Player == null) return;
-        await CardPileCmd.Draw(choiceContext, base.Amount, base.Owner.Player, false);
+        if (base.Owner.Player == null || base.Amount <= 0m)
+        {
+            return;
+        }
+
+        if (base.Amount > 1m)
+        {
+            await PowerCmd.Apply<FlowerGratitudePower>(
+                choiceContext ?? new ThrowingPlayerChoiceContext(),
+                base.Owner,
+                -1m,
+                base.Owner,
+                null,
+                false
+            );
+            return;
+        }
+
+        base.Flash();
+        PlayerChoiceContext drawContext = choiceContext ?? new ThrowingPlayerChoiceContext();
+        await CardPileCmd.Draw(drawContext, 1m, base.Owner.Player, false);
+        await PowerCmd.Apply<FlowerGratitudePower>(
+            drawContext,
+            base.Owner,
+            TriggerCount - base.Amount,
+            base.Owner,
+            null,
+            false
+        );
     }
 
-    // =========================================================
-    // 👇 全局监听器：不管场上发生什么，只要是向日葵血量变了，就会通知这里
-    // =========================================================
     public static async Task OnAnySunflowerHealthChanged(PlayerChoiceContext ctx, Creature sunflower, FlowerHealthEvent eventType, decimal amount)
     {
-        // 我们这张卡只关心【生命回复】和【上限增加】，如果是扣血则直接无视
         if (eventType != FlowerHealthEvent.Heal && eventType != FlowerHealthEvent.MaxHpIncrease)
         {
             return;
         }
 
-        // 确认向日葵的主人 (玩家)
-        var player = sunflower.PetOwner?.Creature;
-        
-        // 检查玩家身上是否有“花的报恩”这个状态
-        if (player != null && player.HasPower<FlowerGratitudePower>())
+        foreach (var player in SunflowerManager.GetCombatPlayers(sunflower))
         {
-            var power = player.GetPower<FlowerGratitudePower>();
+            var power = player.Creature.GetPower<FlowerGratitudePower>();
             if (power != null)
             {
-                await power.TriggerDraw(ctx);
+                await power.RegisterSunflowerHealthChange(ctx);
             }
         }
     }

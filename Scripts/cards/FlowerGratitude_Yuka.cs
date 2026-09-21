@@ -20,32 +20,27 @@ public class FlowerGratitude_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("DrawAmount", 1m), // 每次触发抽1张
-        new SunlightCostVar(10m),
+        new DynamicVar("DrawAmount", 1m),
+        new DynamicVar("TriggerCount", 4m),
+        new SunlightCostVar(4m),
     ];
 
-    // 2费，能力牌，罕见，目标是自己
     public FlowerGratitude_Yuka() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        // 👇 修复 1：使用标准安全的 as 转换，彻底消灭 CS1061 报错
         var player = base.Owner as MegaCrit.Sts2.Core.Entities.Players.Player;
         if (player == null) return;
 
-        // 👇 核心修改：读取动态变量，并把 cardPlay 收据交给基类查验！
         int requiredSunlight = (int)DynamicVars["SunlightCost"].BaseValue;
         if (base.TryPayFixedSunlight(player, requiredSunlight, cardPlay))
         {
-            int amount = (int)DynamicVars["DrawAmount"].BaseValue;
-
-            // 给自己挂上“花的报恩”能力
             await PowerCmd.Apply<FlowerGratitudePower>(
                 choiceContext,
                 base.Owner.Creature,
-                amount,
+                DynamicVars["TriggerCount"].BaseValue,
                 base.Owner.Creature,
                 this,
                 false
@@ -53,8 +48,6 @@ public class FlowerGratitude_Yuka : KazamiYukaCard
         }
         else
         {
-            // 阳光不足时，卡牌直接打出但不生效（这里做保险）
-            // 可以加一个音效提示失败
         }
     }
 

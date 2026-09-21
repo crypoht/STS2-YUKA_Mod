@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using STS2RitsuLib.Scaffolding.Content;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Models;
 using KazamiYuka.Scripts;
+using KazamiYuka.Scripts.Patches;
 using Godot;
 
 namespace KazamiYuka.Scripts.Cards;
@@ -26,29 +28,21 @@ public abstract class KazamiYukaCard : ModCardTemplate
             : TemporaryCardPortraitPath;
     }
 
-    // =======================================================
-    // 👇 恢复这个公开属性！让你的 UI 图标也能直接读取它！
-    // =======================================================
     public bool IsSunlightFree 
-{
-    get 
     {
-        // 1. 读取官方能量成本的当前状态
-        var energy = base.EnergyCost;
-        if (energy == null) return false;
-
-        // 2. 官方判定：卡牌现在被强行设为了 0 费 (不论是药水、遗物还是 Buff 导致的)
-        // GetResolved() 会返回最终生效的费用（扣除所有 modifier 后的值）
-        if (energy.GetResolved() == 0)
+        get 
         {
-            // 如果它本来是有费用的 (Canonical > 0)，现在变成 0，说明它被免单了
-            // 或者如果它本来就是 0 费，但被某种特效修改过 (HasLocalModifiers)
-            if (energy.Canonical > 0 || energy.HasLocalModifiers) return true;
+            return IsEnergyCostTemporarilyFree(this);
         }
-        
-        return false;
     }
-}
+
+    public static bool IsEnergyCostTemporarilyFree(CardModel card)
+    {
+        var energy = card.EnergyCost;
+        return energy != null
+            && energy.GetWithModifiers(CostModifiers.None) > 0
+            && energy.GetResolved() == 0;
+    }
 
     protected KazamiYukaCard(int cost, CardType type, CardRarity rarity, TargetType targetType, bool shouldShowInCardLibrary) 
         : base(cost, type, rarity, targetType, shouldShowInCardLibrary)
@@ -61,7 +55,6 @@ public abstract class KazamiYukaCard : ModCardTemplate
         {
            if (!base.IsPlayable) return false;
 
-            // 拦截：手牌里如果已经免费，直接防卡手放行！
             if (this.IsSunlightFree) return true;
 
             if (DynamicVars.TryGetValue("SunlightCost", out var sunCostVar))
@@ -80,39 +73,30 @@ public abstract class KazamiYukaCard : ModCardTemplate
         }
     }
 
-    // ==========================================================
-    // 👇 核心修复：完善 0 费卡牌的收据判定！
-    // ==========================================================
     protected bool IsFreeFromReceipt(CardPlay cardPlay)
     {
         if (cardPlay == null || cardPlay.Card?.EnergyCost == null) return false;
 
-        // 如果收据显示实际消耗了 0 能量
-        if (cardPlay.Resources.EnergySpent == 0)
-        {
-            // 条件1：卡牌本来是要花能量的 (如 SunlightStrike_Yuka, Canonical=1)
-            if (cardPlay.Card.EnergyCost.Canonical > 0) return true;
-
-            // 条件2：卡牌本来就是 0 费 (如 FlowerBedProtection_Yuka, Canonical=0)
-            // 但是它身上被药水/水花贴了“本回合免费”的临时标签！
-            if (cardPlay.Card.EnergyCost.HasLocalModifiers) return true;
-        }
-        return false;
+        return cardPlay.Resources.EnergySpent == 0
+            && IsEnergyCostTemporarilyFree(cardPlay.Card);
     }
 
-    // 接口 A
     protected bool TryPayFixedSunlight(Player player, int requiredAmount, CardPlay cardPlay)
     {
-        if (IsFreeFromReceipt(cardPlay)) return true; // 查收据，免单放行！
+        if (PhantasmagoriaofFlowerViewPayment.TryConsumeFixedSunlightPayment(this, requiredAmount))
+        {
+            return true;
+        }
+
+        if (IsFreeFromReceipt(cardPlay)) return true;
         return SunlightManager.TrySpendSunlight(player, requiredAmount);
     }
 
-    // 接口 B
     protected int ConsumeUpToMaxSunlight(Player player, int maxLimit, CardPlay cardPlay)
     {
-        if (IsFreeFromReceipt(cardPlay)) return maxLimit; // 查收据，免单当最大值！
+        if (IsFreeFromReceipt(cardPlay)) return maxLimit;
 
-        int sunAvailable = SunlightManager.CurrentSunlight;
+        int sunAvailable = SunlightManager.GetSunlight(player);
         int sunToSpend = Math.Min(sunAvailable, maxLimit);
         
         if (sunToSpend > 0) SunlightManager.TrySpendSunlight(player, sunToSpend);

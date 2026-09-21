@@ -1,83 +1,149 @@
 using System;
+using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Entities.Players;
+using KazamiYuka.Scripts.Relics;
 
 namespace KazamiYuka.Scripts;
 
 public static class SunlightManager
 {
-    // 当前拥有的阳光数量
-    public static int CurrentSunlight { get; private set; } = 0;
+	[Obsolete("Use GetSunlight(player) for gameplay. CurrentSunlight kept for compatibility only.")]
+	public static int CurrentSunlight { get; private set; } = 0;
 
-    // 广播频道：当阳光数量改变时，通知 UI 去更新画面 (参数：旧值, 新值)
-    public static event Action<int, int>? SunlightChanged;
-    public static event Action<Player, int>? SunlightSpent;
+	[Obsolete("Use SunlightChangedForPlayer. Global event kept for compatibility only.")]
+	public static event Action<int, int>? SunlightChanged;
+	public static event Action<Player, int, int>? SunlightChangedForPlayer;
+	public static event Action<Player, int>? SunlightGained;
+	public static event Action<Player, int>? SunlightSpent;
 
-    // 在每场战斗开始时清零
-    public static void ResetForCombat()
-    {
-        int old = CurrentSunlight;
-        CurrentSunlight = 0;
-        _playerSunlight.Clear(); // 👇 必须加上这句，把玩家专属池也彻底倒空！
-        SunlightChanged?.Invoke(old, CurrentSunlight);
-    }
+	public static bool IsYukaPlayer(Player player)
+	{
+		if (player?.Relics == null) return false;
+		foreach (var relic in player.Relics)
+		{
+			if (relic is KazamiYukaStarterRelic or OldSleepingCap_Yuka)
+				return true;
+		}
+		return false;
+	}
 
-    // 获得阳光的方法
+	public static int GetFierceSunlight(Player player)
+	{
+		if (player == null) return 0;
+		int actualSunlight = GetSunlight(player);
+		if (actualSunlight > 0) return actualSunlight;
+		return IsYukaPlayer(player) ? 0 : 3;
+	}
 
-    private static Dictionary<Player, int> _playerSunlight = new Dictionary<Player, int>();
-    public static void GainSunlight(Player player, int amount)
-    {
+	public static void ResetForCombat()
+	{
+		_playerSunlight.Clear();
+		_sunlightGainedThisTurn.Clear();
+#pragma warning disable CS0618
+		int old = CurrentSunlight;
+		CurrentSunlight = 0;
+		SunlightChanged?.Invoke(old, CurrentSunlight);
+#pragma warning restore CS0618
+	}
 
-        if (player == null) return;
-        
-        if (!_playerSunlight.ContainsKey(player))
-            _playerSunlight[player] = 0;
+	private static Dictionary<Player, int> _playerSunlight = new Dictionary<Player, int>();
+	private static readonly Dictionary<Player, int> _sunlightGainedThisTurn = new();
 
-        _playerSunlight[player] += amount;
+	public static void ResetSunlightGainedThisTurn(Player player)
+	{
+		if (player != null)
+		{
+			_sunlightGainedThisTurn[player] = 0;
+		}
+	}
 
-        if (amount <= 0) return;
-        int old = CurrentSunlight;
-        CurrentSunlight += amount;
-        SunlightChanged?.Invoke(old, CurrentSunlight);
-    }
+	public static int GetSunlightGainedThisTurn(Player player)
+	{
+		return player != null && _sunlightGainedThisTurn.TryGetValue(player, out int amount)
+			? amount
+			: 0;
+	}
 
-    public static bool HasEnoughSunlight(Player player, int amount)
-    {
-        if (player == null) return false;
+	public static void GainSunlight(Player player, int amount)
+	{
+		if (player == null) return;
+		
+		if (!_playerSunlight.ContainsKey(player))
+			_playerSunlight[player] = 0;
 
-        // 如果玩家连记录都没有，且需要的阳光大于0，肯定不够
-        if (!_playerSunlight.ContainsKey(player))
-        {
-            return amount <= 0; 
-        }
+		int oldPersonal = _playerSunlight[player];
+		_playerSunlight[player] += amount;
 
-        return _playerSunlight[player] >= amount;
-    }
+		if (amount <= 0) return;
 
-    // 修改：要求必须传入是哪个 Player 在花阳光
-    public static bool TrySpendSunlight(Player player, int amount)
-    {
-        if (player == null) return false;
+		if (!_sunlightGainedThisTurn.ContainsKey(player))
+			_sunlightGainedThisTurn[player] = 0;
+		_sunlightGainedThisTurn[player] += amount;
+#pragma warning disable CS0618
+		int old = CurrentSunlight;
+		CurrentSunlight += amount;
+		SunlightChanged?.Invoke(old, CurrentSunlight);
+#pragma warning restore CS0618
+		SunlightChangedForPlayer?.Invoke(player, oldPersonal, _playerSunlight[player]);
+		SunlightGained?.Invoke(player, amount);
+	}
 
-        // 确保字典里有这个玩家，防止报错
-        if (!_playerSunlight.ContainsKey(player))
-        {
-            _playerSunlight[player] = 0;
-        }
+	public static bool HasEnoughSunlight(Player player, int amount)
+	{
+		if (player == null) return false;
 
-        // 检查该名玩家的专属阳光是否足够
-        if (_playerSunlight[player] >= amount)
-        {
-            int old = CurrentSunlight; // 保留为了给UI发送广播
-            
-            // 完美扣除：同时扣除玩家专属池和全局池
-            _playerSunlight[player] -= amount;
-            CurrentSunlight -= amount;
-            
-            SunlightChanged?.Invoke(old, CurrentSunlight);
-            SunlightSpent?.Invoke(player, amount);
-            return true;
-        }
-        
-        return false; // 阳光不够，施法失败
-    }
+		if (!_playerSunlight.ContainsKey(player))
+		{
+			return amount <= 0; 
+		}
+
+		return _playerSunlight[player] >= amount;
+	}
+
+	public static int GetSunlight(Player player)
+	{
+		if (player == null)
+		{
+			return 0;
+		}
+
+		return _playerSunlight.TryGetValue(player, out int amount) ? amount : 0;
+	}
+
+	public static int SpendAllSunlight(Player player)
+	{
+		int amount = GetSunlight(player);
+		if (amount <= 0 || !TrySpendSunlight(player, amount))
+		{
+			return 0;
+		}
+
+		return amount;
+	}
+
+	public static bool TrySpendSunlight(Player player, int amount)
+	{
+		if (player == null) return false;
+
+		if (!_playerSunlight.ContainsKey(player))
+		{
+			_playerSunlight[player] = 0;
+		}
+
+		if (_playerSunlight[player] >= amount)
+		{
+			int oldPersonal = _playerSunlight[player];
+			_playerSunlight[player] -= amount;
+#pragma warning disable CS0618
+			int old = CurrentSunlight;
+			CurrentSunlight -= amount;
+			SunlightChanged?.Invoke(old, CurrentSunlight);
+#pragma warning restore CS0618
+			SunlightChangedForPlayer?.Invoke(player, oldPersonal, _playerSunlight[player]);
+			SunlightSpent?.Invoke(player, amount);
+			return true;
+		}
+		
+		return false;
+	}
 }

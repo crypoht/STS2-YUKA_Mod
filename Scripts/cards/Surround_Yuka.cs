@@ -18,7 +18,7 @@ public class Surround_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("BonusMaxHp", 2m)
+        new DynamicVar("BonusMaxHp", 3m)
     ];
 
     public Surround_Yuka() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)

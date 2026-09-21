@@ -1,9 +1,13 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -17,11 +21,7 @@ public class UmbrellaTechnique_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(5m, ValueProp.Move),
-        new CalculationBaseVar(1m),
-        new CalculationExtraVar(1m),
-        new CalculatedVar("HitCount").WithMultiplier((card, _) =>
-            SunflowerManager.GetSunflowers(card.Owner).Count)
+        new DynamicVar("SunflowerDamage", 3m)
     ];
 
     public UmbrellaTechnique_Yuka() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, true)
@@ -33,18 +33,37 @@ public class UmbrellaTechnique_Yuka : KazamiYukaCard
         var player = base.Owner;
         if (player == null || cardPlay.Target == null) return;
 
-        int hitCount = (int)((CalculatedVar)DynamicVars["HitCount"]).Calculate(null);
+        foreach (Creature sunflower in SunflowerManager.GetSunflowers(player).Where(flower => flower.IsAlive))
+        {
+            await CreatureCmd.Damage(
+                choiceContext,
+                cardPlay.Target,
+                DynamicVars["SunflowerDamage"].BaseValue,
+                ValueProp.Unpowered | ValueProp.Move,
+                sunflower,
+                this,
+                cardPlay
+            );
+        }
 
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .WithHitCount(hitCount)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash", null, null)
-            .Execute(choiceContext);
+        CardPile discardPile = PileType.Discard.GetPile(player);
+        if (discardPile.Cards.Count <= 0)
+        {
+            return;
+        }
+
+        IEnumerable<CardModel> selectedCards = await CardSelectCmd.FromCombatPile(
+            choiceContext,
+            discardPile,
+            player,
+            new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1)
+        );
+        CardModel? selectedCard = selectedCards.FirstOrDefault();
+        if (selectedCard != null)
+        {
+            await CardPileCmd.Add(selectedCard, PileType.Hand, CardPilePosition.Bottom, null, false);
+        }
     }
 
-    protected override void OnUpgrade()
-    {
-        DynamicVars.Damage.UpgradeValueBy(1m);
-    }
+    protected override void OnUpgrade() => DynamicVars["SunflowerDamage"].UpgradeValueBy(1m);
 }

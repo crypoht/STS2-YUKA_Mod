@@ -13,16 +13,16 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KazamiYuka.Scripts.Cards;
 
 [RegisterCard(typeof(KazamiYukaCardPool))]
-public class UmbrellaParry_Yuka : KazamiYukaCard // 继承自您专属的基类
+public class UmbrellaParry_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new BlockVar(8, ValueProp.Move),                   // 基础 8 点格挡
-        new DynamicVar("SunlightGain", 1m)    // 基础获得 1 点阳光
+        new BlockVar(9, ValueProp.Move),
+        new DynamicVar("SunlightGain", 2m)
     ];
 
-    // 1费，技能牌，普通稀有度，目标为自身
+
     public UmbrellaParry_Yuka() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, true)
     {
     }
@@ -32,16 +32,15 @@ public class UmbrellaParry_Yuka : KazamiYukaCard // 继承自您专属的基类
         int blockAmount = (int)DynamicVars.Block.BaseValue;
         int sunAmount = (int)DynamicVars["SunlightGain"].BaseValue;
 
-        // 1. 执行官方标准获得格挡指令
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay, false);
 
-        // 2. 完美的获取阳光
         SunlightManager.GainSunlight(base.Owner, sunAmount);
     }
 
     protected override void OnUpgrade()
     {
-        // 升级时：格挡保持 8 点，阳光获得量 +1（从 1 变成 2）
+
         DynamicVars["SunlightGain"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(4);
     }
 }

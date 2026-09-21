@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -23,6 +22,23 @@ public sealed class FacingSunPower : ModPowerTemplate
         BigIconPath: "res://mods/KazamiYuka/images/powers/FacingSunPower.png"
     );
 
+    public override decimal ModifyDamageMultiplicative(
+        Creature? target,
+        decimal amount,
+        ValueProp props,
+        Creature? dealer,
+        CardModel? cardSource,
+        CardPlay? cardPlay)
+    {
+        if (target?.Monster is KazamiYukaSunflower &&
+            target.PetOwner?.Creature == base.Owner)
+        {
+            return 0.5m;
+        }
+
+        return 1m;
+    }
+
     public override decimal ModifyHpLostBeforeOstyLate(
         Creature target,
         decimal amount,
@@ -30,12 +46,7 @@ public sealed class FacingSunPower : ModPowerTemplate
         Creature? dealer,
         CardModel? cardSource)
     {
-        if (amount <= 0m || target.PetOwner != base.Owner.Player)
-        {
-            return amount;
-        }
-
-        return amount * 0.5m;
+        return amount;
     }
 
     public override async Task AfterPlayerTurnStart(

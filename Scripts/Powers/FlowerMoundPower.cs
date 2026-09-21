@@ -25,10 +25,15 @@ public sealed class FlowerMoundPower : ModPowerTemplate
     {
         if (eventType != FlowerHealthEvent.Damage) return Task.CompletedTask;
 
-        var player = sunflower.PetOwner;
-        if (player == null || !player.Creature.HasPower<FlowerMoundPower>()) return Task.CompletedTask;
+        foreach (var player in SunflowerManager.GetCombatPlayers(sunflower))
+        {
+            FlowerMoundPower? power = player.Creature.GetPower<FlowerMoundPower>();
+            if (power != null)
+            {
+                SunlightManager.GainSunlight(player, power.Amount);
+            }
+        }
 
-        SunlightManager.GainSunlight(player, (int)player.Creature.GetPower<FlowerMoundPower>()!.Amount);
         return Task.CompletedTask;
     }
 }

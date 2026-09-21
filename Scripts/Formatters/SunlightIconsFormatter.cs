@@ -4,9 +4,11 @@ using System.Text.RegularExpressions;
 using SmartFormat.Core.Extensions;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using KazamiYuka.Scripts.DynamicVars;
+using STS2RitsuLib.Interop.AutoRegistration;
 
 namespace KazamiYuka.Scripts.Formatters
 {
+    [RegisterSmartFormatter]
     public class SunlightIconsFormatter : IFormatter
     {
         public string Name 
@@ -51,8 +53,7 @@ namespace KazamiYuka.Scripts.Formatters
                     }
                 }
 
-                // 输出暗号，交给 CustomTextIconPatch 去真正画图
-                string iconTag = "[sunlight]";
+                string iconTag = "[img width=16 height=16]res://mods/KazamiYuka/images/sunlight_icon.png[/img]";
                 string result = string.Concat(Enumerable.Repeat(iconTag, count));
 
                 formattingInfo.Write(result);

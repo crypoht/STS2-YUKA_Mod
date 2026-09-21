@@ -1,0 +1,96 @@
+﻿using System;
+using MegaCrit.Sts2.Core.Entities.Players;
+
+namespace KazamiYuka.Scripts;
+
+public static class SunlightManager
+{
+    public static int CurrentSunlight { get; private set; } = 0;
+
+    public static event Action<int, int>? SunlightChanged;
+    public static event Action<Player, int>? SunlightGained;
+    public static event Action<Player, int>? SunlightSpent;
+
+    public static void ResetForCombat()
+    {
+        int old = CurrentSunlight;
+        CurrentSunlight = 0;
+        _playerSunlight.Clear();
+        SunlightChanged?.Invoke(old, CurrentSunlight);
+    }
+
+    private static Dictionary<Player, int> _playerSunlight = new Dictionary<Player, int>();
+    public static void GainSunlight(Player player, int amount)
+    {
+
+        if (player == null) return;
+        
+        if (!_playerSunlight.ContainsKey(player))
+            _playerSunlight[player] = 0;
+
+        _playerSunlight[player] += amount;
+
+        if (amount <= 0) return;
+        int old = CurrentSunlight;
+        CurrentSunlight += amount;
+        SunlightChanged?.Invoke(old, CurrentSunlight);
+        SunlightGained?.Invoke(player, amount);
+    }
+
+    public static bool HasEnoughSunlight(Player player, int amount)
+    {
+        if (player == null) return false;
+
+        if (!_playerSunlight.ContainsKey(player))
+        {
+            return amount <= 0; 
+        }
+
+        return _playerSunlight[player] >= amount;
+    }
+
+    public static int GetSunlight(Player player)
+    {
+        if (player == null)
+        {
+            return 0;
+        }
+
+        return _playerSunlight.TryGetValue(player, out int amount) ? amount : 0;
+    }
+
+    public static int SpendAllSunlight(Player player)
+    {
+        int amount = GetSunlight(player);
+        if (amount <= 0 || !TrySpendSunlight(player, amount))
+        {
+            return 0;
+        }
+
+        return amount;
+    }
+
+    public static bool TrySpendSunlight(Player player, int amount)
+    {
+        if (player == null) return false;
+
+        if (!_playerSunlight.ContainsKey(player))
+        {
+            _playerSunlight[player] = 0;
+        }
+
+        if (_playerSunlight[player] >= amount)
+        {
+            int old = CurrentSunlight;
+            _playerSunlight[player] -= amount;
+            CurrentSunlight -= amount;
+            
+            SunlightChanged?.Invoke(old, CurrentSunlight);
+            SunlightSpent?.Invoke(player, amount);
+            return true;
+        }
+        
+        return false;
+    }
+}
+

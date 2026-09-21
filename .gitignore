@@ -1,8 +1,9 @@
 # Local-only Markdown notes
 *.local.md
+PROJECT_SUMMARY.md
+*.png
 
 # Godot generated metadata
 *.uid
 *.import
 .godot/
-

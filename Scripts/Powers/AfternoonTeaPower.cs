@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models.Cards;
@@ -14,7 +15,6 @@ using MegaCrit.Sts2.Core.Models;
 
 namespace KazamiYuka.Scripts.Powers;
 
-// ================== 未升级版：随机一朵 ==================
 [RegisterPower]
 public sealed class AfternoonTeaRandomPower : ModPowerTemplate
 {
@@ -22,23 +22,22 @@ public sealed class AfternoonTeaRandomPower : ModPowerTemplate
     public override PowerStackType StackType => PowerStackType.Counter;
     public override PowerAssetProfile AssetProfile => new("res://mods/KazamiYuka/images/powers/AfternoonTeaPower_small.png", "res://mods/KazamiYuka/images/powers/AfternoonTeaPower.png");
 
-    // 👇 官方正确的挂载钩子
     public override Task AfterApplied(Creature? applier, CardModel? cardSource)
     {
-        SunlightManager.SunlightChanged += OnSunlightChanged;
+        SunlightManager.SunlightGained += OnSunlightGained;
         return base.AfterApplied(applier, cardSource);
     }
 
-    // 👇 官方正确的移除钩子（极其重要：防止内存泄漏！）
     public override Task AfterRemoved(Creature oldOwner)
     {
-        SunlightManager.SunlightChanged -= OnSunlightChanged;
+        SunlightManager.SunlightGained -= OnSunlightGained;
         return base.AfterRemoved(oldOwner);
     }
 
-    private void OnSunlightChanged(int oldSun, int newSun)
+    private void OnSunlightGained(Player targetPlayer, int amount)
     {
-        if (oldSun == newSun) return;
+        var myPlayer = base.Owner.Player;
+        if (myPlayer == null || targetPlayer != myPlayer) return;
         _ = TriggerMaxHpGain();
     }
 
@@ -64,7 +63,6 @@ public sealed class AfternoonTeaRandomPower : ModPowerTemplate
     }
 }
 
-// ================== 升级版：所有向日葵 ==================
 [RegisterPower]
 public sealed class AfternoonTeaAllPower : ModPowerTemplate
 {
@@ -74,19 +72,20 @@ public sealed class AfternoonTeaAllPower : ModPowerTemplate
 
     public override Task AfterApplied(Creature? applier, CardModel? cardSource)
     {
-        SunlightManager.SunlightChanged += OnSunlightChanged;
+        SunlightManager.SunlightGained += OnSunlightGained;
         return base.AfterApplied(applier, cardSource);
     }
 
     public override Task AfterRemoved(Creature oldOwner)
     {
-        SunlightManager.SunlightChanged -= OnSunlightChanged;
+        SunlightManager.SunlightGained -= OnSunlightGained;
         return base.AfterRemoved(oldOwner);
     }
 
-    private void OnSunlightChanged(int oldSun, int newSun)
+    private void OnSunlightGained(Player targetPlayer, int amount)
     {
-        if (oldSun == newSun) return;
+        var myPlayer = base.Owner.Player;
+        if (myPlayer == null || targetPlayer != myPlayer) return;
         _ = TriggerMaxHpGain();
     }
 

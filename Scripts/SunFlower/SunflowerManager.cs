@@ -1,11 +1,16 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Godot;
+using MegaCrit.Sts2.Core.Assets;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Nodes;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 using KazamiYuka.Scripts.Powers;
@@ -19,22 +24,96 @@ namespace KazamiYuka.Scripts;
 
 public enum FlowerHealthEvent
     {
-        Heal,           // 生命回复
-        Damage,         // 生命减少 (受伤)
-        MaxHpIncrease,  // 上限增加
-        MaxHpDecrease   // 上限减少
+        Heal,
+        Damage,
+        MaxHpIncrease,
+        MaxHpDecrease
     }
 
     public delegate Task FlowerHealthChangedHandler(PlayerChoiceContext ctx, Creature sunflower, FlowerHealthEvent eventType, decimal amount);
 
 public static class SunflowerManager
 {
-    
+    private static readonly Dictionary<ulong, int> _relicXiangYangApplications = new();
+    private static readonly Dictionary<ulong, Player> _relicPlayers = new();
+    private static readonly List<TextureRect> _sunflowerTargetButtons = new();
+    private static readonly List<Button> _sunflowerTargetHitboxes = new();
+    private static readonly List<(Button Hitbox, NCreature FlowerNode)> _sunflowerTargetHitboxTargets = new();
+    private static readonly List<NSelectionReticle> _sunflowerTargetReticles = new();
+    private static Control? _sunflowerTargetPanel;
+    private static readonly List<NHealthBar> _sunflowerHealthBars = new();
+    private static readonly List<(Creature Flower, Action<int, int> CurrentHpChanged, Action<int, int> MaxHpChanged)> _sunflowerHealthSubscriptions = new();
+    private static readonly List<Creature> _sunflowerSlots = new();
+    private static Control? _sunflowerCombatClip;
+    private static NTargetManager? _subscribedTargetManager;
+    private static bool _isSunflowerTargetingCardActive;
+    private static bool _isRefreshingTargetButtons;
+    private static bool _targetButtonsRefreshQueued;
+    private static int _targetButtonsHideDepth;
+    private const float SunflowerTargetPanelY = 430f;
+    private const float SunflowerTargetRowHeight = 64f;
+    private const float SunflowerAvatarOffsetX = 14f;
+    private const float SunflowerAvatarOffsetY = 10f;
+    private const float SunflowerAvatarSize = 48f;
+    private const float SunflowerHealthBarOffsetY = 41f;
+    private const float SunflowerHealthBarOffsetX = 63f;
+    private const float SunflowerTargetReticleOffsetX = -8f;
+    private const float SunflowerTargetReticleOffsetY = -6f;
+    private const float SunflowerCombatClipTop = 0f;
+    private const float SunflowerCombatClipBottom = 760f;
+
     public static List<Creature> GetSunflowers(Player player)
     {
         return player?.Creature?.CombatState?.Allies?
-            .Where(c => c.Monster is KazamiYukaSunflower && c.PetOwner == player)
+            .Where(c => c.IsAlive && c.Monster is KazamiYukaSunflower)
             .ToList() ?? new List<Creature>();
+    }
+
+    public static IReadOnlyList<Player> GetCombatPlayers(Creature creature)
+    {
+        return creature.CombatState?.Players ?? Array.Empty<Player>();
+    }
+
+    public static IReadOnlyList<Creature> GetAllCombatSunflowers(Creature creature)
+    {
+        return GetOrderedSunflowers()
+            .Where(flower =>
+                flower.IsAlive &&
+                flower.Monster is KazamiYukaSunflower &&
+                flower.CombatState == creature.CombatState)
+            .ToList();
+    }
+
+    public static void ResetCombatState()
+    {
+        _relicXiangYangApplications.Clear();
+        RefreshRelicCounters();
+    }
+
+    public static int GetRelicXiangYangApplicationsRemaining(Player player)
+    {
+        if (player == null || player.Relics == null)
+        {
+            return 0;
+        }
+
+        bool hasSunHat = player.Relics.Any(relic => relic is KazamiYukaStarterRelic);
+        bool hasOldSleepingCap = player.Relics.Any(relic => relic is Relics.OldSleepingCap_Yuka);
+        if (!hasSunHat && !hasOldSleepingCap)
+        {
+            return 0;
+        }
+
+        _relicPlayers[player.NetId] = player;
+        return Math.Max(0, 3 - _relicXiangYangApplications.GetValueOrDefault(player.NetId));
+    }
+
+    private static void RefreshRelicCounters()
+    {
+        foreach (Player player in _relicPlayers.Values)
+        {
+            RefreshRelicCounter(player);
+        }
     }
 
     private static readonly Vector2[] SunflowerSlotOffsets =
@@ -46,13 +125,12 @@ public static class SunflowerManager
         new Vector2(330f, 4f)
     ];
 
-    public static async Task Summon(Player summoner, decimal initialHp, int maxSunflowers = 5)
+    public static async Task Summon(Player summoner, decimal initialHp, int maxSunflowers = 5, bool grantGuard = false, bool grantDegraded = false)
     {
         if (summoner == null) return;
 
         var existingSunflowers = GetSunflowers(summoner);
 
-        // ========== 溢出处理：场上已满时，给所有向日葵加上一半数值的最大生命 ==========
         if (existingSunflowers.Count >= maxSunflowers)
         {
             decimal overflowMaxHp = initialHp / 2m;
@@ -65,26 +143,38 @@ public static class SunflowerManager
 
         decimal surroundBonusMaxHp = SurroundPower.GetBonusMaxHp(summoner);
         Creature newFlower = await PlayerCmd.AddPet<KazamiYukaSunflower>(summoner);
-        
-        await CreatureCmd.SetMaxHp(newFlower, initialHp + surroundBonusMaxHp);
-        await CreatureCmd.Heal(newFlower, initialHp + surroundBonusMaxHp, true);
+        RegisterSunflowerSlot(newFlower);
+
+        if (grantDegraded)
+        {
+            await PowerCmd.Apply<DegradedPower>(
+                new ThrowingPlayerChoiceContext(),
+                newFlower,
+                1m,
+                summoner.Creature,
+                null,
+                false
+            );
+        }
+
+        decimal newFlowerMaxHp = initialHp + surroundBonusMaxHp;
+        if (grantDegraded)
+        {
+            newFlowerMaxHp = Math.Min(newFlowerMaxHp, 1m);
+        }
+
+        await CreatureCmd.SetMaxHp(newFlower, newFlowerMaxHp);
+        await CreatureCmd.Heal(newFlower, newFlowerMaxHp, true);
 
         ArrangeSunflowers(summoner);
 
-        KazamiYukaStarterRelic? starterRelic = null;
-        if (summoner.Relics != null)
+        decimal relicXiangYangBonus = GetRelicXiangYangBonus(summoner);
+        if (relicXiangYangBonus > 0m)
         {
-            foreach (var relic in summoner.Relics)
-            {
-                if (relic is KazamiYukaStarterRelic yukaRelic)
-                {
-                    starterRelic = yukaRelic;
-                    break;
-                }
-            }
+            _relicXiangYangApplications[summoner.NetId] =
+                _relicXiangYangApplications.GetValueOrDefault(summoner.NetId) + 1;
+            RefreshRelicCounter(summoner);
         }
-
-        
 
         if (CombatManager.Instance != null && CombatManager.Instance.IsInProgress)
         {
@@ -93,15 +183,19 @@ public static class SunflowerManager
 
         if (newFlower != null)
         {
-            await PowerCmd.Apply<XiangYangPower>(
-                new ThrowingPlayerChoiceContext(),
-                newFlower,          
-                1,                  
-                summoner.Creature,  
-                null                
-            );
+            decimal xiangYangAmount = relicXiangYangBonus + DoubleHeadedSunflowerPower.GetExtraXiangYang(summoner);
+            if (xiangYangAmount > 0m)
+            {
+                await PowerCmd.Apply<XiangYangPower>(
+                    new ThrowingPlayerChoiceContext(),
+                    newFlower,
+                    xiangYangAmount,
+                    summoner.Creature,
+                    null
+                );
+            }
 
-            if (surroundBonusMaxHp > 0)
+            if (grantGuard || surroundBonusMaxHp > 0)
             {
                 await PowerCmd.Apply<SunflowerGuardPower>(
                     new ThrowingPlayerChoiceContext(),
@@ -112,18 +206,82 @@ public static class SunflowerManager
                     false
                 );
             }
+
+        }
+    }
+
+    private static decimal GetRelicXiangYangBonus(Player summoner)
+    {
+        if (summoner.Relics == null ||
+            _relicXiangYangApplications.GetValueOrDefault(summoner.NetId) >= 3)
+        {
+            return 0m;
+        }
+
+        foreach (var relic in summoner.Relics)
+        {
+            if (relic is Relics.OldSleepingCap_Yuka)
+            {
+                return 3m;
+            }
+        }
+
+        foreach (var relic in summoner.Relics)
+        {
+            if (relic is KazamiYukaStarterRelic)
+            {
+                return 2m;
+            }
+        }
+
+        return 0m;
+    }
+
+    private static void RefreshRelicCounter(Player player)
+    {
+        foreach (var relic in player.Relics)
+        {
+            if (relic is KazamiYukaStarterRelic starterRelic)
+            {
+                starterRelic.RefreshSunflowerCounter();
+            }
+            else if (relic is Relics.OldSleepingCap_Yuka oldSleepingCap)
+            {
+                oldSleepingCap.RefreshSunflowerCounter();
+            }
         }
     }
     public static void ArrangeSunflowers(Player summoner)
     {
-        ArrangeSunflowers(summoner, GetSunflowers(summoner));
+        ArrangeSunflowers(summoner, GetOrderedSunflowers());
+        RefreshTargetButtons();
+    }
+
+    public static async void ArrangeSunflowersDeferred(Player summoner)
+    {
+        NCombatRoom? room = NCombatRoom.Instance;
+        if (room == null)
+        {
+            return;
+        }
+
+        await room.ToSignal(room.GetTree(), SceneTree.SignalName.ProcessFrame);
+        ArrangeSunflowers(summoner);
     }
 
     private static void ArrangeSunflowers(Player summoner, IReadOnlyList<Creature> sunflowers)
     {
         NCombatRoom? room = NCombatRoom.Instance;
-        NCreature? playerNode = room?.GetCreatureNode(summoner.Creature);
-        if (room == null || playerNode == null)
+        if (room == null)
+        {
+            return;
+        }
+
+        Player localPlayer = summoner.Creature.CombatState == null
+            ? summoner
+            : LocalContext.GetMe(summoner.Creature.CombatState) ?? summoner;
+        NCreature? playerNode = room.GetCreatureNode(localPlayer.Creature);
+        if (playerNode == null)
         {
             return;
         }
@@ -133,42 +291,555 @@ public static class SunflowerManager
             20f
         );
 
-        for (int index = 0; index < sunflowers.Count; index++)
+        int slotIndex = 0;
+        foreach (Creature flower in sunflowers)
         {
-            Creature flower = sunflowers[index];
             NCreature? flowerNode = room.GetCreatureNode(flower);
             if (flowerNode == null)
             {
                 continue;
             }
 
-            Vector2 offset = SunflowerSlotOffsets[index % SunflowerSlotOffsets.Length];
+            Vector2 offset = SunflowerSlotOffsets[slotIndex % SunflowerSlotOffsets.Length];
             flowerNode.Position = playerRelativeOrigin + offset;
-            SetSunflowerLayer(flowerNode, playerNode);
+            SetSunflowerLayer(flowerNode, playerNode, slotIndex);
             room.SetCreatureIsInteractable(flower, true);
 
             if (flowerNode.Visuals?.Bounds != null)
             {
                 flowerNode.Visuals.Bounds.Visible = true;
             }
+
+            slotIndex++;
         }
     }
 
-    private static void SetSunflowerLayer(NCreature flowerNode, NCreature playerNode)
+    private static void SetSunflowerLayer(NCreature flowerNode, NCreature playerNode, int slotIndex)
     {
         flowerNode.ZAsRelative = true;
         flowerNode.ZIndex = 1;
+        flowerNode.Visible = true;
 
         if (flowerNode.Visuals != null)
         {
             flowerNode.Visuals.ZAsRelative = true;
             flowerNode.Visuals.ZIndex = 0;
+            flowerNode.Visuals.Visible = true;
+        }
+    }
+
+    public static void AttachTargetButtons(NCombatUi combatUi)
+    {
+        DetachTargetButtons();
+        SubscribeTargetingSignals();
+
+        Control targetParent = (Control?)NRun.Instance?.GlobalUi ?? combatUi;
+        int targetLayer = NRun.Instance?.GlobalUi?.MultiplayerPlayerContainer?.ZIndex ?? 0;
+        _sunflowerCombatClip = new Control
+        {
+            Name = "SunflowerCombatClip",
+            Position = new Vector2(0f, SunflowerCombatClipTop),
+            Size = new Vector2(1920f, SunflowerCombatClipBottom - SunflowerCombatClipTop),
+            ClipContents = true,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            ZAsRelative = true,
+            ZIndex = targetLayer
+        };
+        targetParent.AddChild(_sunflowerCombatClip);
+
+        _sunflowerTargetPanel = new Control
+        {
+            Name = "SunflowerTargetPanel",
+            Position = new Vector2(18f, SunflowerTargetPanelY),
+            Size = new Vector2(280f, 360f),
+            ClipContents = true,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            ZAsRelative = true,
+            ZIndex = 0
+        };
+        _sunflowerCombatClip.AddChild(_sunflowerTargetPanel);
+        RefreshTargetButtons();
+    }
+
+    public static void DetachTargetButtons()
+    {
+        foreach (TextureRect button in _sunflowerTargetButtons)
+        {
+            if (GodotObject.IsInstanceValid(button))
+            {
+                button.QueueFree();
+            }
+        }
+
+        _sunflowerTargetButtons.Clear();
+        foreach (Button hitbox in _sunflowerTargetHitboxes)
+        {
+            if (GodotObject.IsInstanceValid(hitbox))
+            {
+                hitbox.QueueFree();
+            }
+        }
+
+        _sunflowerTargetHitboxes.Clear();
+        _sunflowerTargetHitboxTargets.Clear();
+        foreach (NSelectionReticle reticle in _sunflowerTargetReticles)
+        {
+            if (GodotObject.IsInstanceValid(reticle))
+            {
+                reticle.QueueFree();
+            }
+        }
+
+        _sunflowerTargetReticles.Clear();
+        foreach (NHealthBar healthBar in _sunflowerHealthBars)
+        {
+            if (GodotObject.IsInstanceValid(healthBar))
+            {
+                healthBar.QueueFree();
+            }
+        }
+
+        _sunflowerHealthBars.Clear();
+        foreach (var subscription in _sunflowerHealthSubscriptions)
+        {
+            subscription.Flower.CurrentHpChanged -= subscription.CurrentHpChanged;
+            subscription.Flower.MaxHpChanged -= subscription.MaxHpChanged;
+        }
+
+        _sunflowerHealthSubscriptions.Clear();
+        if (_sunflowerTargetPanel != null && GodotObject.IsInstanceValid(_sunflowerTargetPanel))
+        {
+            _sunflowerTargetPanel.QueueFree();
+        }
+
+        _sunflowerTargetPanel = null;
+        if (_sunflowerCombatClip != null && GodotObject.IsInstanceValid(_sunflowerCombatClip))
+        {
+            _sunflowerCombatClip.QueueFree();
+        }
+
+        _sunflowerCombatClip = null;
+        _sunflowerSlots.Clear();
+        _isSunflowerTargetingCardActive = false;
+        _targetButtonsHideDepth = 0;
+    }
+
+    public static void SetActiveTargetingCard(CardModel? card)
+    {
+        _isSunflowerTargetingCardActive =
+            card?.TargetType == KazamiYukaTargetTypes.Sunflower &&
+            card is ICustomTargetValidator;
+        RefreshSunflowerTargetHitboxes();
+    }
+
+    public static void HideTargetButtons()
+    {
+        if (_sunflowerCombatClip != null && GodotObject.IsInstanceValid(_sunflowerCombatClip))
+        {
+            _sunflowerCombatClip.Visible = false;
+        }
+
+        DisableSunflowerTargetHitboxes();
+    }
+
+    public static void ShowTargetButtons()
+    {
+        if (_targetButtonsHideDepth > 0)
+        {
+            return;
+        }
+
+        if (_sunflowerCombatClip != null && GodotObject.IsInstanceValid(_sunflowerCombatClip))
+        {
+            _sunflowerCombatClip.Visible = true;
+        }
+    }
+
+    public static void PushTargetButtonsHidden()
+    {
+        _targetButtonsHideDepth++;
+        HideTargetButtons();
+    }
+
+    public static void PopTargetButtonsHidden()
+    {
+        if (_targetButtonsHideDepth > 0)
+        {
+            _targetButtonsHideDepth--;
+        }
+
+        ShowTargetButtons();
+    }
+
+    public static void RefreshTargetButtons()
+    {
+        if (_sunflowerTargetPanel == null || !GodotObject.IsInstanceValid(_sunflowerTargetPanel))
+        {
+            return;
+        }
+
+        if (_isRefreshingTargetButtons)
+        {
+            QueueTargetButtonsRefresh();
+            return;
+        }
+
+        _isRefreshingTargetButtons = true;
+        try
+        {
+            foreach (TextureRect button in _sunflowerTargetButtons)
+            {
+                if (GodotObject.IsInstanceValid(button))
+                {
+                    button.QueueFree();
+                }
+            }
+
+            _sunflowerTargetButtons.Clear();
+            foreach (Button hitbox in _sunflowerTargetHitboxes)
+            {
+                if (GodotObject.IsInstanceValid(hitbox))
+                {
+                    hitbox.QueueFree();
+                }
+            }
+
+            _sunflowerTargetHitboxes.Clear();
+            _sunflowerTargetHitboxTargets.Clear();
+            foreach (NSelectionReticle reticle in _sunflowerTargetReticles)
+            {
+                if (GodotObject.IsInstanceValid(reticle))
+                {
+                    reticle.QueueFree();
+                }
+            }
+
+            _sunflowerTargetReticles.Clear();
+            foreach (NHealthBar healthBar in _sunflowerHealthBars)
+            {
+                if (GodotObject.IsInstanceValid(healthBar))
+                {
+                    healthBar.QueueFree();
+                }
+            }
+
+            _sunflowerHealthBars.Clear();
+            foreach (var subscription in _sunflowerHealthSubscriptions)
+            {
+                subscription.Flower.CurrentHpChanged -= subscription.CurrentHpChanged;
+                subscription.Flower.MaxHpChanged -= subscription.MaxHpChanged;
+            }
+
+            _sunflowerHealthSubscriptions.Clear();
+            NCombatRoom? room = NCombatRoom.Instance;
+            if (room == null)
+            {
+                return;
+            }
+
+            int displayIndex = 0;
+            foreach (Creature flower in GetOrderedSunflowers())
+            {
+                if (flower.Monster is not KazamiYukaSunflower || !flower.IsAlive)
+                {
+                    continue;
+                }
+
+                NCreature? flowerNode = room.GetCreatureNode(flower);
+                if (flowerNode == null)
+                {
+                    continue;
+                }
+
+                TextureRect? button = null;
+                try
+                {
+                    PackedScene? iconScene = PreloadManager.Cache.GetScene(
+                        "res://mods/KazamiYuka/scenes/Sunflower_icon.tscn");
+                    button = iconScene?.Instantiate<TextureRect>();
+                }
+                catch (Exception exception)
+                {
+                    GD.PrintErr($"[KazamiYuka] Failed to load Sunflower_icon.tscn: {exception.Message}");
+                }
+
+                if (button == null)
+                {
+                    Texture2D? iconTexture = GD.Load<Texture2D>(
+                        "res://mods/KazamiYuka/images/SunFlower_icon.png");
+                    if (iconTexture != null)
+                    {
+                        button = new TextureRect
+                        {
+                            Texture = iconTexture
+                        };
+                    }
+                }
+
+                if (button == null)
+                {
+                    continue;
+                }
+
+                int rowIndex = displayIndex;
+                button.Name = $"SunflowerTargetButton{rowIndex}";
+                button.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
+                button.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+                button.Position = new Vector2(
+                    SunflowerAvatarOffsetX,
+                    rowIndex * SunflowerTargetRowHeight + SunflowerAvatarOffsetY);
+                button.Size = new Vector2(SunflowerAvatarSize, SunflowerAvatarSize);
+                button.MouseFilter = Control.MouseFilterEnum.Ignore;
+                button.ZAsRelative = true;
+                button.ZIndex = 1;
+                _sunflowerTargetPanel.AddChild(button);
+                _sunflowerTargetButtons.Add(button);
+
+                Button targetHitbox = new()
+                {
+                    Name = $"SunflowerTargetHitbox{rowIndex}",
+                    Position = new Vector2(0f, rowIndex * SunflowerTargetRowHeight),
+                    Size = new Vector2(280f, SunflowerTargetRowHeight),
+                    Text = string.Empty,
+                    Flat = true,
+                    FocusMode = Control.FocusModeEnum.None,
+                    MouseFilter = Control.MouseFilterEnum.Ignore,
+                    ZAsRelative = true,
+                    ZIndex = 3
+                };
+                targetHitbox.MouseEntered += () => HoverSunflowerTarget(flowerNode);
+                targetHitbox.MouseExited += () => UnhoverSunflowerTarget(flowerNode);
+                targetHitbox.Pressed += () => SelectSunflowerTarget(flowerNode);
+                _sunflowerTargetPanel.AddChild(targetHitbox);
+                _sunflowerTargetHitboxes.Add(targetHitbox);
+                _sunflowerTargetHitboxTargets.Add((targetHitbox, flowerNode));
+
+                NCreatureStateDisplay? stateDisplay = flowerNode.GetNodeOrNull<NCreatureStateDisplay>("%HealthBar");
+                NHealthBar? sourceHealthBar = stateDisplay?.GetNodeOrNull<NHealthBar>("%HealthBar");
+                if (sourceHealthBar == null)
+                {
+                    continue;
+                }
+
+                NHealthBar? healthBar = sourceHealthBar.Duplicate() as NHealthBar;
+                if (healthBar == null)
+                {
+                    continue;
+                }
+
+                healthBar.Name = $"SunflowerHealthBar{rowIndex}";
+                healthBar.Position = new Vector2(
+                    SunflowerHealthBarOffsetX,
+                    rowIndex * SunflowerTargetRowHeight + SunflowerHealthBarOffsetY);
+                healthBar.Scale = Vector2.One;
+                healthBar.MouseFilter = Control.MouseFilterEnum.Ignore;
+                healthBar.ZAsRelative = true;
+                healthBar.ZIndex = 2;
+                healthBar.Visible = true;
+                _sunflowerTargetPanel.AddChild(healthBar);
+                healthBar.SetCreature(flower);
+                healthBar.HpBarContainer.Position = Vector2.Zero;
+                healthBar.HpBarContainer.Size = new Vector2(173f, healthBar.HpBarContainer.Size.Y);
+                healthBar.RefreshValues();
+                _sunflowerHealthBars.Add(healthBar);
+
+                NSelectionReticle targetReticle = PreloadManager.Cache.GetScene(
+                    "res://scenes/ui/selection_reticle.tscn").Instantiate<NSelectionReticle>();
+                targetReticle.Name = $"SunflowerTargetReticle{rowIndex}";
+                targetReticle.Position = healthBar.Position + new Vector2(
+                    SunflowerTargetReticleOffsetX,
+                    SunflowerTargetReticleOffsetY);
+                targetReticle.Size = new Vector2(190f, 44f);
+                targetReticle.MouseFilter = Control.MouseFilterEnum.Ignore;
+                targetReticle.ZAsRelative = true;
+                targetReticle.ZIndex = 4;
+                targetReticle.Visible = true;
+                _sunflowerTargetPanel.AddChild(targetReticle);
+                _sunflowerTargetReticles.Add(targetReticle);
+
+                targetHitbox.ZIndex = 5;
+                targetHitbox.MoveToFront();
+
+                Action<int, int> currentHpChanged = (_, _) => QueueTargetButtonsRefresh();
+                Action<int, int> maxHpChanged = (_, _) => QueueTargetButtonsRefresh();
+                flower.CurrentHpChanged += currentHpChanged;
+                flower.MaxHpChanged += maxHpChanged;
+                _sunflowerHealthSubscriptions.Add((flower, currentHpChanged, maxHpChanged));
+                targetHitbox.MouseEntered += () => SetSunflowerTargetReticleVisible(targetReticle, true);
+                targetHitbox.MouseExited += () => SetSunflowerTargetReticleVisible(targetReticle, false);
+
+                displayIndex++;
+            }
+
+            RefreshSunflowerTargetHitboxes();
+        }
+        finally
+        {
+            _isRefreshingTargetButtons = false;
+        }
+    }
+
+    private static async void QueueTargetButtonsRefresh()
+    {
+        if (_targetButtonsRefreshQueued)
+        {
+            return;
+        }
+
+        _targetButtonsRefreshQueued = true;
+        try
+        {
+            NCombatRoom? room = NCombatRoom.Instance;
+            if (room == null)
+            {
+                return;
+            }
+
+            await room.ToSignal(room.GetTree(), SceneTree.SignalName.ProcessFrame);
+            RefreshTargetButtons();
+        }
+        finally
+        {
+            _targetButtonsRefreshQueued = false;
+        }
+    }
+
+    private static void RegisterSunflowerSlot(Creature sunflower)
+    {
+        if (sunflower.Monster is KazamiYukaSunflower && !_sunflowerSlots.Contains(sunflower))
+        {
+            _sunflowerSlots.Add(sunflower);
+        }
+    }
+
+    private static IReadOnlyList<Creature> GetOrderedSunflowers()
+    {
+        NCombatRoom? room = NCombatRoom.Instance;
+        if (room != null)
+        {
+            foreach (NCreature creatureNode in room.CreatureNodes)
+            {
+                Creature? creature = creatureNode.Entity;
+                if (creature?.Monster is KazamiYukaSunflower)
+                {
+                    RegisterSunflowerSlot(creature);
+                }
+            }
+        }
+
+        return _sunflowerSlots;
+    }
+
+    private static void SelectSunflowerTarget(NCreature flowerNode)
+    {
+        NTargetManager? targetManager = NTargetManager.Instance;
+        if (targetManager == null
+            || !targetManager.IsInSelection
+            || !GodotObject.IsInstanceValid(flowerNode)
+            || !targetManager.AllowedToTargetNode(flowerNode))
+        {
+            return;
+        }
+
+        targetManager.OnNodeHovered(flowerNode);
+
+        MethodInfo? finishTargeting = typeof(NTargetManager).GetMethod(
+            "FinishTargeting",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        finishTargeting?.Invoke(targetManager, [false]);
+    }
+
+    private static void HoverSunflowerTarget(NCreature flowerNode)
+    {
+        NTargetManager? targetManager = NTargetManager.Instance;
+        if (targetManager == null || !targetManager.IsInSelection || !GodotObject.IsInstanceValid(flowerNode))
+        {
+            return;
+        }
+
+        targetManager.OnNodeHovered(flowerNode);
+    }
+
+    private static void UnhoverSunflowerTarget(NCreature flowerNode)
+    {
+        NTargetManager? targetManager = NTargetManager.Instance;
+        if (targetManager == null || !targetManager.IsInSelection || !GodotObject.IsInstanceValid(flowerNode))
+        {
+            return;
+        }
+
+        targetManager.OnNodeUnhovered(flowerNode);
+    }
+
+    private static void SubscribeTargetingSignals()
+    {
+        NTargetManager? targetManager = NTargetManager.Instance;
+        if (targetManager == null || ReferenceEquals(_subscribedTargetManager, targetManager))
+        {
+            return;
+        }
+
+        if (_subscribedTargetManager != null && GodotObject.IsInstanceValid(_subscribedTargetManager))
+        {
+            _subscribedTargetManager.TargetingBegan -= RefreshSunflowerTargetHitboxes;
+            _subscribedTargetManager.TargetingEnded -= DisableSunflowerTargetHitboxes;
+        }
+
+        _subscribedTargetManager = targetManager;
+        targetManager.TargetingBegan += RefreshSunflowerTargetHitboxes;
+        targetManager.TargetingEnded += DisableSunflowerTargetHitboxes;
+    }
+
+    private static void RefreshSunflowerTargetHitboxes()
+    {
+        NTargetManager? targetManager = NTargetManager.Instance;
+        bool isSelecting = targetManager?.IsInSelection == true && _isSunflowerTargetingCardActive;
+
+        foreach ((Button hitbox, NCreature flowerNode) in _sunflowerTargetHitboxTargets)
+        {
+            if (!GodotObject.IsInstanceValid(hitbox) || !GodotObject.IsInstanceValid(flowerNode))
+            {
+                continue;
+            }
+
+            bool canTargetSunflower = isSelecting && targetManager!.AllowedToTargetNode(flowerNode);
+            hitbox.MouseFilter = canTargetSunflower
+                ? Control.MouseFilterEnum.Stop
+                : Control.MouseFilterEnum.Ignore;
+        }
+    }
+
+    private static void DisableSunflowerTargetHitboxes()
+    {
+        _isSunflowerTargetingCardActive = false;
+        foreach (Button hitbox in _sunflowerTargetHitboxes)
+        {
+            if (GodotObject.IsInstanceValid(hitbox))
+            {
+                hitbox.MouseFilter = Control.MouseFilterEnum.Ignore;
+            }
+        }
+    }
+
+    private static void SetSunflowerTargetReticleVisible(NSelectionReticle reticle, bool visible)
+    {
+        if (!GodotObject.IsInstanceValid(reticle))
+        {
+            return;
+        }
+
+        if (visible)
+        {
+            reticle.OnSelect();
+        }
+        else
+        {
+            reticle.OnDeselect();
         }
     }
 
     private static readonly List<FlowerHealthChangedHandler> _healthListeners = new();
 
-    // 任何想监听向日葵血量变化的类，调用这个方法注册自己
     public static void RegisterHealthListener(FlowerHealthChangedHandler handler)
     {
         if (!_healthListeners.Contains(handler))
@@ -177,13 +848,14 @@ public static class SunflowerManager
         }
     }
 
-    // 内部广播方法：依次通知所有订阅了的监听器
     private static async Task NotifyHealthChanged(PlayerChoiceContext ctx, Creature sunflower, FlowerHealthEvent eventType, decimal amount)
     {
         foreach (var listener in _healthListeners)
         {
             await listener(ctx, sunflower, eventType, amount);
         }
+
+        QueueTargetButtonsRefresh();
     }
 
     public static Task NotifyDamage(PlayerChoiceContext ctx, Creature sunflower, decimal amount)
@@ -191,9 +863,11 @@ public static class SunflowerManager
         return NotifyHealthChanged(ctx, sunflower, FlowerHealthEvent.Damage, amount);
     }
 
-    // =========================================================
-    // 👇 4. 修改你原来的方法，让它们在执行后自动广播！
-    // =========================================================
+    public static Task NotifyMaxHpDecrease(PlayerChoiceContext ctx, Creature sunflower, decimal amount)
+    {
+        return NotifyHealthChanged(ctx, sunflower, FlowerHealthEvent.MaxHpDecrease, amount);
+    }
+
     public static async Task HealSingle(PlayerChoiceContext choiceContext, Creature sunflower, decimal amount)
     {
         if (sunflower != null && sunflower.IsAlive)
@@ -203,7 +877,6 @@ public static class SunflowerManager
         }
     }
 
-    // 修复：让群体回血也能顺利触发单体广播
     public static async Task HealAll(PlayerChoiceContext choiceContext, Player summoner, decimal amount)
     {
         foreach (var flower in GetSunflowers(summoner))
@@ -216,17 +889,39 @@ public static class SunflowerManager
     {
         if (sunflower != null && sunflower.IsAlive)
         {
-            await CreatureCmd.GainMaxHp(sunflower, amount);
-            await NotifyHealthChanged(choiceContext, sunflower, FlowerHealthEvent.MaxHpIncrease, amount);
+            decimal totalAmount = amount + GetFlourishBonus(sunflower);
+
+            if (sunflower.GetPowerAmount<DegradedPower>() > 0)
+            {
+                totalAmount = Math.Min(totalAmount, Math.Max(0m, 1m - sunflower.MaxHp));
+            }
+
+            if (totalAmount > 0m)
+            {
+                await CreatureCmd.GainMaxHp(sunflower, totalAmount);
+                await NotifyHealthChanged(choiceContext, sunflower, FlowerHealthEvent.MaxHpIncrease, totalAmount);
+            }
         }
     }
 
-    // 修复：让群体加生命上限也能顺利触发单体广播
+    public static void UnregisterHealthListener(FlowerHealthChangedHandler handler)
+    {
+        _healthListeners.Remove(handler);
+    }
+
     public static async Task GainMaxHpAll(PlayerChoiceContext choiceContext, Player summoner, decimal amount)
     {
         foreach (var flower in GetSunflowers(summoner))
         {
             await GainMaxHpSingle(choiceContext, flower, amount);
         }
+    }
+
+    private static decimal GetFlourishBonus(Creature sunflower)
+    {
+        return GetCombatPlayers(sunflower)
+            .Select(player => player.Creature.GetPower<FlourishPower>())
+            .Where(power => power != null)
+            .Sum(power => power!.Amount);
     }
 }

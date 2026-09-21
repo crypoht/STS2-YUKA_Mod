@@ -16,7 +16,7 @@ public class FlowerMound_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("SunlightGain", 3m)
+        new DynamicVar("SunlightGain", 2m)
     ];
 
     public FlowerMound_Yuka() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)

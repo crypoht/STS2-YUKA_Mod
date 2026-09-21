@@ -20,13 +20,11 @@ public class ScatteredLight_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("MaxConsume", 4m),     // 最多消耗 4 点
-        new DynamicVar("GainPerConsume", 4m)  // 每消耗 1 点，每回合获得 4 点（仅用于文本显示）
+        new DynamicVar("MaxConsume", 4m),     
+        new DynamicVar("GainPerConsume", 4m)  
     ];
 
-     protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip> AdditionalHoverTips => [
-        ModKeywordRegistry.CreateHoverTip(KazamiYukaKeywords.FierceSun)
-    ];
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSun];
 
     public ScatteredLight_Yuka() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)
     {
@@ -39,14 +37,10 @@ public class ScatteredLight_Yuka : KazamiYukaCard
 
         int maxConsume = (int)DynamicVars["MaxConsume"].BaseValue;
 
-        // 调用底层接口扣费并查验免单
-        // 调用底层接口扣费并查验免单
         int consumedSunlight = base.ConsumeUpToMaxSunlight(player, maxConsume, cardPlay);
 
-        // 如果成功消耗了阳光（比如消耗了 3 点）
         if (consumedSunlight > 0)
         {
-            // 👇 直接把消耗的阳光点数当作层数（回合数）发给玩家，不要乘 4！
             await PowerCmd.Apply<ScatteredLightPower>(
                 choiceContext,
                 player.Creature,

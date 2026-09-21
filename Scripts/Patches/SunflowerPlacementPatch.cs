@@ -1,21 +1,20 @@
 using HarmonyLib;
+using Godot;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
-using KazamiYuka.Scripts;
 
-namespace KazamiYuka.Patches;
+namespace KazamiYuka.Scripts.Patches;
 
 [HarmonyPatch(typeof(NCombatRoom), nameof(NCombatRoom.AddCreature))]
-public static class SunflowerPlacementPatch
+internal static class SunflowerPlacementPatch
 {
-    [HarmonyPostfix]
-    public static void Postfix(Creature creature)
+    private static void Postfix(Creature creature)
     {
-        if (creature.Monster is not KazamiYukaSunflower || creature.PetOwner is not { } owner)
+        if (creature.Monster is not KazamiYukaSunflower || creature.PetOwner == null)
         {
             return;
         }
 
-        SunflowerManager.ArrangeSunflowers(owner);
+        SunflowerManager.ArrangeSunflowersDeferred(creature.PetOwner);
     }
 }

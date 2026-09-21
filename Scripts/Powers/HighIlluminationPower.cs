@@ -30,26 +30,34 @@ public sealed class HighIlluminationPower : ModPowerTemplate
         CombatSide side,
         IEnumerable<Creature> participants)
     {
-        if (side == base.Owner.Side)
+        if (side != base.Owner.Side || !base.Owner.IsAlive || base.Owner.PetOwner == null)
         {
-            var combatState = base.Owner.CombatState;
-            if (combatState == null) return;
+            return;
+        }
 
-            var lowestHpEnemy = combatState.Enemies
-                .Where(e => e.IsAlive)
-                .OrderBy(e => e.CurrentHp)
-                .FirstOrDefault();
+        var combatState = base.Owner.CombatState;
+        if (combatState == null)
+        {
+            return;
+        }
 
-           if (lowestHpEnemy != null)
-            {
-                await CreatureCmd.Damage(
-                    choiceContext, 
-                    lowestHpEnemy, 
-                    base.Amount, 
-                    ValueProp.Unpowered, 
-                    base.Owner
-                );
-            }
+        var lowestHpEnemy = combatState.Enemies
+            .Where(enemy => enemy.IsAlive)
+            .OrderBy(enemy => enemy.CurrentHp)
+            .FirstOrDefault();
+
+        if (lowestHpEnemy != null)
+        {
+            base.Flash();
+            await CreatureCmd.Damage(
+                choiceContext,
+                lowestHpEnemy,
+                base.Amount,
+                ValueProp.Unpowered | ValueProp.Move,
+                base.Owner,
+                null,
+                null
+            );
         }
     }
 }

@@ -1,43 +1,160 @@
 using HarmonyLib;
 using Godot;
+using System.Collections.Generic;
+using MegaCrit.Sts2.addons.mega_text;
+using MegaCrit.Sts2.Core.Nodes;
+using MegaCrit.Sts2.Core.Nodes.Multiplayer;
 using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Combat;
-using KazamiYuka.Scripts.Nodes; 
-// 👇 确保引用了 SunlightManager 的命名空间
-using KazamiYuka.Scripts; 
+using MegaCrit.Sts2.Core.Entities.Players;
+using KazamiYuka.Scripts.Nodes;
+using KazamiYuka.Scripts;
 
 namespace KazamiYuka.Scripts.Patches;
 
 [HarmonyPatch(typeof(NCombatUi), nameof(NCombatUi.Activate))]
 public static class InjectSunlightCounterPatch
 {
+    private static NSunlightCounter? _energyCounter;
+    private static readonly List<NMultiplayerSunlightCounter> _multiplayerPlayerCounters = new();
+
     public static void Postfix(NCombatUi __instance, CombatState state)
     {
-        // ==========================================
-        // 👇 核心修复：借鸡生蛋！在这里顺手把阳光清空！
-        // ==========================================
+        GD.Print("[InjectSunlightCounterPatch] Postfix called");
+
         SunlightManager.ResetForCombat();
+        SunflowerManager.ResetCombatState();
         GD.Print("[KazamiYuka] 战斗开始！阳光已重置为 0。");
 
-        // 1. 动态加载阳光场景（注意必须是绝对正确的 res://mods/ 路径）
-        PackedScene scene = GD.Load<PackedScene>("res://mods/KazamiYuka/scenes/SunlightCounter.tscn");
-        
-        if (scene != null)
+        var localPlayer = MegaCrit.Sts2.Core.Context.LocalContext.GetMe(state);
+        if (localPlayer == null)
         {
-            // 2. 实例化节点
-            NSunlightCounter sunlightUi = scene.Instantiate<NSunlightCounter>();
-            
-            // 3. 安全注入：挂载到官方大管家的 EnergyCounterContainer 下面
-            __instance.EnergyCounterContainer.CallDeferred(Node.MethodName.AddChild, sunlightUi);
-
-            // 4. 调整位置！
-            sunlightUi.Position = new Vector2(-48f, -47f); 
-            
-            GD.Print("[KazamiYuka] 阳光计数器已全局注入到当前角色的战斗 UI 中！");
+            return;
         }
-        else
+
+        if (!SunlightManager.IsYukaPlayer(localPlayer) && state.Players.Count <= 1)
+        {
+            return;
+        }
+
+        if ((_energyCounter != null && GodotObject.IsInstanceValid(_energyCounter)) ||
+            _multiplayerPlayerCounters.Exists(counter => GodotObject.IsInstanceValid(counter)))
+        {
+            GD.Print("[InjectSunlightCounterPatch] Counter already exists, skipping injection");
+            return;
+        }
+
+        PackedScene? scene = GD.Load<PackedScene>("res://mods/KazamiYuka/scenes/SunlightCounter.tscn");
+
+        if (scene == null)
         {
             GD.PrintErr("[KazamiYuka] 严重错误：找不到阳光计数器的场景文件！");
+            return;
+        }
+
+        GD.Print("[InjectSunlightCounterPatch] Scene loaded successfully");
+
+        NSunlightCounter? sunlightUi = scene.Instantiate<NSunlightCounter>();
+
+        if (sunlightUi == null)
+        {
+            GD.PrintErr("[InjectSunlightCounterPatch] Failed to instantiate NSunlightCounter");
+            return;
+        }
+
+        GD.Print("[InjectSunlightCounterPatch] NSunlightCounter instantiated");
+
+        sunlightUi.SetAnchorsPreset(Control.LayoutPreset.TopLeft);
+        sunlightUi.Position = new Vector2(-35f, -40f);
+        __instance.EnergyCounterContainer.AddChild(sunlightUi);
+        _energyCounter = sunlightUi;
+
+        if (state.Players.Count > 1)
+        {
+            NMultiplayerPlayerStateContainer? playerStates =
+                NRun.Instance?.GlobalUi?.MultiplayerPlayerContainer;
+
+            if (playerStates != null)
+            {
+                foreach (Node child in playerStates.GetChildren())
+                {
+                    if (child is not NMultiplayerPlayerState playerState)
+                    {
+                        continue;
+                    }
+
+                    HBoxContainer? topInfoContainer = playerState.GetNodeOrNull<HBoxContainer>("TopInfoContainer");
+                    Control? officialStarContainer =
+                        playerState.GetNodeOrNull<Control>("%StarCountContainer");
+                    if (topInfoContainer == null || officialStarContainer == null)
+                    {
+                        continue;
+                    }
+
+                    Control? sunlightContainer = officialStarContainer.Duplicate() as Control;
+                    if (sunlightContainer == null)
+                    {
+                        continue;
+                    }
+
+                    MegaLabel? sunlightLabel =
+                        sunlightContainer.GetNodeOrNull<MegaLabel>("StarCount");
+                    if (sunlightLabel == null)
+                    {
+                        sunlightContainer.QueueFree();
+                        continue;
+                    }
+
+                    Texture2D? sunlightIcon =
+                        GD.Load<Texture2D>("res://mods/KazamiYuka/images/sunlight.png");
+                    if (sunlightIcon == null)
+                    {
+                        sunlightContainer.QueueFree();
+                        continue;
+                    }
+
+                    sunlightContainer.Name = "SunlightCountContainer";
+                    sunlightContainer.Visible = false;
+                    sunlightContainer.MouseFilter = Control.MouseFilterEnum.Ignore;
+                    ReplaceCounterIconTextures(sunlightContainer, sunlightIcon);
+                    topInfoContainer.AddChild(sunlightContainer);
+
+                    NMultiplayerSunlightCounter multiplayerCounter = new();
+                    sunlightContainer.AddChild(multiplayerCounter);
+                    multiplayerCounter.Initialize(playerState.Player, sunlightContainer, sunlightLabel);
+                    _multiplayerPlayerCounters.Add(multiplayerCounter);
+                }
+            }
+        }
+
+        SunflowerManager.AttachTargetButtons(__instance);
+
+        GD.Print("[KazamiYuka] 阳光计数器已按官方多人血条容器注入！");
+    }
+
+    [HarmonyPatch(typeof(NCombatUi), nameof(NCombatUi.Deactivate))]
+    public static class DeactivatePatch
+    {
+        public static void Postfix()
+        {
+            GD.Print("[InjectSunlightCounterPatch] Combat UI deactivated, clearing counter references");
+            _energyCounter = null;
+            _multiplayerPlayerCounters.Clear();
+            SunflowerManager.DetachTargetButtons();
+        }
+    }
+
+    private static void ReplaceCounterIconTextures(Node node, Texture2D sunlightIcon)
+    {
+        foreach (Node child in node.GetChildren())
+        {
+            if (child is TextureRect textureRect)
+            {
+                textureRect.Texture = sunlightIcon;
+            }
+
+            ReplaceCounterIconTextures(child, sunlightIcon);
         }
     }
 }

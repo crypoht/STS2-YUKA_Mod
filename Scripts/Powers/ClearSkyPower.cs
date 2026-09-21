@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using KazamiYuka.Scripts;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -26,19 +26,20 @@ public sealed class ClearSkyPower : ModPowerTemplate
 
     public override Task AfterApplied(Creature? applier, CardModel? cardSource)
     {
-        SunlightManager.SunlightChanged += OnSunlightChanged;
+        SunlightManager.SunlightGained += OnSunlightGained;
         return base.AfterApplied(applier, cardSource);
     }
 
     public override Task AfterRemoved(Creature oldOwner)
     {
-        SunlightManager.SunlightChanged -= OnSunlightChanged;
+        SunlightManager.SunlightGained -= OnSunlightGained;
         return base.AfterRemoved(oldOwner);
     }
 
-    private void OnSunlightChanged(int oldSunlight, int newSunlight)
+    private void OnSunlightGained(Player targetPlayer, int amount)
     {
-        if (_isTriggering || newSunlight <= oldSunlight || base.Amount <= 0) return;
+        var myPlayer = base.Owner.Player;
+        if (_isTriggering || amount <= 0 || base.Amount <= 0 || myPlayer == null || targetPlayer != myPlayer) return;
         _ = TriggerExtraSunlight();
     }
 

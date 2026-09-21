@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://djpgquf48e8eq"]
+
+[ext_resource type="Texture2D" uid="uid://c5c8gswjgfbqw" path="res://mods/KazamiYuka/images/SunFlower_icon.png" id="1_ps7im"]
+
+[node name="Node2D" type="TextureRect"]
+texture = ExtResource("1_ps7im")
+
+[node name="Control" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 65.0
+offset_bottom = 62.0

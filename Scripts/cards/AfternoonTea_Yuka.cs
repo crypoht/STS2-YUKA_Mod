@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using KazamiYuka.Scripts.Powers;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
@@ -12,26 +14,41 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public class AfternoonTea_Yuka : KazamiYukaCard
 {
+    protected override IEnumerable<DynamicVar> CanonicalVars => [
+        new DynamicVar("SunlightPerHeal", 5m),
+        new DynamicVar("HealingPerThreshold", 1m)
+    ];
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
-    public AfternoonTea_Yuka() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
+    public override CardMultiplayerConstraint MultiplayerConstraint
+        => CardMultiplayerConstraint.MultiplayerOnly;
+
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
+
+    public AfternoonTea_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var player = base.Owner as MegaCrit.Sts2.Core.Entities.Players.Player;
-        if (player == null) return;
+        Player owner = base.Owner;
 
-        await CreatureCmd.TriggerAnim(player.Creature, "Cast", player.Character.CastAnimDelay);
+        await CreatureCmd.TriggerAnim(owner.Creature, "Cast", owner.Character.CastAnimDelay);
 
-        if (base.IsUpgraded)
+        foreach (Player otherPlayer in owner.Creature.CombatState?.Players.Where(player => player != owner) ?? Enumerable.Empty<Player>())
         {
-            await PowerCmd.Apply<AfternoonTeaAllPower>(choiceContext, player.Creature, 1, player.Creature, this, false);
-        }
-        else
-        {
-            await PowerCmd.Apply<AfternoonTeaRandomPower>(choiceContext, player.Creature, 1, player.Creature, this, false);
+            int sunlight = SunlightManager.GetSunlight(otherPlayer);
+            SunlightManager.SpendAllSunlight(otherPlayer);
+
+            int healing = sunlight / DynamicVars["SunlightPerHeal"].IntValue
+                * DynamicVars["HealingPerThreshold"].IntValue;
+            if (healing > 0)
+            {
+                await CreatureCmd.Heal(otherPlayer.Creature, healing, true);
+            }
         }
     }
+
+    protected override void OnUpgrade() => EnergyCost.UpgradeBy(-1);
 }

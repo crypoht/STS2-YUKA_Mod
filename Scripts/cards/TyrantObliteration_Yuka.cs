@@ -20,14 +20,12 @@ public class TyrantObliteration_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(7m, ValueProp.Move),         // 基础伤害 8
-        new DynamicVar("MaxConsume", 2m),          // 最多消耗 4 点阳光
-        new DynamicVar("HitCount", 1m)             // 初始攻击次数 1
+        new DamageVar(4m, ValueProp.Move),
+        new DynamicVar("MaxConsume", 2m),
+        new DynamicVar("HitCount", 1m)
     ];
 
-     protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip> AdditionalHoverTips => [
-        ModKeywordRegistry.CreateHoverTip(KazamiYukaKeywords.FierceSun)
-    ];
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSun];
 
     public TyrantObliteration_Yuka() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy, true)
     {
@@ -63,6 +61,6 @@ public class TyrantObliteration_Yuka : KazamiYukaCard
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(1m);
-        DynamicVars["MaxConsume"].UpgradeValueBy(2m);
+        DynamicVars["MaxConsume"].UpgradeValueBy(1m);
     }
 }

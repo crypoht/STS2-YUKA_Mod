@@ -2,10 +2,12 @@ using Godot.Bridge;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using STS2RitsuLib; // 🌟 必须引用
-using STS2RitsuLib.Interop; // 🌟 必须引用
-using System.Reflection; // 🌟 用于获取 Assembly
+using STS2RitsuLib; 
+using STS2RitsuLib.Interop; 
+using STS2RitsuLib.Localization.SmartFormat;
+using System.Reflection; 
 using Godot;
+using KazamiYuka.Scripts.Formatters;
 
 namespace KazamiYuka.Scripts;
 
@@ -24,6 +26,8 @@ public class Entry
 
         KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Powers.FlowerGratitudePower.OnAnySunflowerHealthChanged);
         KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Powers.FlowerMoundPower.OnAnySunflowerHealthChanged);
+        KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Powers.SunflowerFieldPower.OnSunflowerHealthChanged);
+        KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Cards.FlowingWind_Yuka.OnAnySunflowerHealthChanged);
 
         try
     {
@@ -45,6 +49,7 @@ public class Entry
         RitsuLibFramework.EnsureGodotScriptsRegistered(assembly, Logger);
         
         ModTypeDiscoveryHub.RegisterModAssembly(ModId, assembly);
+        ModSmartFormatExtensionRegistry.For(ModId).Register<SunlightIconsFormatter>();
         
         Log.Info("KazamiYuka Mod (RitsuLib Mode) initialized successfully!");
     }

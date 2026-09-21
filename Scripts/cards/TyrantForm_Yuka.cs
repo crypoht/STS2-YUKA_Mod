@@ -26,6 +26,9 @@ public class TyrantForm_Yuka : KazamiYukaCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        TyrantFormPower? existingPower = base.Owner.Creature.GetPower<TyrantFormPower>();
+        decimal previousStacks = existingPower?.Amount ?? 0m;
+
         await PowerCmd.Apply<TyrantFormPower>(
             choiceContext,
             base.Owner.Creature,
@@ -34,6 +37,8 @@ public class TyrantForm_Yuka : KazamiYukaCard
             this,
             false
         );
+
+        base.Owner.Creature.GetPower<TyrantFormPower>()?.SetTriggerAmountForCurrentCard(previousStacks);
     }
 
     protected override void OnUpgrade()

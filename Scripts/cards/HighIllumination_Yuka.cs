@@ -17,12 +17,14 @@ public class HighIllumination_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("DamageAmount", 4m)
+        new DynamicVar("DamageAmount", 5m)
     ];
 
     public HighIllumination_Yuka() : base(1, CardType.Skill, CardRarity.Common, TargetType.None, true)
     {
     }
+
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
@@ -41,10 +43,11 @@ public class HighIllumination_Yuka : KazamiYukaCard
                 false
             );
         }
+
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["DamageAmount"].UpgradeValueBy(2m);
+        DynamicVars["DamageAmount"].UpgradeValueBy(3m);
     }
 }

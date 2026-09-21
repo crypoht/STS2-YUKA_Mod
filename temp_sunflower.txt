@@ -1,0 +1,289 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Godot;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Context;
+using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
+using KazamiYuka.Scripts.Powers;
+using MegaCrit.Sts2.Core.Runs;
+using MegaCrit.Sts2.Core.ValueProps;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Hooks;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+
+namespace KazamiYuka.Scripts;
+
+public enum FlowerHealthEvent
+    {
+        Heal,
+        Damage,
+        MaxHpIncrease,
+        MaxHpDecrease
+    }
+
+    public delegate Task FlowerHealthChangedHandler(PlayerChoiceContext ctx, Creature sunflower, FlowerHealthEvent eventType, decimal amount);
+
+public static class SunflowerManager
+{
+    public static List<Creature> GetSunflowers(Player player)
+    {
+        return player?.Creature?.CombatState?.Allies?
+            .Where(c => c.Monster is KazamiYukaSunflower)
+            .ToList() ?? new List<Creature>();
+    }
+
+    public static IReadOnlyList<Player> GetCombatPlayers(Creature creature)
+    {
+        return creature.CombatState?.Players ?? Array.Empty<Player>();
+    }
+
+    private static readonly Vector2[] SunflowerSlotOffsets =
+    [
+        new Vector2(0f, -110f),
+        new Vector2(220f, -120f),
+        new Vector2(440f, -105f),
+        new Vector2(110f, 18f),
+        new Vector2(330f, 4f)
+    ];
+
+    public static async Task Summon(Player summoner, decimal initialHp, int maxSunflowers = 5, bool grantGuard = false, bool grantDegraded = false)
+    {
+        if (summoner == null) return;
+
+        var existingSunflowers = GetSunflowers(summoner);
+
+        if (existingSunflowers.Count >= maxSunflowers)
+        {
+            decimal overflowMaxHp = initialHp / 2m;
+            if (overflowMaxHp > 0)
+            {
+                await GainMaxHpAll(null!, summoner, overflowMaxHp);
+            }
+            return;
+        }
+
+        decimal surroundBonusMaxHp = SurroundPower.GetBonusMaxHp(summoner);
+        Creature newFlower = await PlayerCmd.AddPet<KazamiYukaSunflower>(summoner);
+
+        if (grantDegraded)
+        {
+            await PowerCmd.Apply<DegradedPower>(
+                new ThrowingPlayerChoiceContext(),
+                newFlower,
+                1m,
+                summoner.Creature,
+                null,
+                false
+            );
+        }
+
+        decimal newFlowerMaxHp = initialHp + surroundBonusMaxHp;
+        if (grantDegraded)
+        {
+            newFlowerMaxHp = Math.Min(newFlowerMaxHp, 1m);
+        }
+
+        await CreatureCmd.SetMaxHp(newFlower, newFlowerMaxHp);
+        await CreatureCmd.Heal(newFlower, newFlowerMaxHp, true);
+
+        ArrangeSunflowers(summoner);
+
+        KazamiYukaStarterRelic? starterRelic = null;
+        if (summoner.Relics != null)
+        {
+            foreach (var relic in summoner.Relics)
+            {
+                if (relic is KazamiYukaStarterRelic yukaRelic)
+                {
+                    starterRelic = yukaRelic;
+                    break;
+                }
+            }
+        }
+
+        
+
+        if (CombatManager.Instance != null && CombatManager.Instance.IsInProgress)
+        {
+            SfxCmd.Play("event:/sfx/player/defect/orb_dark_evoke", 1f);
+        }
+
+        if (newFlower != null)
+        {
+            decimal starterRelicXiangYang = starterRelic == null ? 0m : 1m;
+            await PowerCmd.Apply<XiangYangPower>(
+                new ThrowingPlayerChoiceContext(),
+                newFlower,          
+                1m + starterRelicXiangYang + DoubleHeadedSunflowerPower.GetExtraXiangYang(summoner),
+                summoner.Creature,  
+                null                
+            );
+
+            if (grantGuard || surroundBonusMaxHp > 0)
+            {
+                await PowerCmd.Apply<SunflowerGuardPower>(
+                    new ThrowingPlayerChoiceContext(),
+                    newFlower,
+                    1m,
+                    summoner.Creature,
+                    null,
+                    false
+                );
+            }
+
+        }
+    }
+    public static void ArrangeSunflowers(Player summoner)
+    {
+        ArrangeSunflowers(summoner, GetSunflowers(summoner));
+    }
+
+    private static void ArrangeSunflowers(Player summoner, IReadOnlyList<Creature> sunflowers)
+    {
+        NCombatRoom? room = NCombatRoom.Instance;
+        if (room == null)
+        {
+            return;
+        }
+
+        Player localPlayer = summoner.Creature.CombatState == null
+            ? summoner
+            : LocalContext.GetMe(summoner.Creature.CombatState) ?? summoner;
+        NCreature? playerNode = room.GetCreatureNode(localPlayer.Creature);
+        if (playerNode == null)
+        {
+            return;
+        }
+
+        Vector2 playerRelativeOrigin = playerNode.Position + new Vector2(
+            playerNode.Hitbox.Size.X * 0.5f + 90f,
+            20f
+        );
+
+        int slotIndex = 0;
+        foreach (Creature flower in sunflowers)
+        {
+            NCreature? flowerNode = room.GetCreatureNode(flower);
+            if (flowerNode == null)
+            {
+                continue;
+            }
+
+            Vector2 offset = SunflowerSlotOffsets[slotIndex % SunflowerSlotOffsets.Length];
+            flowerNode.Position = playerRelativeOrigin + offset;
+            SetSunflowerLayer(flowerNode, playerNode);
+            room.SetCreatureIsInteractable(flower, true);
+
+            if (flowerNode.Visuals?.Bounds != null)
+            {
+                flowerNode.Visuals.Bounds.Visible = true;
+            }
+
+            slotIndex++;
+        }
+    }
+
+    private static void SetSunflowerLayer(NCreature flowerNode, NCreature playerNode)
+    {
+        flowerNode.ZAsRelative = true;
+        flowerNode.ZIndex = 1;
+
+        if (flowerNode.Visuals != null)
+        {
+            flowerNode.Visuals.ZAsRelative = true;
+            flowerNode.Visuals.ZIndex = 0;
+        }
+    }
+
+    private static readonly List<FlowerHealthChangedHandler> _healthListeners = new();
+
+    public static void RegisterHealthListener(FlowerHealthChangedHandler handler)
+    {
+        if (!_healthListeners.Contains(handler))
+        {
+            _healthListeners.Add(handler);
+        }
+    }
+
+    private static async Task NotifyHealthChanged(PlayerChoiceContext ctx, Creature sunflower, FlowerHealthEvent eventType, decimal amount)
+    {
+        foreach (var listener in _healthListeners)
+        {
+            await listener(ctx, sunflower, eventType, amount);
+        }
+    }
+
+    public static Task NotifyDamage(PlayerChoiceContext ctx, Creature sunflower, decimal amount)
+    {
+        return NotifyHealthChanged(ctx, sunflower, FlowerHealthEvent.Damage, amount);
+    }
+
+    public static Task NotifyMaxHpDecrease(PlayerChoiceContext ctx, Creature sunflower, decimal amount)
+    {
+        return NotifyHealthChanged(ctx, sunflower, FlowerHealthEvent.MaxHpDecrease, amount);
+    }
+
+    public static async Task HealSingle(PlayerChoiceContext choiceContext, Creature sunflower, decimal amount)
+    {
+        if (sunflower != null && sunflower.IsAlive)
+        {
+            await CreatureCmd.Heal(sunflower, amount, true);
+            await NotifyHealthChanged(choiceContext, sunflower, FlowerHealthEvent.Heal, amount);
+        }
+    }
+
+    public static async Task HealAll(PlayerChoiceContext choiceContext, Player summoner, decimal amount)
+    {
+        foreach (var flower in GetSunflowers(summoner))
+        {
+            await HealSingle(choiceContext, flower, amount);
+        }
+    }
+
+    public static async Task GainMaxHpSingle(PlayerChoiceContext choiceContext, Creature sunflower, decimal amount)
+    {
+        if (sunflower != null && sunflower.IsAlive)
+        {
+            decimal totalAmount = amount + GetFlourishBonus(sunflower);
+
+            if (sunflower.GetPowerAmount<DegradedPower>() > 0)
+            {
+                totalAmount = Math.Min(totalAmount, Math.Max(0m, 1m - sunflower.MaxHp));
+            }
+
+            if (totalAmount > 0m)
+            {
+                await CreatureCmd.GainMaxHp(sunflower, totalAmount);
+                await NotifyHealthChanged(choiceContext, sunflower, FlowerHealthEvent.MaxHpIncrease, totalAmount);
+            }
+        }
+    }
+
+    public static void UnregisterHealthListener(FlowerHealthChangedHandler handler)
+    {
+        _healthListeners.Remove(handler);
+    }
+
+    public static async Task GainMaxHpAll(PlayerChoiceContext choiceContext, Player summoner, decimal amount)
+    {
+        foreach (var flower in GetSunflowers(summoner))
+        {
+            await GainMaxHpSingle(choiceContext, flower, amount);
+        }
+    }
+
+    private static decimal GetFlourishBonus(Creature sunflower)
+    {
+        return GetCombatPlayers(sunflower)
+            .Select(player => player.Creature.GetPower<FlourishPower>())
+            .Where(power => power != null)
+            .Sum(power => power!.Amount);
+    }
+}
+

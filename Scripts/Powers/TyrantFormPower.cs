@@ -20,6 +20,8 @@ namespace KazamiYuka.Scripts.Powers;
 [RegisterPower]
 public sealed class TyrantFormPower : ModPowerTemplate
 {
+    private decimal? _triggerAmountForCurrentCard;
+
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
@@ -28,14 +30,14 @@ public sealed class TyrantFormPower : ModPowerTemplate
         BigIconPath: "res://mods/KazamiYuka/images/powers/TyrantFormPower.png"
     );
 
+    public void SetTriggerAmountForCurrentCard(decimal amount)
+    {
+        _triggerAmountForCurrentCard = amount;
+    }
+
     public override async Task AfterCardPlayedLate(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Card.Owner.Creature != base.Owner)
-        {
-            return;
-        }
-
-        if (cardPlay.Card is TyrantForm_Yuka)
         {
             return;
         }
@@ -65,7 +67,10 @@ public sealed class TyrantFormPower : ModPowerTemplate
             await CreatureCmd.LoseMaxHp(choiceContext, sunflower, maxHpLoss, false);
         }
 
-        if (totalMaxHpLoss <= 0m || base.Amount <= 0m)
+        decimal triggerAmount = _triggerAmountForCurrentCard ?? base.Amount;
+        _triggerAmountForCurrentCard = null;
+
+        if (totalMaxHpLoss <= 0m || triggerAmount <= 0m)
         {
             return;
         }
@@ -80,7 +85,7 @@ public sealed class TyrantFormPower : ModPowerTemplate
             await CreatureCmd.Damage(
                 choiceContext,
                 enemy,
-                totalMaxHpLoss * base.Amount,
+                totalMaxHpLoss * triggerAmount,
                 ValueProp.Unpowered | ValueProp.Move,
                 base.Owner
             );

@@ -18,7 +18,7 @@ public class FacingSun_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new BlockVar(20m, ValueProp.Move),
+        new BlockVar(18m, ValueProp.Move),
         new SunlightCostVar(3m)
     ];
 
@@ -42,9 +42,6 @@ public class FacingSun_Yuka : KazamiYukaCard
             cardPlay,
             false
         );
-
-        // 将临时能力挂在玩家身上，而不是逐朵挂在向日葵身上。
-        // 这样既能稳定收到玩家回合开始钩子，也能在伤害修正中覆盖所有向日葵。
         await PowerCmd.Apply<FacingSunPower>(
             choiceContext,
             player.Creature,

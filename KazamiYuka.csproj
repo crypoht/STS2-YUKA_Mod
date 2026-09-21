@@ -9,8 +9,11 @@
     <!-- 改成你的杀戮尖塔2目录 -->
     <Sts2Dir>D:\SteamLibrary\steamapps\common\Slay the Spire 2</Sts2Dir>
     <Sts2DataDir>$(Sts2Dir)\data_sts2_windows_x86_64</Sts2DataDir>
-    <RitsuLibDir>D:\SteamLibrary\steamapps\workshop\content\2868840\3747602295\lib\0.107.1</RitsuLibDir>
+    <RitsuLibDir>D:\SteamLibrary\steamapps\workshop\content\2868840\3747602295</RitsuLibDir>
+    <RitsuLibReferenceTarget>0.107.1</RitsuLibReferenceTarget>
   </PropertyGroup>
+
+  <Import Project="$(RitsuLibDir)\RitsuLib.References.props" />
 
   <ItemGroup>
     <Reference Include="sts2">
@@ -22,11 +25,6 @@
       <HintPath>$(Sts2DataDir)\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="STS2-RitsuLib">
-      <HintPath>$(RitsuLibDir)\STS2-RitsuLib.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-
     <Reference Include="SmartFormat"> 
       <HintPath>$(Sts2DataDir)\SmartFormat.dll</HintPath> 
       <Private>false</Private>

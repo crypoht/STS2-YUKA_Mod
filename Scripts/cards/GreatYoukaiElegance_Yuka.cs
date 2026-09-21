@@ -20,8 +20,8 @@ public class GreatYoukaiElegance_Yuka : KazamiYukaCard
     public override bool GainsBlock => true;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new CalculationBaseVar(14m),
-        new CalculationExtraVar(4m),
+        new CalculationBaseVar(12m),
+        new CalculationExtraVar(3m),
         new CalculatedBlockVar(ValueProp.Move).WithMultiplier((CardModel card, Creature? _) =>
             SunflowerManager.GetSunflowers(card.Owner).Count)
     ];

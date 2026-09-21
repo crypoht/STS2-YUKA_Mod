@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KazamiYuka.Scripts.Keywords;
@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models.Cards;
+using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 using KazamiYuka.Scripts;
@@ -17,6 +18,7 @@ namespace KazamiYuka.Scripts.Cards;
 
 [RegisterCard(typeof(KazamiYukaCardPool))]
 [RegisterCharacterStarterCard(typeof(KazamiYukaCharacter), 1)]
+[RegisterArchaicToothTranscendence(typeof(Fantasy_Yuka))]
 public class Sunshine_Yuka : KazamiYukaCard, ICustomTargetValidator
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
@@ -25,13 +27,11 @@ public class Sunshine_Yuka : KazamiYukaCard, ICustomTargetValidator
         new DynamicVar("MaxSunlight", 5m)
     ];
 
-    public Sunshine_Yuka() : base(2, CardType.Attack, CardRarity.Basic, KazamiYukaTargetTypes.Sunflower, true)
+    public Sunshine_Yuka() : base(1, CardType.Attack, CardRarity.Basic, KazamiYukaTargetTypes.Sunflower, true)
     {
     }
 
-    protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip> AdditionalHoverTips => [
-        ModKeywordRegistry.CreateHoverTip(KazamiYukaKeywords.FierceSun)
-    ];
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSun];
 
     public bool IsValidCustomTarget(Creature target)
     {
@@ -63,11 +63,15 @@ public class Sunshine_Yuka : KazamiYukaCard, ICustomTargetValidator
 
             if (lowestHpEnemy != null)
             {
-                await DamageCmd.Attack(targetFlower.CurrentHp)
-                    .Targeting(lowestHpEnemy)
-                    .WithHitFx("vfx/vfx_attack_blunt", "event:/sfx/player/ironclad/bludgeon")
-                    .FromCard(this, cardPlay)
-                    .Execute(choiceContext);
+                await CreatureCmd.Damage(
+                    choiceContext,
+                    lowestHpEnemy,
+                    targetFlower.CurrentHp,
+                    ValueProp.Move,
+                    targetFlower,
+                    this,
+                    cardPlay
+                );
             }
         }
     }

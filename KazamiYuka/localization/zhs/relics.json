@@ -1,5 +1,8 @@
-{
-  "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.title": "太阳草帽",
-  "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.description": "每当你召唤一朵[gold]向日葵[/gold]时，给予它 1 层[gold]向阳[/gold]。",
-  "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.flavor": "“花之暴君从不离身的优雅之物。”"
+﻿{
+    "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.title":  "太阳草帽",
+    "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.description":  "每场战斗中，前3株种植的[gold]向日葵[/gold]会每回合为你提供{:sunlightIcons(2)}。",
+    "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.flavor":  "“花之暴君从不离身的优雅之物。”",
+    "KAZAMI_YUKA_RELIC_OLD_SLEEPING_CAP_YUKA.title":  "旧日睡帽",
+    "KAZAMI_YUKA_RELIC_OLD_SLEEPING_CAP_YUKA.description":  "每场战斗中，前3株种植的[gold]向日葵[/gold]会每回合给你提供{:sunlightIcons(3)}。回合结束时，本回合每获得{:sunlightIcons(1)}，所有[gold]向日葵[/gold]就回复1点生命。",
+    "KAZAMI_YUKA_RELIC_OLD_SLEEPING_CAP_YUKA.flavor":  "\"曾经是某位神明最喜欢的装备。\""
 }

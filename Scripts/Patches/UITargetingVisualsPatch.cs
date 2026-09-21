@@ -15,6 +15,7 @@ public class UITargetingVisualsPatch
     public static void Prefix(Control control, ref Func<Node, bool> nodeFilter)
     {
         var holder = control.GetParent() as MegaCrit.Sts2.Core.Nodes.Cards.Holders.NHandCardHolder;
+        SunflowerManager.SetActiveTargetingCard(holder?.CardModel);
         if (holder != null && holder.CardModel is ICustomTargetValidator validator)
         {
             var originalFilter = nodeFilter;

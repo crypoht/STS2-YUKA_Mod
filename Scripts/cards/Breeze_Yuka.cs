@@ -17,16 +17,15 @@ public class Breeze_Yuka : KazamiYukaCard, IVariableSunlightCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("MaxSunConsume", 4m)
+        new DynamicVar("MaxSunConsume", 4m),
+        new DynamicVar("HpUp", 2m)
     ];
+
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSun];
 
     public Breeze_Yuka() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
-
-    protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip> AdditionalHoverTips => [
-        ModKeywordRegistry.CreateHoverTip(KazamiYukaKeywords.FierceSun)
-    ];
 
     public int GetMaxSunlightConsume()
     {
@@ -39,9 +38,9 @@ public class Breeze_Yuka : KazamiYukaCard, IVariableSunlightCard
         if (player == null) return;
 
         int consumedSunlight = ConsumeUpToMaxSunlight(player, GetMaxSunlightConsume(), cardPlay);
-        for (int index = 0; index < consumedSunlight; index++)
+        if (consumedSunlight > 0)
         {
-            await SunflowerManager.GainMaxHpAll(choiceContext, player, 1m);
+            await SunflowerManager.GainMaxHpAll(choiceContext, player, consumedSunlight*DynamicVars["HpUp"].BaseValue);
         }
     }
 

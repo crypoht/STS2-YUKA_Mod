@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
@@ -25,9 +25,7 @@ public class SunlightRepeater_Yuka : KazamiYukaCard
 
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
-     protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip> AdditionalHoverTips => [
-        ModKeywordRegistry.CreateHoverTip(KazamiYukaKeywords.FierceSun)
-    ];
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSun];
 
     protected override IEnumerable<DynamicVar> CanonicalVars
     {
@@ -35,25 +33,16 @@ public class SunlightRepeater_Yuka : KazamiYukaCard
         {
             DynamicVar[] array = new DynamicVar[4];
             array[0] = new CalculationBaseVar(8m);      
-            array[1] = new ExtraDamageVar(4m);          
-            array[2] = new DynamicVar("MaxSunConsume", 8m); 
+            array[1] = new ExtraDamageVar(2m);          
+            array[2] = new DynamicVar("MaxSunConsume", 10m); 
             
             array[3] = new CalculatedDamageVar(ValueProp.Move).WithMultiplier((CardModel card, MegaCrit.Sts2.Core.Entities.Creatures.Creature? _) => 
             {
                 int maxSunLimit = (int)card.DynamicVars["MaxSunConsume"].BaseValue;
 
-                // 👇 核心改动 1：UI 视觉同步！
-                // 读取官方底层数据：如果卡牌现在处于免费状态，面板直接按满额阳光计算伤害！
-                bool isFree = false;
-                if (card.EnergyCost != null && card.EnergyCost.GetResolved() == 0)
-                {
-                    if (card.EnergyCost.Canonical > 0 || card.EnergyCost.HasLocalModifiers) isFree = true;
-                }
-                
-                if (isFree) return maxSunLimit;
+                if (IsEnergyCostTemporarilyFree(card)) return maxSunLimit;
 
-                // 如果没免费，再老老实实看池子里有多少阳光
-                return Math.Min(SunlightManager.CurrentSunlight, maxSunLimit);
+                return card.Owner != null ? Math.Min(SunlightManager.GetFierceSunlight(card.Owner), maxSunLimit) : 0;
             });
 
             return array;
@@ -68,15 +57,10 @@ public class SunlightRepeater_Yuka : KazamiYukaCard
 
         int maxSunLimit = (int)DynamicVars["MaxSunConsume"].BaseValue;
 
-        // 👇 核心改动 2：删掉原本手动计算和直接调用 SunlightManager 的代码！
-        // 调用基类的终极接口，交出 cardPlay 收据，让基类去判断是不是免费！
         int actualSpent = base.ConsumeUpToMaxSunlight(player, maxSunLimit, cardPlay);
 
-        // 因为我们在上面的 UI 计算里加了 isFree 判断
-        // 所以当免费时，此时读取的 PreviewValue 绝对是满额的最大伤害！
         decimal finalDamage = base.DynamicVars.CalculatedDamage.PreviewValue;
 
-        // 轰出最终伤害！
         await DamageCmd.Attack(finalDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
@@ -86,8 +70,7 @@ public class SunlightRepeater_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        // 升级时：阳光限制到 10，系数到 5
-        DynamicVars["MaxSunConsume"].UpgradeValueBy(2m);
-        base.DynamicVars.ExtraDamage.UpgradeValueBy(1m); // 4 -> 5
+        DynamicVars["MaxSunConsume"].UpgradeValueBy(3m);
+        base.DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

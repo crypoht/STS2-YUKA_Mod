@@ -19,11 +19,9 @@ public class Unity_Yuka : KazamiYukaCard
     public override STS2RitsuLib.Scaffolding.Content.CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        // 👇 1. 直接把官方基数当作我们的“基础成长值”，图鉴会完美读取并显示它！
-        new CalculationBaseVar(2m), 
+        new CalculationBaseVar(2m),
         new CalculationExtraVar(1m),
         
-        // 👇 2. 计算公式
         new CalculatedVar("CalculatedGrow").WithMultiplier((card, _) => {
             var player = card.Owner;
             if (player == null) return 0m; 
@@ -39,11 +37,9 @@ public class Unity_Yuka : KazamiYukaCard
         })
     ];
 
-    protected override IEnumerable<IHoverTip> AdditionalHoverTips => [
-        ModKeywordRegistry.CreateHoverTip(KazamiYukaKeywords.Grow)
-    ];
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.Grow];
 
-    public Unity_Yuka() : base(2, CardType.Skill, CardRarity.Common, TargetType.None, true)
+    public Unity_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.None, true)
     {
     }
 

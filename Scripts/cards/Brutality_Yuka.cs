@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -31,14 +32,15 @@ public class Brutality_Yuka : KazamiYukaCard
             decimal totalDamage = 0m;
             foreach (Creature sunflower in SunflowerManager.GetSunflowers(player))
             {
-                totalDamage += sunflower.CurrentHp / 2;
+                totalDamage += Math.Ceiling(sunflower.CurrentHp / 2m);
             }
 
-            return totalDamage;
-        })
+            return totalDamage * card.DynamicVars["DamageMultiplier"].BaseValue;
+        }),
+        new DynamicVar("DamageMultiplier", 2m)
     ];
 
-    public Brutality_Yuka() : base(3, CardType.Attack, CardRarity.Rare, TargetType.AllEnemies, true)
+    public Brutality_Yuka() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AllEnemies, true)
     {
     }
 
@@ -53,7 +55,7 @@ public class Brutality_Yuka : KazamiYukaCard
         decimal totalDamage = DynamicVars.CalculatedDamage.Calculate(null);
         foreach (Creature sunflower in SunflowerManager.GetSunflowers(player))
         {
-            int hpLoss = sunflower.CurrentHp / 2;
+            int hpLoss = (int)Math.Ceiling(sunflower.CurrentHp / 2m);
             if (hpLoss <= 0)
             {
                 continue;

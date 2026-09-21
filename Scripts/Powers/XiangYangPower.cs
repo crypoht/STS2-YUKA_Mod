@@ -1,4 +1,6 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -28,18 +30,16 @@ public class XiangYangPower : ModPowerTemplate
     {
         if (base.Owner != null && side == base.Owner.Side)
         {
-            base.Flash(); 
+            base.Flash();
             
-
-            if (base.Owner.PetOwner is { } yukaPlayer)
+            var combatPlayers = SunflowerManager.GetCombatPlayers(base.Owner)
+                .Distinct()
+                .ToList();
+            
+            foreach (var player in combatPlayers)
             {
-                SunlightManager.GainSunlight(yukaPlayer, base.Amount); 
-            }
-            else if (base.Owner.Player is { } selfPlayer)
-            {
-                SunlightManager.GainSunlight(selfPlayer, base.Amount);
+                SunlightManager.GainSunlight(player, base.Amount);
             }
         }
     }
-
 }

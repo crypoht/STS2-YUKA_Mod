@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 namespace KazamiYuka.Scripts.Nodes;
 
 /// <summary>
-/// 向日葵召唤位置选择器。
-/// 在战斗中显示一个跟随鼠标的光标，让玩家选择召唤位置。
+/// 向日葵种植位置选择器。
+/// 在战斗中显示一个跟随鼠标的光标，让玩家选择种植位置。
 /// </summary>
 public partial class SunflowerPositionPicker : Node2D
 {

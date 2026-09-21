@@ -22,24 +22,20 @@ public class SowSeeds_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
-    // 👇 修改为给予4点生命值
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new HealVar(4)
     ];
 
-    public SowSeeds_Yuka() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self, true)
+    public SowSeeds_Yuka() : base(0, CardType.Skill, CardRarity.Basic, TargetType.Self, true)
     {
     }
 
-    protected override IEnumerable<IHoverTip> AdditionalHoverTips => [
-        ModKeywordRegistry.CreateHoverTip(KazamiYukaKeywords.Grow)
-    ];
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Innate, KazamiYukaKeywords.Grow];
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SunflowerManager.Summon(Owner, DynamicVars.Heal.BaseValue);
     }
 
-    // 👇 升级逻辑：基础费用 -1（也就是从 1费 变成 0费）
-    protected override void OnUpgrade() => base.EnergyCost.UpgradeBy(-1);
+    protected override void OnUpgrade() => DynamicVars.Heal.UpgradeValueBy(3);
 }

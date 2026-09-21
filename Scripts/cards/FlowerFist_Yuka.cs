@@ -24,7 +24,7 @@ public class FlowerFist_Yuka : KazamiYukaCard
     ];
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(8m, ValueProp.Move),
+        new DamageVar(10m, ValueProp.Move),
         new PowerVar<VulnerablePower>(1m),
         new PowerVar<WeakPower>(1m)
     ];
@@ -51,6 +51,6 @@ public class FlowerFist_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(4m);
     }
 }

@@ -1,12 +1,13 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KazamiYuka.Scripts.Keywords;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
-using KazamiYuka.Scripts.Powers;
-using KazamiYuka.Scripts;
 using STS2RitsuLib.Interop.AutoRegistration;
+using STS2RitsuLib.Keywords;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace KazamiYuka.Scripts.Cards;
@@ -17,12 +18,15 @@ public class InfiniteSpiral_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("MaxHpGained", 6m),
-        new EnergyVar(2),         
-        new CardsVar(2)          
+        new DynamicVar("MaxSunConsume", 3m),
+        new CardsVar(1),
+        new EnergyVar(1),
+        new DynamicVar("MaxHpGained", 1m)
     ];
 
-    public InfiniteSpiral_Yuka() : base(0, CardType.Power, CardRarity.Rare, TargetType.None, true)
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust, KazamiYukaKeywords.FierceSun];
+
+    public InfiniteSpiral_Yuka() : base(0, CardType.Skill, CardRarity.Rare, TargetType.None, true)
     {
     }
 
@@ -31,21 +35,36 @@ public class InfiniteSpiral_Yuka : KazamiYukaCard
         var player = base.Owner as MegaCrit.Sts2.Core.Entities.Players.Player;
         if (player == null) return;
 
-        int maxHp = (int)DynamicVars["MaxHpGained"].BaseValue;
-        int draw = base.DynamicVars.Cards.IntValue;
-        int energy = base.DynamicVars.Energy.IntValue;
+        int maxSunlight = DynamicVars["MaxSunConsume"].IntValue;
+        int availableSunlight = Math.Min(SunlightManager.GetSunlight(player), maxSunlight);
+        int consumedSunlight = availableSunlight;
+        if (consumedSunlight > 0)
+        {
+            SunlightManager.TrySpendSunlight(player, consumedSunlight);
+        }
 
-
-        await SunflowerManager.GainMaxHpAll(choiceContext, player, maxHp);
-        await CardPileCmd.Draw(choiceContext, draw, player, false);
-        await PlayerCmd.GainEnergy(energy, player);
-        await PowerCmd.Apply<InfiniteSpiralPower>(choiceContext, player.Creature, 1, player.Creature, this, false);
+        int repeats = 1 + consumedSunlight;
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue * repeats, player, false);
+        await PlayerCmd.GainEnergy(DynamicVars.Energy.IntValue * repeats, player);
+        await SunflowerManager.GainMaxHpAll(
+            choiceContext,
+            player,
+            DynamicVars["MaxHpGained"].BaseValue * repeats
+        );
+        await CreatureCmd.Damage(
+            choiceContext,
+            player.Creature,
+            repeats,
+            MegaCrit.Sts2.Core.ValueProps.ValueProp.Unblockable |
+            MegaCrit.Sts2.Core.ValueProps.ValueProp.Unpowered,
+            player.Creature,
+            this,
+            cardPlay
+        );
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["MaxHpGained"].UpgradeValueBy(2m);
-        base.DynamicVars.Cards.UpgradeValueBy(1m);
-        base.DynamicVars.Energy.UpgradeValueBy(1m);
+        DynamicVars["MaxSunConsume"].UpgradeValueBy(1m);
     }
 }

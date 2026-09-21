@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KazamiYuka.Scripts;
@@ -6,12 +7,13 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
-using MegaCrit.Sts2.Core.ValueProps;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rooms;
 using KazamiYuka.Scripts.DynamicVars;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KazamiYuka.Scripts.Cards;
 
@@ -23,34 +25,26 @@ public class ViolentArt_Yuka : KazamiYukaCard
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new CalculationBaseVar(21m),
         new ExtraDamageVar(4m),
-        new DynamicVar("SunlightSpentCount", 0m),
         new CalculatedDamageVar(ValueProp.Move).WithMultiplier((CardModel card, Creature? _) =>
-            card.DynamicVars["SunlightSpentCount"].BaseValue),
-        new SunlightCostVar(1m),
+            ViolentArtState.GetSpendCount(((ViolentArt_Yuka)card).Owner)),
+        new SunlightCostVar(2m),
     ];
 
     public ViolentArt_Yuka() : base(3, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, true)
     {
+        ViolentArtState.EnsureSubscribed();
     }
 
-    public override void AfterCreated()
+    public override Task BeforeCombatStart()
     {
-        SunlightManager.SunlightSpent += OnSunlightSpent;
-        base.AfterCreated();
+        ViolentArtState.Reset(base.Owner);
+        return base.BeforeCombatStart();
     }
 
-    private void OnSunlightSpent(Player player, int amount)
+    public override Task AfterCombatEnd(CombatRoom room)
     {
-        if (HasBeenRemovedFromState)
-        {
-            SunlightManager.SunlightSpent -= OnSunlightSpent;
-            return;
-        }
-
-        if (base.Owner == player)
-        {
-            DynamicVars["SunlightSpentCount"].BaseValue += 1m;
-        }
+        ViolentArtState.Reset(base.Owner);
+        return base.AfterCombatEnd(room);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
@@ -78,5 +72,70 @@ public class ViolentArt_Yuka : KazamiYukaCard
     {
         DynamicVars.CalculationBase.UpgradeValueBy(4m);
         DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+    }
+}
+
+internal static class ViolentArtState
+{
+    private sealed class PlayerRecord
+    {
+        public object? CombatState;
+        public int SpendCount;
+    }
+
+    private static readonly Dictionary<Player, PlayerRecord> Records = [];
+    private static bool _subscribed;
+
+    public static void EnsureSubscribed()
+    {
+        if (_subscribed)
+        {
+            return;
+        }
+
+        SunlightManager.SunlightSpent += OnSunlightSpent;
+        _subscribed = true;
+    }
+
+    public static int GetSpendCount(Player? player)
+    {
+        return player == null ? 0 : GetRecord(player).SpendCount;
+    }
+
+    public static void Reset(Player? player)
+    {
+        if (player == null)
+        {
+            return;
+        }
+
+        GetRecord(player).SpendCount = 0;
+    }
+
+    private static PlayerRecord GetRecord(Player player)
+    {
+        EnsureSubscribed();
+        object? combatState = player.Creature?.CombatState;
+        if (!Records.TryGetValue(player, out PlayerRecord? record) ||
+            !ReferenceEquals(record.CombatState, combatState))
+        {
+            record = new PlayerRecord
+            {
+                CombatState = combatState
+            };
+            Records[player] = record;
+        }
+
+        return record;
+    }
+
+    private static void OnSunlightSpent(Player player, int amount)
+    {
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        GetRecord(player).SpendCount++;
     }
 }
