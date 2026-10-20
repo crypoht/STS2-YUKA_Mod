@@ -17,10 +17,11 @@ public class SunlightCollection_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("SunAmount", 5m)
+        new DynamicVar("SunAmount", 4m),
+        new CardsVar(2)
     ];
 
-    public SunlightCollection_Yuka() : base(0, CardType.Skill, CardRarity.Common, TargetType.None, true)
+    public SunlightCollection_Yuka() : base(1, CardType.Skill, CardRarity.Common, TargetType.None, true)
     {
     }
 
@@ -31,12 +32,11 @@ public class SunlightCollection_Yuka : KazamiYukaCard
         int amount = (int)DynamicVars["SunAmount"].BaseValue;
 
         SunlightManager.GainSunlight(base.Owner, amount);
-
-        await Task.CompletedTask; 
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, base.Owner, false);
     }
 
     protected override void OnUpgrade()
     {
-        base.RemoveKeyword(CardKeyword.Exhaust);
+        RemoveKeyword(CardKeyword.Exhaust);
     }
 }

@@ -15,7 +15,7 @@ public sealed class Warmth_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("SunlightThreshold", 8m)];
-    public Warmth_Yuka() : base(2, CardType.Power, CardRarity.Rare, TargetType.Self, true) { }
+    public Warmth_Yuka() : base(1, CardType.Power, CardRarity.Rare, TargetType.Self, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
         await PowerCmd.Apply<WarmthPower>(context, base.Owner.Creature, 1m, base.Owner.Creature, this, false);

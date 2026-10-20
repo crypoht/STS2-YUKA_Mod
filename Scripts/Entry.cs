@@ -8,6 +8,7 @@ using STS2RitsuLib.Localization.SmartFormat;
 using System.Reflection; 
 using Godot;
 using KazamiYuka.Scripts.Formatters;
+using KazamiYuka.Scripts.Patches;
 
 namespace KazamiYuka.Scripts;
 
@@ -22,12 +23,14 @@ public class Entry
 
     public static void Init()
     {
+        GD.Print("[KazamiYuka][CombatTrace] Entry.Init begin.");
         _ = KazamiYukaTargetTypes.Sunflower;
 
         KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Powers.FlowerGratitudePower.OnAnySunflowerHealthChanged);
         KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Powers.FlowerMoundPower.OnAnySunflowerHealthChanged);
         KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Powers.SunflowerFieldPower.OnSunflowerHealthChanged);
         KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Cards.FlowingWind_Yuka.OnAnySunflowerHealthChanged);
+        RitsuLibFramework.RegisterCardOnPlayHookListener(new YukaPowerCastAnimationHook());
 
         try
     {
@@ -39,18 +42,19 @@ public class Entry
         GD.PrintErr($"[KazamiYuka] 阳光图标加载失败！请检查图片和 import 文件！错误: {e.Message}");
     }
 
-        var harmony = new Harmony("sts2.mod.kazamiyuka");
-        harmony.PatchAll();
-        
         ScriptManagerBridge.LookupScriptsInAssembly(typeof(Entry).Assembly);
 
         var assembly = Assembly.GetExecutingAssembly();
         
         RitsuLibFramework.EnsureGodotScriptsRegistered(assembly, Logger);
+
+        var harmony = new Harmony("sts2.mod.kazamiyuka");
+        harmony.PatchAll();
         
         ModTypeDiscoveryHub.RegisterModAssembly(ModId, assembly);
         ModSmartFormatExtensionRegistry.For(ModId).Register<SunlightIconsFormatter>();
         
+        GD.Print("[KazamiYuka][CombatTrace] Entry.Init complete.");
         Log.Info("KazamiYuka Mod (RitsuLib Mode) initialized successfully!");
     }
 }

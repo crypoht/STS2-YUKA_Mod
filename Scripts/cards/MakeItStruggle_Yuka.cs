@@ -18,7 +18,7 @@ public sealed class MakeItStruggle_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new DamageVar(21m, ValueProp.Move),
-        new DynamicVar("SunflowerDamage", 4m)
+        SunflowerDamageVar(4m)
     ];
 
     public MakeItStruggle_Yuka()
@@ -38,18 +38,19 @@ public sealed class MakeItStruggle_Yuka : KazamiYukaCard
             .Targeting(play.Target)
             .Execute(context);
 
-        if (!play.Target.IsAlive)
-        {
-            return;
-        }
-
         foreach (Creature sunflower in SunflowerManager.GetSunflowers(base.Owner).Where(flower => flower.IsAlive))
         {
+            Creature? target = GetSunflowerDamageTarget(play.Target);
+            if (target == null)
+            {
+                break;
+            }
+
             await CreatureCmd.Damage(
                 context,
-                play.Target,
+                target,
                 DynamicVars["SunflowerDamage"].BaseValue,
-                ValueProp.Unpowered | ValueProp.Move,
+                ValueProp.Move,
                 sunflower,
                 this,
                 play

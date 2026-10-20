@@ -16,8 +16,7 @@ public class TyrantForm_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("MaxHpLoss", 4m),
-        new DynamicVar("Multiplier", 1m)
+        new DynamicVar("Multiplier", 6m)
     ];
 
     public TyrantForm_Yuka() : base(3, CardType.Power, CardRarity.Rare, TargetType.Self, true)
@@ -26,9 +25,6 @@ public class TyrantForm_Yuka : KazamiYukaCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        TyrantFormPower? existingPower = base.Owner.Creature.GetPower<TyrantFormPower>();
-        decimal previousStacks = existingPower?.Amount ?? 0m;
-
         await PowerCmd.Apply<TyrantFormPower>(
             choiceContext,
             base.Owner.Creature,
@@ -37,12 +33,10 @@ public class TyrantForm_Yuka : KazamiYukaCard
             this,
             false
         );
-
-        base.Owner.Creature.GetPower<TyrantFormPower>()?.SetTriggerAmountForCurrentCard(previousStacks);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Multiplier"].UpgradeValueBy(1m);
+        DynamicVars["Multiplier"].UpgradeValueBy(2m);
     }
 }

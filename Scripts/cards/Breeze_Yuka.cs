@@ -14,6 +14,8 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public class Breeze_Yuka : KazamiYukaCard, IVariableSunlightCard
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [

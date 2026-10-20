@@ -1,8 +1,23 @@
 ﻿{
     "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.title":  "太阳草帽",
     "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.description":  "每场战斗中，前3株种植的[gold]向日葵[/gold]会每回合为你提供{:sunlightIcons(2)}。",
-    "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.flavor":  "“花之暴君从不离身的优雅之物。”",
+    "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.flavor":  "“种植向日葵的必需之物，有害虫的时候可以防止血溅到头发。”",
     "KAZAMI_YUKA_RELIC_OLD_SLEEPING_CAP_YUKA.title":  "旧日睡帽",
     "KAZAMI_YUKA_RELIC_OLD_SLEEPING_CAP_YUKA.description":  "每场战斗中，前3株种植的[gold]向日葵[/gold]会每回合给你提供{:sunlightIcons(3)}。回合结束时，本回合每获得{:sunlightIcons(1)}，所有[gold]向日葵[/gold]就回复1点生命。",
-    "KAZAMI_YUKA_RELIC_OLD_SLEEPING_CAP_YUKA.flavor":  "\"曾经是某位神明最喜欢的装备。\""
+    "KAZAMI_YUKA_RELIC_OLD_SLEEPING_CAP_YUKA.flavor":  "\"迷迷糊糊的，好像看到了一些被抛弃的过去\"",
+    "KAZAMI_YUKA_RELIC_SEED_BAG_YUKA.title":  "种子袋",
+    "KAZAMI_YUKA_RELIC_SEED_BAG_YUKA.description":  "战斗开始时，种植一朵[gold]向日葵[/gold]。",
+    "KAZAMI_YUKA_RELIC_SEED_BAG_YUKA.flavor":  "留在角落的种子袋，就靠这个种出一片花田吧。",
+    "KAZAMI_YUKA_RELIC_YOUKAI_UMBRELLA_YUKA.title":  "妖怪阳伞",
+    "KAZAMI_YUKA_RELIC_YOUKAI_UMBRELLA_YUKA.description":  "你的{:sunlightIcons(1)}会跨战斗保留。",
+    "KAZAMI_YUKA_RELIC_YOUKAI_UMBRELLA_YUKA.flavor":  "没人知道这把伞究竟是什么做的，反正不要碰就可以了。",
+    "KAZAMI_YUKA_RELIC_SUNFLOWER_HEADPIECE_YUKA.title":  "向日葵头饰",
+    "KAZAMI_YUKA_RELIC_SUNFLOWER_HEADPIECE_YUKA.description":  "种植[gold]向日葵[/gold]时，为其额外提高5点生命上限。",
+    "KAZAMI_YUKA_RELIC_SUNFLOWER_HEADPIECE_YUKA.flavor":  "可爱的头饰，专门给妖精们准备的。",
+    "KAZAMI_YUKA_RELIC_POISONOUS_DOLL_YUKA.title":  "剧毒人偶",
+    "KAZAMI_YUKA_RELIC_POISONOUS_DOLL_YUKA.description":  "[gold]向日葵[/gold]造成的伤害额外增加4点。",
+    "KAZAMI_YUKA_RELIC_POISONOUS_DOLL_YUKA.flavor":  "爱丽丝帮忙仿制的人偶。",
+    "KAZAMI_YUKA_RELIC_VISITOR_TICKET_YUKA.title":  "参观卷",
+    "KAZAMI_YUKA_RELIC_VISITOR_TICKET_YUKA.description":  "返还你每场战斗第一次使用的{:sunlightIcons(1)}。",
+    "KAZAMI_YUKA_RELIC_VISITOR_TICKET_YUKA.flavor":  "拿着这个可以免费参观向日花田，但可不包括摘花这个项目。"
 }

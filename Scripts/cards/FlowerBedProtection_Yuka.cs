@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
+using STS2RitsuLib.CardTags;
 using STS2RitsuLib.Scaffolding.Content;
 using KazamiYuka.Scripts;
 using KazamiYuka.Scripts.Powers; 
@@ -19,6 +20,8 @@ namespace KazamiYuka.Scripts.Cards;
 
 public class FlowerBedProtection_Yuka : KazamiYukaCard, ICustomTargetValidator
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     private const int energyCost = 0;
     private const CardType type = CardType.Skill;
     private const CardRarity rarity = CardRarity.Common;

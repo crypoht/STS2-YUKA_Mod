@@ -17,35 +17,17 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class OldMagicCannon_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(13m, ValueProp.Move),
-        new DynamicVar("PreviousSunlight", 0m)
+        new DamageVar(13m, ValueProp.Move)
     ];
 
     public OldMagicCannon_Yuka() : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.AllEnemies, true)
     {
-        OldMagicCannonState.EnsureSubscribed();
-        OldMagicCannonState.Changed += OnStateChanged;
     }
 
-    public override Task BeforeCombatStart()
-    {
-        OldMagicCannonState.Sync(base.Owner);
-        return base.BeforeCombatStart();
-    }
-
-    private void OnStateChanged(Player player)
-    {
-        if (!IsCanonical && !HasBeenRemovedFromState && base.Owner == player)
-        {
-            DynamicVars["PreviousSunlight"].BaseValue = OldMagicCannonState.GetPrevious(player);
-        }
-    }
+    public override int MaxUpgradeLevel => 514114514;
 
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
-        Player player = base.Owner;
-        OldMagicCannonState.Sync(player);
-
         if (base.CombatState == null)
         {
             return;
@@ -55,102 +37,17 @@ public sealed class OldMagicCannon_Yuka : KazamiYukaCard
             .FromCard(this, play)
             .TargetingAllOpponents(base.CombatState)
             .Execute(context);
-
-        int sunlight = OldMagicCannonState.ConsumePrevious(player);
-        if (sunlight > 0)
-        {
-            SunlightManager.GainSunlight(player, sunlight);
-        }
     }
 
-    protected override void OnUpgrade() => base.AddKeyword(CardKeyword.Retain);
-}
-
-internal static class OldMagicCannonState
-{
-    private sealed class PlayerRecord
+    protected override void OnUpgrade()
     {
-        public object? CombatState;
-        public int LastTurn;
-        public int CurrentSunlight;
-        public int PreviousSunlight;
-    }
+        decimal multiplier = CurrentUpgradeLevel < 5
+            ? 0.3m
+            : CurrentUpgradeLevel < 10
+                ? 0.22m
+                : 0.15m;
 
-    private static readonly Dictionary<Player, PlayerRecord> Records = [];
-    private static bool _subscribed;
-    public static event Action<Player>? Changed;
-
-    public static void EnsureSubscribed()
-    {
-        if (_subscribed)
-        {
-            return;
-        }
-
-        SunlightManager.SunlightSpent += OnSunlightSpent;
-        _subscribed = true;
-    }
-
-    public static void Sync(Player player)
-    {
-        EnsureSubscribed();
-        PlayerRecord record = GetRecord(player);
-        int turn = player.PlayerCombatState?.TurnNumber ?? record.LastTurn;
-        if (turn <= record.LastTurn)
-        {
-            return;
-        }
-
-        record.PreviousSunlight = record.CurrentSunlight;
-        record.CurrentSunlight = 0;
-        record.LastTurn = turn;
-        Changed?.Invoke(player);
-    }
-
-    public static int GetPrevious(Player player)
-    {
-        Sync(player);
-        return GetRecord(player).PreviousSunlight;
-    }
-
-    public static int ConsumePrevious(Player player)
-    {
-        Sync(player);
-        PlayerRecord record = GetRecord(player);
-        int sunlight = record.PreviousSunlight;
-        record.PreviousSunlight = 0;
-        Changed?.Invoke(player);
-        return sunlight;
-    }
-
-    private static PlayerRecord GetRecord(Player player)
-    {
-        EnsureSubscribed();
-        object? combatState = player.PlayerCombatState;
-        if (!Records.TryGetValue(player, out PlayerRecord? record) ||
-            !ReferenceEquals(record.CombatState, combatState))
-        {
-            record = new PlayerRecord
-            {
-                CombatState = combatState,
-                LastTurn = player.PlayerCombatState?.TurnNumber ?? 0
-            };
-            Records[player] = record;
-        }
-
-        return record;
-    }
-
-    private static void OnSunlightSpent(Player player, int amount)
-    {
-        if (amount <= 0)
-        {
-            return;
-        }
-
-        PlayerRecord record = GetRecord(player);
-        Sync(player);
-        record.CurrentSunlight += amount;
-        Changed?.Invoke(player);
+        decimal increase = Math.Floor(DynamicVars.Damage.BaseValue * multiplier);
+        DynamicVars.Damage.UpgradeValueBy(Math.Max(1m, increase));
     }
 }

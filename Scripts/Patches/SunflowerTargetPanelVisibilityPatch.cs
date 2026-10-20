@@ -1,4 +1,5 @@
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Nodes.Screens.Map;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
 
@@ -69,6 +70,24 @@ public static class SunflowerTargetPanelHideOnCardGridOpenPatch
 
 [HarmonyPatch(typeof(NCardGridSelectionScreen), nameof(NCardGridSelectionScreen.AfterOverlayClosed))]
 public static class SunflowerTargetPanelShowOnCardGridClosedPatch
+{
+    public static void Postfix()
+    {
+        SunflowerManager.PopTargetButtonsHidden();
+    }
+}
+
+[HarmonyPatch(typeof(NMapScreen), nameof(NMapScreen.Open))]
+public static class SunflowerTargetPanelHideOnMapOpenPatch
+{
+    public static void Postfix()
+    {
+        SunflowerManager.PushTargetButtonsHidden();
+    }
+}
+
+[HarmonyPatch(typeof(NMapScreen), nameof(NMapScreen.Close))]
+public static class SunflowerTargetPanelShowOnMapClosedPatch
 {
     public static void Postfix()
     {

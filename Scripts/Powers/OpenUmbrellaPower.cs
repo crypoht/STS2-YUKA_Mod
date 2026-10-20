@@ -1,10 +1,12 @@
 using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
@@ -15,34 +17,33 @@ namespace KazamiYuka.Scripts.Powers;
 public sealed class OpenUmbrellaPower : ModPowerTemplate
 {
     public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Single;
+    public override PowerStackType StackType => PowerStackType.Counter;
 
     public override PowerAssetProfile AssetProfile => new(
         IconPath: "res://mods/KazamiYuka/images/powers/OpenUmbrellaPower.png",
         BigIconPath: "res://mods/KazamiYuka/images/powers/OpenUmbrellaPower.png"
     );
 
-    public override decimal ModifyDamageMultiplicative(
-        Creature? target,
-        decimal amount,
-        ValueProp props,
-        Creature? dealer,
-        CardModel? cardSource,
-        CardPlay? cardPlay)
+    public override async Task BeforeSideTurnEndEarly(
+        PlayerChoiceContext choiceContext,
+        CombatSide side,
+        IEnumerable<Creature> participants)
     {
-        if (target != base.Owner || !props.IsPoweredAttack())
+        if (side != base.Owner.Side || !base.Owner.IsAlive || base.Owner.CombatState == null)
         {
-            return 1m;
+            return;
         }
 
-        return 0.5m;
-    }
-
-    public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, MegaCrit.Sts2.Core.Entities.Players.Player player)
-    {
-        if (player == base.Owner.Player)
+        base.Flash();
+        foreach (Player player in base.Owner.CombatState.Players.Where(player => player.Creature.IsAlive).ToList())
         {
-            await PowerCmd.Remove(this);
+            await CreatureCmd.GainBlock(
+                player.Creature,
+                base.Amount,
+                ValueProp.Unpowered,
+                null,
+                false
+            );
         }
     }
 }

@@ -1,10 +1,16 @@
 {
   "KAZAMI_YUKA_KEYWORD_GROW.title": "成长",
-  "KAZAMI_YUKA_KEYWORD_GROW.description": "种植一朵[gold]向日葵[/gold]，并使其提升相应的生命上限。最多种植5朵[gold]向日葵[/gold]。超出数量后后将一半数值给予所有[gold]向日葵[/gold]。",
+  "KAZAMI_YUKA_KEYWORD_GROW.description": "种植一朵[gold]向日葵[/gold]，并使其提升相应的生命上限。最多种植5朵[gold]向日葵[/gold]。超出数量后，将一半数值给予所有[gold]向日葵[/gold]。",
 
   "KAZAMI_YUKA_KEYWORD_FIERCE_SUN.title": "烈阳",
   "KAZAMI_YUKA_KEYWORD_FIERCE_SUN.description": "打出时，最多消耗该词条数值的{:sunlightIcons(1)}。",
 
   "KAZAMI_YUKA_KEYWORD_FIERCE_SUN_INFINITE.title": "烈阳-无限",
-  "KAZAMI_YUKA_KEYWORD_FIERCE_SUN_INFINITE.description": "打出时，消耗所有{:sunlightIcons(1)}。"
+  "KAZAMI_YUKA_KEYWORD_FIERCE_SUN_INFINITE.description": "打出时，消耗所有{:sunlightIcons(1)}。",
+
+  "KAZAMI_YUKA_KEYWORD_SQUEEZE.title": "挤压",
+  "KAZAMI_YUKA_KEYWORD_SQUEEZE.description": "这张牌可以对[gold]向日葵[/gold]打出，打出后提高目标[gold]向日葵[/gold]3点生命上限并消耗。",
+
+  "KAZAMI_YUKA_KEYWORD_SUNFLOWER_CARD.title": "向日葵牌",
+  "KAZAMI_YUKA_KEYWORD_SUNFLOWER_CARD.description": "目标为[gold]向日葵[/gold]的牌。"
 }

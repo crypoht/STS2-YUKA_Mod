@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KazamiYuka.Scripts.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -18,32 +17,62 @@ public sealed class SelfSacrifice_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("HpLoss", 8m)
+        new DynamicVar("HpLoss", 8m),
+        new EnergyVar(1),
+        new DynamicVar("SunlightGain", 1m)
     ];
     public SelfSacrifice_Yuka() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.None, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
-        Creature? target = CombatState?.Enemies.Where(enemy => enemy.IsAlive).OrderBy(enemy => enemy.CurrentHp).FirstOrDefault();
-        if (target == null) return;
-
         List<(Creature Flower, decimal Damage)> contributions = [];
         foreach (Creature flower in SunflowerManager.GetSunflowers(base.Owner).ToList())
         {
             if (!flower.IsAlive) continue;
-            decimal before = flower.CurrentHp;
-            await CreatureCmd.Damage(context, flower, DynamicVars["HpLoss"].BaseValue, ValueProp.Unblockable | ValueProp.Unpowered, flower, this, play);
-            if (flower.IsAlive)
+            decimal damage = Math.Min(DynamicVars["HpLoss"].BaseValue, flower.CurrentHp);
+            if (damage > 0m)
             {
-                contributions.Add((flower, before - flower.CurrentHp));
+                contributions.Add((flower, damage));
             }
         }
 
         decimal totalDamage = contributions.Sum(entry => entry.Damage);
         if (totalDamage <= 0m) return;
 
-        foreach (var contribution in contributions.Where(entry => entry.Damage > 0m))
+        foreach (var contribution in contributions)
         {
-            await CreatureCmd.Damage(context, target, contribution.Damage, ValueProp.Unpowered | ValueProp.Move, contribution.Flower, this, play);
+            await CreatureCmd.Damage(
+                context,
+                contribution.Flower,
+                contribution.Damage,
+                ValueProp.Unblockable | ValueProp.Unpowered,
+                this,
+                play
+            );
+
+            if (!contribution.Flower.IsAlive)
+            {
+                await PlayerCmd.GainEnergy(DynamicVars.Energy.IntValue, base.Owner);
+                SunlightManager.GainSunlight(base.Owner, DynamicVars["SunlightGain"].IntValue);
+            }
+        }
+
+        foreach (var contribution in contributions)
+        {
+            Creature? target = GetLowestAliveEnemy();
+            if (target == null)
+            {
+                break;
+            }
+
+            await CreatureCmd.Damage(
+                context,
+                target,
+                contribution.Damage,
+                ValueProp.Move,
+                contribution.Flower,
+                this,
+                play
+            );
         }
     }
     protected override void OnUpgrade() => base.EnergyCost.UpgradeBy(-1);

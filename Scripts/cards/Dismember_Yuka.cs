@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KazamiYuka.Scripts.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -8,28 +7,29 @@ using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
+using KazamiYuka.Scripts.Powers;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace KazamiYuka.Scripts.Cards;
 
 [RegisterCard(typeof(KazamiYukaCardPool))]
-public class FlowerFist_Yuka : KazamiYukaCard
+public sealed class Dismember_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<IHoverTip> AdditionalHoverTips => [
-        HoverTipFactory.FromPower<VulnerablePower>(null),
-        HoverTipFactory.FromPower<WeakPower>(null)
+        HoverTipFactory.FromPower<StrengthPower>(null)
     ];
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(10m, ValueProp.Move),
-        new PowerVar<VulnerablePower>(1m),
-        new PowerVar<WeakPower>(1m)
+        new DamageVar(11m, ValueProp.Move),
+        new DynamicVar("StrengthLoss", 4m),
+        new DynamicVar("Duration", 3m)
     ];
 
-    public FlowerFist_Yuka() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, true)
+    public Dismember_Yuka()
+        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, true)
     {
     }
 
@@ -45,12 +45,20 @@ public class FlowerFist_Yuka : KazamiYukaCard
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash", null, null)
             .Execute(choiceContext);
-        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, DynamicVars["VulnerablePower"].BaseValue, base.Owner.Creature, this, false);
-        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["WeakPower"].BaseValue, base.Owner.Creature, this, false);
+
+        await PowerCmd.Apply<DismemberPower>(
+            choiceContext,
+            cardPlay.Target,
+            DynamicVars["StrengthLoss"].BaseValue,
+            base.Owner.Creature,
+            this,
+            false
+        );
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(4m);
+        DynamicVars["Duration"].UpgradeValueBy(1m);
     }
 }

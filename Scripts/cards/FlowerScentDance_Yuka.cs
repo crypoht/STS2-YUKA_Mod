@@ -18,7 +18,7 @@ public sealed class FlowerScentDance_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("MaxSunlight", 3m)
+        new DynamicVar("MaxSunlight", 5m)
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSun];
@@ -44,6 +44,6 @@ public sealed class FlowerScentDance_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["MaxSunlight"].UpgradeValueBy(1m);
+        DynamicVars["MaxSunlight"].UpgradeValueBy(2m);
     }
 }

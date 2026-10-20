@@ -20,7 +20,7 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class Fantasy_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("MaxHpGain", 2m)
+        new DynamicVar("MaxHpGain", 1m)
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSunInfinite];
@@ -43,14 +43,17 @@ public sealed class Fantasy_Yuka : KazamiYukaCard
             consumedSunlight * DynamicVars["MaxHpGain"].BaseValue
         );
 
-        Creature? target = CombatState?.Enemies.Where(enemy => enemy.IsAlive).OrderBy(enemy => enemy.CurrentHp).FirstOrDefault();
-        if (target == null) return;
-
         foreach (Creature flower in SunflowerManager.GetSunflowers(base.Owner).Where(flower => flower.IsAlive).ToList())
         {
-            await CreatureCmd.Damage(context, target, flower.MaxHp, ValueProp.Unpowered | ValueProp.Move, flower, this, play);
+            Creature? target = GetLowestAliveEnemy();
+            if (target == null)
+            {
+                break;
+            }
+
+            await CreatureCmd.Damage(context, target, flower.MaxHp, ValueProp.Move, flower, this, play);
         }
     }
 
-    protected override void OnUpgrade() => DynamicVars["MaxHpGain"].UpgradeValueBy(1m);
+    protected override void OnUpgrade() => base.EnergyCost.UpgradeBy(-1);
 }

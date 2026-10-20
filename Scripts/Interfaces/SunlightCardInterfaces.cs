@@ -26,7 +26,7 @@ namespace KazamiYuka.Scripts.Interfaces
             var cardModel = card as CardModel; 
             if (cardModel == null) return false;
 
-            if (KazamiYukaCard.IsEnergyCostTemporarilyFree(cardModel)) return true;
+            if (cardPlay.IsAutoPlay || KazamiYukaCard.IsEnergyCostTemporarilyFree(cardModel)) return true;
 
             return SunlightManager.TrySpendSunlight(player, cost);
         }
@@ -37,7 +37,10 @@ namespace KazamiYuka.Scripts.Interfaces
             var cardModel = card as CardModel;
             if (cardModel == null) return 0;
 
-            if (KazamiYukaCard.IsEnergyCostTemporarilyFree(cardModel)) return max;
+            if (cardPlay.IsAutoPlay || KazamiYukaCard.IsEnergyCostTemporarilyFree(cardModel))
+            {
+                return Math.Min(SunlightManager.GetSunlight(player), max);
+            }
 
             int actualSpent = Math.Min(SunlightManager.GetSunlight(player), max);
             

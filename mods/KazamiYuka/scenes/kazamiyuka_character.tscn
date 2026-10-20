@@ -1,28 +1,39 @@
 [gd_scene load_steps=2 format=3 uid="uid://dtk7o38ssjd46"]
 
-[ext_resource type="Texture2D" uid="uid://n5p0fd6meqja" path="res://mods/KazamiYuka/images/kazamiyuka_character.png" id="1_s0637"]
+[ext_resource type="SpineSkeletonDataResource" uid="uid://v70il1wrwb2s" path="res://mods/KazamiYuka/spine/Yuka.tres" id="1_0nyjj"]
 
 [node name="Yuka" type="Node2D"]
 
-[node name="Visuals" type="Sprite2D" parent="."]
+[node name="Visuals" type="SpineSprite" parent="."]
+skeleton_data_res = ExtResource("1_0nyjj")
+preview_skin = "default"
+preview_animation = "idle_loop"
+preview_frame = false
+preview_time = 0.0
 unique_name_in_owner = true
-position = Vector2(1, -129)
-scale = Vector2(0.35, 0.347)
-texture = ExtResource("1_s0637")
+position = Vector2(0, -150)
+scale = Vector2(1.2, 1.2)
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
-offset_left = -130.0
-offset_top = -274.0
-offset_right = 130.0
-offset_bottom = 19.0
+offset_left = -121.0
+offset_top = -288.0
+offset_right = 79.0
+offset_bottom = 4.0
 
 [node name="IntentPos" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(1, -212)
+position = Vector2(-7, -222)
 
 [node name="CenterPos" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(10, -70)
+position = Vector2(-1, -109)
+
+[node name="FormVfx" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0

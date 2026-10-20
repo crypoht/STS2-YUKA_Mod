@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Nodes.Cards;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using KazamiYuka.Scripts;
+using KazamiYuka.Scripts.Powers;
 
 namespace KazamiYuka.Patches;
 
@@ -16,14 +17,45 @@ public class UITargetingVisualsPatch
     {
         var holder = control.GetParent() as MegaCrit.Sts2.Core.Nodes.Cards.Holders.NHandCardHolder;
         SunflowerManager.SetActiveTargetingCard(holder?.CardModel);
-        if (holder != null && holder.CardModel is ICustomTargetValidator validator)
+        if (holder != null && (holder.CardModel is ICustomTargetValidator || SqueezeManager.IsSqueezed(holder.CardModel)))
         {
             var originalFilter = nodeFilter;
             nodeFilter = (node) =>
             {
-                if (originalFilter != null && !originalFilter(node)) return false;
-                if (node is NCreature nCreature) return validator.IsValidCustomTarget(nCreature.Entity);
+                if (node is NCreature nCreature &&
+                    TyrantFormPower.AllowsSunflowerTarget(holder.CardModel, nCreature.Entity))
+                {
+                    return true;
+                }
+
+                if (node is NCreature customCreature)
+                {
+                    if (holder.CardModel is ICustomTargetValidator validator)
+                    {
+                        return (originalFilter == null || originalFilter(node)) &&
+                               validator.IsValidCustomTarget(customCreature.Entity);
+                    }
+
+                    return SqueezeManager.IsValidOriginalOrSunflowerTarget(
+                        holder.CardModel,
+                        customCreature.Entity);
+                }
+
                 return false;
+            };
+        }
+        else
+        {
+            var originalFilter = nodeFilter;
+            nodeFilter = node =>
+            {
+                if (node is NCreature nCreature &&
+                    TyrantFormPower.AllowsSunflowerTarget(holder?.CardModel, nCreature.Entity))
+                {
+                    return true;
+                }
+
+                return originalFilter?.Invoke(node) ?? true;
             };
         }
     }

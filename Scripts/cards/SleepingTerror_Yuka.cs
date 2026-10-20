@@ -16,6 +16,8 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public sealed class SleepingTerror_Yuka : KazamiYukaCard
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     protected override IEnumerable<IHoverTip> AdditionalHoverTips => [
         HoverTipFactory.FromPower<HibernatePower>()
     ];

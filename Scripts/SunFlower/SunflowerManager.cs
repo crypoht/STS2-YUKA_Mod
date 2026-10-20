@@ -44,9 +44,14 @@ public static class SunflowerManager
     private static readonly List<NHealthBar> _sunflowerHealthBars = new();
     private static readonly List<(Creature Flower, Action<int, int> CurrentHpChanged, Action<int, int> MaxHpChanged)> _sunflowerHealthSubscriptions = new();
     private static readonly List<Creature> _sunflowerSlots = new();
+    private static readonly Dictionary<Creature, int> _sunflowerSlotByCreature = new();
+    private static readonly Stack<int> _freeSunflowerSlots = new();
+    private static int _nextSunflowerSlot;
+    private static bool _sunflowerRearrangeQueued;
     private static Control? _sunflowerCombatClip;
     private static NTargetManager? _subscribedTargetManager;
     private static bool _isSunflowerTargetingCardActive;
+    private static CardModel? _activeTargetingCard;
     private static bool _isRefreshingTargetButtons;
     private static bool _targetButtonsRefreshQueued;
     private static int _targetButtonsHideDepth;
@@ -87,6 +92,16 @@ public static class SunflowerManager
     public static void ResetCombatState()
     {
         _relicXiangYangApplications.Clear();
+        foreach (Creature sunflower in _sunflowerSlots)
+        {
+            sunflower.Died -= OnSunflowerDied;
+        }
+
+        _sunflowerSlots.Clear();
+        _sunflowerSlotByCreature.Clear();
+        _freeSunflowerSlots.Clear();
+        _nextSunflowerSlot = 0;
+        _sunflowerRearrangeQueued = false;
         RefreshRelicCounters();
     }
 
@@ -142,6 +157,12 @@ public static class SunflowerManager
         }
 
         decimal surroundBonusMaxHp = SurroundPower.GetBonusMaxHp(summoner);
+        decimal headpieceBonusMaxHp = Relics.SunflowerHeadpiece_Yuka.GetBonusMaxHp(summoner);
+        if (summoner.Character is KazamiYukaCharacter)
+        {
+            await CreatureCmd.TriggerAnim(summoner.Creature, "Cast", summoner.Character.CastAnimDelay);
+        }
+
         Creature newFlower = await PlayerCmd.AddPet<KazamiYukaSunflower>(summoner);
         RegisterSunflowerSlot(newFlower);
 
@@ -157,7 +178,7 @@ public static class SunflowerManager
             );
         }
 
-        decimal newFlowerMaxHp = initialHp + surroundBonusMaxHp;
+        decimal newFlowerMaxHp = initialHp + surroundBonusMaxHp + headpieceBonusMaxHp;
         if (grantDegraded)
         {
             newFlowerMaxHp = Math.Min(newFlowerMaxHp, 1m);
@@ -253,12 +274,24 @@ public static class SunflowerManager
     }
     public static void ArrangeSunflowers(Player summoner)
     {
-        ArrangeSunflowers(summoner, GetOrderedSunflowers());
+        if (!IsCombatActivelyRunning())
+        {
+            return;
+        }
+
+        ArrangeSunflowers(
+            summoner,
+            GetOrderedSunflowers().Where(flower => flower.PetOwner == summoner && flower.IsAlive).ToList());
         RefreshTargetButtons();
     }
 
     public static async void ArrangeSunflowersDeferred(Player summoner)
     {
+        if (!IsCombatActivelyRunning())
+        {
+            return;
+        }
+
         NCombatRoom? room = NCombatRoom.Instance;
         if (room == null)
         {
@@ -266,11 +299,22 @@ public static class SunflowerManager
         }
 
         await room.ToSignal(room.GetTree(), SceneTree.SignalName.ProcessFrame);
+
+        if (!IsCombatActivelyRunning())
+        {
+            return;
+        }
+
         ArrangeSunflowers(summoner);
     }
 
     private static void ArrangeSunflowers(Player summoner, IReadOnlyList<Creature> sunflowers)
     {
+        if (!IsCombatActivelyRunning())
+        {
+            return;
+        }
+
         NCombatRoom? room = NCombatRoom.Instance;
         if (room == null)
         {
@@ -291,7 +335,6 @@ public static class SunflowerManager
             20f
         );
 
-        int slotIndex = 0;
         foreach (Creature flower in sunflowers)
         {
             NCreature? flowerNode = room.GetCreatureNode(flower);
@@ -300,6 +343,8 @@ public static class SunflowerManager
                 continue;
             }
 
+            // 使用向日葵固定槽号定位；不按当前存活数量重新编号。
+            int slotIndex = _sunflowerSlotByCreature.GetValueOrDefault(flower);
             Vector2 offset = SunflowerSlotOffsets[slotIndex % SunflowerSlotOffsets.Length];
             flowerNode.Position = playerRelativeOrigin + offset;
             SetSunflowerLayer(flowerNode, playerNode, slotIndex);
@@ -310,8 +355,13 @@ public static class SunflowerManager
                 flowerNode.Visuals.Bounds.Visible = true;
             }
 
-            slotIndex++;
         }
+    }
+
+    private static bool IsCombatActivelyRunning()
+    {
+        CombatManager? combatManager = CombatManager.Instance;
+        return combatManager is { IsInProgress: true, IsOverOrEnding: false };
     }
 
     private static void SetSunflowerLayer(NCreature flowerNode, NCreature playerNode, int slotIndex)
@@ -419,18 +469,23 @@ public static class SunflowerManager
         }
 
         _sunflowerCombatClip = null;
-        _sunflowerSlots.Clear();
         _isSunflowerTargetingCardActive = false;
+        _activeTargetingCard = null;
         _targetButtonsHideDepth = 0;
     }
 
     public static void SetActiveTargetingCard(CardModel? card)
     {
+        _activeTargetingCard = card;
         _isSunflowerTargetingCardActive =
-            card?.TargetType == KazamiYukaTargetTypes.Sunflower &&
-            card is ICustomTargetValidator;
+            card != null &&
+            (card.TargetType == KazamiYukaTargetTypes.Sunflower ||
+             SqueezeManager.IsSqueezed(card)) &&
+            (card is ICustomTargetValidator || SqueezeManager.IsSqueezed(card));
         RefreshSunflowerTargetHitboxes();
     }
+
+    public static CardModel? GetActiveTargetingCard() => _activeTargetingCard;
 
     public static void HideTargetButtons()
     {
@@ -706,9 +761,84 @@ public static class SunflowerManager
 
     private static void RegisterSunflowerSlot(Creature sunflower)
     {
-        if (sunflower.Monster is KazamiYukaSunflower && !_sunflowerSlots.Contains(sunflower))
+        if (sunflower.Monster is not KazamiYukaSunflower ||
+            !sunflower.IsAlive ||
+            _sunflowerSlotByCreature.ContainsKey(sunflower))
         {
-            _sunflowerSlots.Add(sunflower);
+            return;
+        }
+
+        Player? owner = sunflower.PetOwner;
+        if (owner == null)
+        {
+            return;
+        }
+
+        // 优先复用最近死亡向日葵释放的槽位，否则分配下一个新槽位。
+        int slot;
+        if (_freeSunflowerSlots.Count > 0)
+        {
+            slot = _freeSunflowerSlots.Pop();
+        }
+        else
+        {
+            slot = _nextSunflowerSlot++;
+        }
+
+        _sunflowerSlotByCreature[sunflower] = slot;
+        _sunflowerSlots.Add(sunflower);
+        sunflower.Died += OnSunflowerDied;
+    }
+
+    private static void OnSunflowerDied(Creature sunflower)
+    {
+        if (!_sunflowerSlotByCreature.Remove(sunflower, out int slot))
+        {
+            return;
+        }
+
+        // 死亡只释放原槽位，不移动存活向日葵，也不压缩它们的编号。
+        _freeSunflowerSlots.Push(slot);
+        _sunflowerSlots.Remove(sunflower);
+        sunflower.Died -= OnSunflowerDied;
+        QueueSunflowerRearrange();
+    }
+
+    public static void ArrangeAllSunflowersDeferred()
+    {
+        QueueSunflowerRearrange();
+    }
+
+    private static async void QueueSunflowerRearrange()
+    {
+        if (_sunflowerRearrangeQueued ||
+            CombatManager.Instance is not { IsInProgress: true, IsOverOrEnding: false } ||
+            NCombatRoom.Instance is not NCombatRoom room)
+        {
+            return;
+        }
+
+        _sunflowerRearrangeQueued = true;
+        try
+        {
+            // 官方死亡流程可能还会继续修改宠物节点；等待一帧后再恢复固定槽位。
+            await room.ToSignal(room.GetTree(), SceneTree.SignalName.ProcessFrame);
+            if (CombatManager.Instance is not { IsInProgress: true, IsOverOrEnding: false })
+            {
+                return;
+            }
+
+            foreach (Player owner in _sunflowerSlots
+                         .Select(flower => flower.PetOwner)
+                         .OfType<Player>()
+                         .Distinct())
+            {
+                ArrangeSunflowers(owner);
+            }
+        }
+        finally
+        {
+            _sunflowerRearrangeQueued = false;
         }
     }
 
@@ -720,14 +850,16 @@ public static class SunflowerManager
             foreach (NCreature creatureNode in room.CreatureNodes)
             {
                 Creature? creature = creatureNode.Entity;
-                if (creature?.Monster is KazamiYukaSunflower)
+                if (creature is { IsAlive: true } && creature.Monster is KazamiYukaSunflower)
                 {
                     RegisterSunflowerSlot(creature);
                 }
             }
         }
 
-        return _sunflowerSlots;
+        return _sunflowerSlots
+            .OrderBy(flower => _sunflowerSlotByCreature.GetValueOrDefault(flower))
+            .ToList();
     }
 
     private static void SelectSunflowerTarget(NCreature flowerNode)
@@ -812,6 +944,7 @@ public static class SunflowerManager
     private static void DisableSunflowerTargetHitboxes()
     {
         _isSunflowerTargetingCardActive = false;
+        _activeTargetingCard = null;
         foreach (Button hitbox in _sunflowerTargetHitboxes)
         {
             if (GodotObject.IsInstanceValid(hitbox))

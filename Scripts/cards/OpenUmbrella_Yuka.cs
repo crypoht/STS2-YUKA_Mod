@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KazamiYuka.Scripts.Powers;
 using KazamiYuka.Scripts.DynamicVars;
@@ -14,14 +15,33 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public sealed class OpenUmbrella_Yuka : KazamiYukaCard
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new SunlightCostVar(1m)];
-    public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
-    public OpenUmbrella_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true) { }
+    protected override IEnumerable<DynamicVar> CanonicalVars => [
+        new SunlightCostVar(4m),
+        new PowerVar<OpenUmbrellaPower>(2m)
+    ];
+    public OpenUmbrella_Yuka() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
-        if (TryPayFixedSunlight(base.Owner, DynamicVars["SunlightCost"].IntValue, play))
-            await PowerCmd.Apply<OpenUmbrellaPower>(context, base.Owner.Creature, 1m, base.Owner.Creature, this, false);
+        if (!TryPayFixedSunlight(base.Owner, DynamicVars["SunlightCost"].IntValue, play))
+        {
+            return;
+        }
+
+        foreach (var sunflower in SunflowerManager.GetSunflowers(base.Owner).Where(flower => flower.IsAlive))
+        {
+            await PowerCmd.Apply<OpenUmbrellaPower>(
+                context,
+                sunflower,
+                DynamicVars["OpenUmbrellaPower"].BaseValue,
+                base.Owner.Creature,
+                this,
+                false
+            );
+        }
     }
-    protected override void OnUpgrade() => EnergyCost.UpgradeBy(-1);
+
+    protected override void OnUpgrade() => DynamicVars["OpenUmbrellaPower"].UpgradeValueBy(1m);
 }

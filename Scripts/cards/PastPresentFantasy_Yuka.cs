@@ -20,5 +20,5 @@ public sealed class PastPresentFantasy_Yuka : KazamiYukaCard
         await PowerCmd.Apply<EnergySunPower>(context, base.Owner.Creature, DynamicVars["SunlightPerEnergy"].BaseValue, base.Owner.Creature, this, false);
     }
 
-    protected override void OnUpgrade() => DynamicVars["SunlightPerEnergy"].UpgradeValueBy(1m);
+    protected override void OnUpgrade() => base.EnergyCost.UpgradeBy(-1);
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MegaCrit.Sts2.Core.Entities.Players;
 using KazamiYuka.Scripts.Relics;
 
@@ -37,7 +38,14 @@ public static class SunlightManager
 
 	public static void ResetForCombat()
 	{
+		Dictionary<Player, int> retainedSunlight = _playerSunlight
+			.Where(pair => pair.Key.Relics?.Any(relic => relic is YoukaiUmbrella_Yuka) == true)
+			.ToDictionary(pair => pair.Key, pair => pair.Value);
 		_playerSunlight.Clear();
+		foreach (var pair in retainedSunlight)
+		{
+			_playerSunlight[pair.Key] = pair.Value;
+		}
 		_sunlightGainedThisTurn.Clear();
 #pragma warning disable CS0618
 		int old = CurrentSunlight;

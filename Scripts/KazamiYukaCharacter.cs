@@ -1,4 +1,7 @@
 using Godot;
+using MegaCrit.Sts2.Core.Animation;
+using MegaCrit.Sts2.Core.Bindings.MegaSpine;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models.Relics;
@@ -76,18 +79,38 @@ public class KazamiYukaCharacter : ModCharacterTemplate<KazamiYukaCardPool, Kaza
             ),
             Multiplayer: new(
                 // 多人模式-手指。
-                // ArmPointingTexturePath: null,
+                ArmPointingTexturePath: "res://mods/KazamiYuka/images/hands/zhi.png",
                 // 多人模式剪刀石头布-石头。
-                // ArmRockTexturePath: null,
+                ArmRockTexturePath: "res://mods/KazamiYuka/images/hands/shitou.png",
                 // 多人模式剪刀石头布-布。
-                // ArmPaperTexturePath: null,
+                ArmPaperTexturePath: "res://mods/KazamiYuka/images/hands/bu.png",
                 // 多人模式剪刀石头布-剪刀。
-                // ArmScissorsTexturePath: null
+                ArmScissorsTexturePath: "res://mods/KazamiYuka/images/hands/jiandao.png"
             )));
 
     // 攻击和施法动画延迟，以对齐动画
     public override float AttackAnimDelay => 0f;
     public override float CastAnimDelay => 0f;
+
+    public override CreatureAnimator GenerateAnimator(MegaSprite controller, Creature creature)
+    {
+        var idle = new AnimState("idle_loop", true);
+        var lowHealth = new AnimState("low_health_loop", true);
+        var animator = new CreatureAnimator(IsLowHealth(creature) ? lowHealth : idle, controller);
+        animator.AddAnyState("Idle", idle, () => !IsLowHealth(creature));
+        animator.AddAnyState("Idle", lowHealth, () => IsLowHealth(creature));
+        animator.AddAnyState("Relaxed", idle);
+        animator.AddAnyState("Dead", new AnimState("die", false));
+
+        foreach (var (state, trigger) in AnimationStates)
+        {
+            state.AddNextState(idle, () => !IsLowHealth(creature));
+            state.AddNextState(lowHealth, () => IsLowHealth(creature));
+            animator.AddAnyState(trigger, state);
+        }
+
+        return animator;
+    }
 
     // 如果你的人物不需要时间线小故事，加上这句。
     // public override bool RequiresEpochAndTimeline => false;

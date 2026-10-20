@@ -1,13 +1,15 @@
 [gd_scene load_steps=3 format=3 uid="uid://wsekny15026"]
 
 [ext_resource type="Script" uid="uid://bc01s1f0ybdav" path="res://Scripts/Nodes/KazamiYukaMerchantCharacter.cs" id="1_kgrjb"]
-[ext_resource type="Texture2D" uid="uid://bwqm7fcyujn3w" path="res://mods/KazamiYuka/images/FUMOKAZAMIYUKA.png" id="2_wqrpt"]
+[ext_resource type="SpineSkeletonDataResource" uid="uid://v70il1wrwb2s" path="res://mods/KazamiYuka/spine/Yuka.tres" id="2_wqrpt"]
 
 [node name="YukaMerchant" type="Node2D"]
 script = ExtResource("1_kgrjb")
 
-[node name="Visuals" type="Sprite2D" parent="."]
+[node name="Visuals" type="SpineSprite" parent="."]
 unique_name_in_owner = true
-position = Vector2(-4.999998, -64)
-scale = Vector2(0.21622138, 0.21188761)
-texture = ExtResource("2_wqrpt")
+position = Vector2(-5, -110)
+scale = Vector2(2.0, 2.0)
+skeleton_data_res = ExtResource("2_wqrpt")
+preview_skin = "default"
+preview_animation = "idle_loop"

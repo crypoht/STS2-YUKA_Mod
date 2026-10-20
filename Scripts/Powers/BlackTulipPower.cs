@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -19,6 +20,10 @@ public sealed class BlackTulipPower : ModPowerTemplate
 {
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars => [
+        new BlackTulipDamagePercentVar()
+    ];
 
     public override PowerAssetProfile AssetProfile => new(
         IconPath: "res://mods/KazamiYuka/images/powers/BlackTulipPower.png",
@@ -38,7 +43,7 @@ public sealed class BlackTulipPower : ModPowerTemplate
             return 1m;
         }
 
-        return 1m + base.Amount * 0.25m;
+        return 1m + GetDamagePercent(base.Amount) / 100m;
     }
 
     public override async Task BeforeSideTurnEndEarly(
@@ -61,6 +66,30 @@ public sealed class BlackTulipPower : ModPowerTemplate
 
             await CreatureCmd.LoseMaxHp(choiceContext, sunflower, maxHpLoss, false);
             await SunflowerManager.NotifyMaxHpDecrease(choiceContext, sunflower, maxHpLoss);
+        }
+    }
+
+    private static decimal GetDamagePercent(decimal amount)
+    {
+        return amount * 25m;
+    }
+
+    private sealed class BlackTulipDamagePercentVar : DynamicVar
+    {
+        public BlackTulipDamagePercentVar() : base("DamagePercent", 50m)
+        {
+        }
+
+        protected override decimal GetBaseValueForIConvertible()
+        {
+            return _owner is BlackTulipPower power
+                ? GetDamagePercent(power.Amount)
+                : base.GetBaseValueForIConvertible();
+        }
+
+        public override string ToString()
+        {
+            return ((int)GetBaseValueForIConvertible()).ToString();
         }
     }
 }

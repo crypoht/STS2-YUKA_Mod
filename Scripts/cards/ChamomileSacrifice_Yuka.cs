@@ -18,6 +18,8 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public sealed class ChamomileSacrifice_Yuka : KazamiYukaCard
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
@@ -29,8 +31,7 @@ public sealed class ChamomileSacrifice_Yuka : KazamiYukaCard
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [
-        CardKeyword.Exhaust,
-        KazamiYukaKeywords.Grow
+        CardKeyword.Exhaust
     ];
 
     public ChamomileSacrifice_Yuka()
@@ -60,6 +61,6 @@ public sealed class ChamomileSacrifice_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        base.EnergyCost.UpgradeBy(-1);
+       base.RemoveKeyword(CardKeyword.Exhaust);
     }
 }

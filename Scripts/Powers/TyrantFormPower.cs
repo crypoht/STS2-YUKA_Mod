@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using KazamiYuka.Scripts;
-using KazamiYuka.Scripts.Cards;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -20,8 +17,6 @@ namespace KazamiYuka.Scripts.Powers;
 [RegisterPower]
 public sealed class TyrantFormPower : ModPowerTemplate
 {
-    private decimal? _triggerAmountForCurrentCard;
-
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
@@ -30,65 +25,73 @@ public sealed class TyrantFormPower : ModPowerTemplate
         BigIconPath: "res://mods/KazamiYuka/images/powers/TyrantFormPower.png"
     );
 
-    public void SetTriggerAmountForCurrentCard(decimal amount)
+    public static bool AllowsSunflowerTarget(CardModel? card, Creature? target)
     {
-        _triggerAmountForCurrentCard = amount;
+        if (card == null ||
+            target?.Monster is not KazamiYukaSunflower ||
+            !target.IsAlive ||
+            card.Type != CardType.Attack ||
+            card.Owner?.Creature.GetPower<TyrantFormPower>() == null)
+        {
+            return false;
+        }
+
+        return card.TargetType is TargetType.AnyEnemy or TargetType.RandomEnemy or TargetType.AllEnemies;
     }
 
-    public override async Task AfterCardPlayedLate(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    public static bool AllowsAttackCard(CardModel? card)
     {
-        if (cardPlay.Card.Owner.Creature != base.Owner)
+        return card?.Owner?.Creature.GetPower<TyrantFormPower>() != null &&
+            card.Type == CardType.Attack &&
+            card.TargetType is TargetType.AnyEnemy or TargetType.RandomEnemy or TargetType.AllEnemies;
+    }
+
+    public override async Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext,
+        Creature? dealer,
+        DamageResult result,
+        ValueProp props,
+        Creature target,
+        CardModel? cardSource)
+    {
+        if (!result.WasTargetKilled ||
+            target.Monster is not KazamiYukaSunflower ||
+            dealer?.Monster is KazamiYukaSunflower ||
+            cardSource?.Type != CardType.Attack ||
+            cardSource.Owner?.Creature != base.Owner ||
+            target.MaxHp <= 0m)
         {
             return;
         }
 
-        var player = base.Owner.Player;
         var combatState = base.Owner.CombatState;
-        if (player == null || combatState == null)
+        if (combatState == null)
         {
             return;
         }
 
-        decimal totalMaxHpLoss = 0m;
-        foreach (Creature sunflower in SunflowerManager.GetSunflowers(player))
-        {
-            if (!sunflower.IsAlive)
-            {
-                continue;
-            }
-
-            decimal maxHpLoss = Math.Min(4m, Math.Max(0m, sunflower.MaxHp - 1m));
-            if (maxHpLoss <= 0m)
-            {
-                continue;
-            }
-
-            totalMaxHpLoss += maxHpLoss;
-            await CreatureCmd.LoseMaxHp(choiceContext, sunflower, maxHpLoss, false);
-        }
-
-        decimal triggerAmount = _triggerAmountForCurrentCard ?? base.Amount;
-        _triggerAmountForCurrentCard = null;
-
-        if (totalMaxHpLoss <= 0m || triggerAmount <= 0m)
+        decimal damage = target.MaxHp * base.Amount;
+        if (damage <= 0m)
         {
             return;
         }
 
-        foreach (Creature enemy in combatState.Enemies)
+        var enemies = combatState.Enemies
+            .Where(enemy => enemy.IsAlive)
+            .ToList();
+        if (enemies.Count == 0)
         {
-            if (!enemy.IsAlive)
-            {
-                continue;
-            }
-
-            await CreatureCmd.Damage(
-                choiceContext,
-                enemy,
-                totalMaxHpLoss * triggerAmount,
-                ValueProp.Unpowered | ValueProp.Move,
-                base.Owner
-            );
+            return;
         }
+
+        await CreatureCmd.Damage(
+            choiceContext,
+            enemies,
+            damage,
+            ValueProp.Unpowered | ValueProp.Move,
+            base.Owner,
+            null,
+            null
+        );
     }
 }

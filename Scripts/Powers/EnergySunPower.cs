@@ -24,7 +24,7 @@ public sealed class EnergySunPower : ModPowerTemplate
         {
             if (base.Owner.Player != null)
             {
-                SunlightManager.GainSunlight(base.Owner.Player, amount * (int)base.Amount);
+                SunlightManager.GainSunlight(base.Owner.Player, (int)base.Amount);
             }
             await Task.CompletedTask;
         }

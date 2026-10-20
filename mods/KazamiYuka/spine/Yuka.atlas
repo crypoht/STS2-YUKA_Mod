@@ -1,0 +1,237 @@
+
+Yuka.png
+size: 2034,837
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+0001
+  rotate: false
+  xy: 1070, 31
+  size: 148, 233
+  orig: 384, 384
+  offset: 99, 60
+  index: -1
+0002
+  rotate: false
+  xy: 1218, 364
+  size: 148, 234
+  orig: 384, 384
+  offset: 99, 60
+  index: -1
+0003
+  rotate: false
+  xy: 1068, 362
+  size: 148, 235
+  orig: 384, 384
+  offset: 99, 60
+  index: -1
+0004
+  rotate: false
+  xy: 1026, 599
+  size: 148, 236
+  orig: 384, 384
+  offset: 99, 60
+  index: -1
+0005
+  rotate: false
+  xy: 1176, 600
+  size: 148, 235
+  orig: 384, 384
+  offset: 99, 60
+  index: -1
+0006
+  rotate: false
+  xy: 1326, 602
+  size: 150, 233
+  orig: 384, 384
+  offset: 99, 60
+  index: -1
+0056
+  rotate: true
+  xy: 2, 2
+  size: 175, 197
+  orig: 384, 384
+  offset: 74, 60
+  index: -1
+0057
+  rotate: false
+  xy: 885, 584
+  size: 139, 251
+  orig: 384, 384
+  offset: 125, 61
+  index: -1
+0058
+  rotate: false
+  xy: 836, 258
+  size: 230, 269
+  orig: 384, 384
+  offset: 24, 60
+  index: -1
+0059
+  rotate: true
+  xy: 496, 477
+  size: 358, 244
+  orig: 384, 384
+  offset: 13, 12
+  index: -1
+0060
+  rotate: false
+  xy: 496, 204
+  size: 338, 271
+  orig: 384, 384
+  offset: 38, 59
+  index: -1
+0061
+  rotate: true
+  xy: 698, 3
+  size: 199, 205
+  orig: 384, 384
+  offset: 47, 59
+  index: -1
+0062
+  rotate: true
+  xy: 1820, 225
+  size: 148, 212
+  orig: 384, 384
+  offset: 110, 60
+  index: -1
+0103
+  rotate: true
+  xy: 1828, 459
+  size: 205, 167
+  orig: 384, 384
+  offset: 93, 57
+  index: -1
+0104
+  rotate: true
+  xy: 201, 4
+  size: 173, 274
+  orig: 384, 384
+  offset: 109, 39
+  index: -1
+0105
+  rotate: false
+  xy: 905, 2
+  size: 163, 254
+  orig: 384, 384
+  offset: 119, 59
+  index: -1
+0106
+  rotate: true
+  xy: 1370, 8
+  size: 130, 214
+  orig: 384, 384
+  offset: 119, 59
+  index: -1
+0116
+  rotate: false
+  xy: 742, 529
+  size: 141, 306
+  orig: 384, 384
+  offset: 107, 59
+  index: -1
+0117
+  rotate: true
+  xy: 1828, 666
+  size: 169, 195
+  orig: 384, 384
+  offset: 85, 61
+  index: -1
+0118
+  rotate: false
+  xy: 1586, 20
+  size: 165, 118
+  orig: 384, 384
+  offset: 117, 57
+  index: -1
+0125
+  rotate: false
+  xy: 1220, 33
+  size: 148, 231
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0126
+  rotate: false
+  xy: 1370, 140
+  size: 148, 229
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0127
+  rotate: false
+  xy: 1520, 140
+  size: 148, 229
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0128
+  rotate: false
+  xy: 1478, 606
+  size: 149, 229
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0129
+  rotate: false
+  xy: 1528, 375
+  size: 148, 229
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0130
+  rotate: false
+  xy: 1629, 606
+  size: 148, 229
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0131
+  rotate: false
+  xy: 1670, 144
+  size: 148, 229
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0132
+  rotate: false
+  xy: 1678, 375
+  size: 148, 229
+  orig: 384, 384
+  offset: 100, 76
+  index: -1
+0133
+  rotate: false
+  xy: 1368, 371
+  size: 158, 229
+  orig: 384, 384
+  offset: 92, 77
+  index: -1
+0135
+  rotate: true
+  xy: 477, 5
+  size: 172, 219
+  orig: 384, 384
+  offset: 92, 76
+  index: -1
+0137
+  rotate: true
+  xy: 1820, 28
+  size: 195, 206
+  orig: 384, 384
+  offset: 81, 76
+  index: -1
+0143
+  rotate: false
+  xy: 1068, 266
+  size: 223, 94
+  orig: 384, 384
+  offset: 90, 37
+  index: -1
+FUMOKAZAMIYUKA
+  rotate: false
+  xy: 2, 179
+  size: 492, 656
+  orig: 524, 694
+  offset: 19, 21
+  index: -1

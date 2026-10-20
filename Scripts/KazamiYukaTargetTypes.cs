@@ -11,4 +11,10 @@ public static class KazamiYukaTargetTypes
             Entry.ModId,
             "sunflower",
             target => target.IsAlive && target.Monster is KazamiYukaSunflower);
+
+    public static TargetType SqueezedCardTarget { get; } =
+        CustomTargetType.RegisterSingleTargetType(
+            Entry.ModId,
+            "squeezed_card_target",
+            target => target.IsAlive);
 }

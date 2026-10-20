@@ -14,10 +14,12 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public sealed class BrightSunshine_Yuka : KazamiYukaCard
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new BlockVar(6m, ValueProp.Move),
-        new DynamicVar("HealAmount", 6m),
+        new BlockVar(8m, ValueProp.Move),
+        new DynamicVar("HealAmount", 8m),
         new SunlightCostVar(2m)
     ];
 

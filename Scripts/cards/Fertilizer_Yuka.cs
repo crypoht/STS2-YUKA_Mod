@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KazamiYuka.Scripts.DynamicVars;
 using STS2RitsuLib.Interop.AutoRegistration;
+using STS2RitsuLib.CardTags;
 using STS2RitsuLib.Scaffolding.Content;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -16,6 +17,8 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(TokenCardPool))]
 public sealed class Fertilizer_Yuka : KazamiYukaCard, ICustomTargetValidator
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     public override IEnumerable<MegaCrit.Sts2.Core.Entities.Cards.CardKeyword> CanonicalKeywords => [
         MegaCrit.Sts2.Core.Entities.Cards.CardKeyword.Exhaust

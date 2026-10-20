@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
-using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -14,7 +12,7 @@ namespace KazamiYuka.Scripts.Powers;
 [RegisterPower]
 public sealed class BubblePower : ModPowerTemplate
 {
-    public override PowerType Type => PowerType.Debuff;
+    public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public override PowerAssetProfile AssetProfile => new(
@@ -22,24 +20,17 @@ public sealed class BubblePower : ModPowerTemplate
         BigIconPath: "res://mods/KazamiYuka/images/powers/BubblePower.png"
     );
 
-    public override async Task AfterSideTurnEnd(
+    public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext,
-        CombatSide side,
-        IEnumerable<Creature> participants)
+        Player player)
     {
-        if (side != base.Owner.Side || !base.Owner.IsAlive)
+        if (player != base.Owner.Player)
         {
             return;
         }
 
+        int sunlightLoss = Math.Max(0, (int)base.Amount);
+        SunlightManager.TrySpendSunlight(player, sunlightLoss);
         base.Flash();
-        decimal maxHpLoss = Math.Min(base.Amount, Math.Max(0m, base.Owner.MaxHp - 1m));
-        if (maxHpLoss > 0m)
-        {
-            await CreatureCmd.LoseMaxHp(choiceContext, base.Owner, maxHpLoss, false);
-            await SunflowerManager.NotifyMaxHpDecrease(choiceContext, base.Owner, maxHpLoss);
-        }
-
-        await PowerCmd.Remove(this);
     }
 }

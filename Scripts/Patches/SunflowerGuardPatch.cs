@@ -29,12 +29,15 @@ public class SunflowerGuardPatch
         decimal amount, 
         ValueProp props, 
         Creature dealer, 
-        CardModel cardSource, 
+        CardModel cardSource,
+        HpLossHookPhase phases,
         ref decimal __result) 
     {
         if (combatState == null) return;
 
-        if (target.Monster is KazamiYukaSunflower && __result > 0)
+        if (target.Monster is KazamiYukaSunflower &&
+            phases.HasFlag(HpLossHookPhase.AfterOsty) &&
+            __result > 0)
         {
             _ = NotifyAfterDamageAsync(target, __result);
             return;

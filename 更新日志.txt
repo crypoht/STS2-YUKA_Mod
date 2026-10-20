@@ -1,0 +1,313 @@
+KazamiYuka 更新日志
+
+2026-10-20
+【修复钢笔尖不作用于向日葵伤害】
+文件：Scripts/Patches/SunflowerDamageDealerCompatibilityPatch.cs、更新日志.txt
+内容：保留向日葵作为伤害来源以支持向日葵自身增伤，同时让官方钢笔尖正确识别由玩家攻击牌触发的向日葵伤害，并在第十张攻击牌时翻倍。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误。
+
+2026-10-20
+【修复自动重放阳光支付与向日葵牌标签】
+文件：Scripts/cards/KazamiYukaCard.cs、Scripts/Interfaces/SunlightCardInterfaces.cs、相关向日葵效果卡、更新日志.txt
+内容：自动打出的卡牌沿用官方CardPlay.IsAutoPlay资源收据，不再重复消耗阳光；补齐群体、随机及多目标向日葵效果卡的向日葵牌标签，避免被挤压错误转换为肥料。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误。
+
+2026-10-18
+【修复折肢断体持续回合数】
+文件：Scripts/Powers/DismemberPower.cs、更新日志.txt
+内容：折肢断体改为独立实例，每次施加单独记录持续回合数；基础卡持续3个目标回合，升级卡持续4个目标回合，回合结束时不再按官方临时力量的一回合逻辑立即移除。
+验证：待构建验证。
+
+2026-10-18
+【修复折肢断体能力图标继承冲突】
+文件：Scripts/Powers/DismemberPower.cs、更新日志.txt
+内容：TemporaryStrengthPower的官方图标路径不可覆写，现改为ModPowerTemplate并保留临时力量削减、回合结束恢复力量及叠层逻辑，同时显式绑定DismemberPower图标。
+验证：待构建验证。
+
+2026-10-18
+【修复折肢断体能力图标】
+文件：Scripts/Powers/DismemberPower.cs、更新日志.txt
+内容：为继承官方TemporaryStrengthPower的折肢断体能力补充自定义小图标和大图标资源映射。问题不是卡牌显示基类导致的。
+验证：待构建验证。
+
+2026-10-18
+【修复官方宠物布局覆盖向日葵位置】
+文件：Scripts/SunFlower/SunflowerManager.cs、Scripts/Patches/SunflowerPlacementPatch.cs、更新日志.txt
+内容：官方添加或移除宠物时会把宠物临时排列到角色旁边。向日葵死亡事件及其战斗节点移除后，现在等待官方流程完成，再按共享固定槽位恢复存活向日葵；不会重新压缩编号。
+验证：待部署构建及游戏内验证。
+
+2026-10-18
+【向日葵槽位栈改为全体玩家共享】
+文件：Scripts/SunFlower/SunflowerManager.cs、更新日志.txt
+内容：按反馈将槽位编号与空槽栈从玩家独立改为整场战斗共享。不同玩家召唤的向日葵使用同一组槽位编号，任意向日葵死亡后释放槽位，下一次召唤优先复用栈顶编号；玩家归属仍保留用于自身效果判定。
+验证：待源码编译；当前游戏进程可能锁定 Mod 目录 DLL，未强制关闭进程。
+
+2026-10-18
+【向日葵改用固定槽位与空槽栈】
+文件：Scripts/SunFlower/SunflowerManager.cs、更新日志.txt
+内容：每名玩家独立记录向日葵槽号。向日葵死亡时只把原槽号压入空槽栈，不重排幸存向日葵；之后召唤优先取回栈顶槽号。布局和图层使用固定槽号，避免0号死亡后其余向日葵整体换位。
+验证：C# 编译成功；构建自动复制 DLL 时因 SlayTheSpire2.exe (PID 13068) 占用目标文件而失败。未关闭游戏进程；多人及死亡/复用流程待游戏内验证。
+
+2026-10-18
+【撤销死亡后自动重排向日葵】
+文件：Scripts/Patches/SunflowerPlacementPatch.cs、Scripts/SunFlower/SunflowerManager.cs、更新日志.txt
+内容：排查发现，上一版在向日葵节点移除后主动重排幸存植株，导致其占用首个近角色的位置。现移除死亡后的重排；生命值变化不触发布局，召唤时布局逻辑保留。
+验证：构建验证待完成；游戏内复现确认待用户验证。
+
+2026-10-18
+【修复向日葵死亡后存活植株移位】
+文件：Scripts/SunFlower/SunflowerManager.cs、Scripts/Patches/SunflowerPlacementPatch.cs、更新日志.txt
+内容：向日葵战斗节点移除后，延迟按所属玩家的存活向日葵重新应用自定义位置；布局时不再把其他玩家或已死亡的向日葵纳入排列。
+验证：待构建验证；待游戏内验证死亡移除后的布局。
+
+2026-10-18
+【修正战斗结束阶段向日葵重排判断】
+文件：Scripts/SunFlower/SunflowerManager.cs、Scripts/Patches/SunflowerPlacementPatch.cs、更新日志.txt
+内容：布局重排不再只检查IsInProgress；敌人全部死亡后的IsEnding阶段也会被视为战斗结束阶段。加入延迟回调及实际写位置前的IsOverOrEnding检查，避免结束流程中向日葵被移动到玩家宠物默认位置。
+验证：待构建验证。
+
+2026-10-18
+【调整从容能力文本】
+文件：KazamiYuka/localization/zhs/powers.json、更新日志.txt
+内容：从容能力说明改为显示剩余回合数与能量图标：“接下来{回合数}个回合获得{能量图标}”。
+验证：本地化JSON解析通过；仅本地化修改，未重新编译。
+
+2026-10-18
+【为大妖怪的从容增加持续能量效果】
+文件：Scripts/cards/GreatYoukaiComposure_Yuka.cs、Scripts/Powers/ComposurePower.cs、KazamiYuka/localization/zhs/cards.json、powers.json、更新日志.txt
+内容：保留原有格挡效果，新增“从容”能力。接下来3（4）个玩家回合在能量重置后获得1点能量，每次触发减少1层，层数归零时能力移除。
+参考：官方EnergyNextTurnPower使用AfterEnergyReset发放能量；本实现将其延伸为按层数重复触发。
+验证：本地化JSON解析通过；dotnet build KazamiYuka.csproj --no-restore成功，0个警告、0个错误，DLL已由原构建目标复制到游戏Mod目录。未修改csproj、未导出PCK。
+
+2026-10-18
+【调整阳光收集、开伞和自我牺牲；新增向日葵牌说明】
+文件：Scripts/cards/SunlightCollection_Yuka.cs、Scripts/cards/OpenUmbrella_Yuka.cs、Scripts/Powers/OpenUmbrellaPower.cs、Scripts/cards/SelfSacrifice_Yuka.cs、Scripts/KazamiYukaKeywords.cs、Scripts/cards/CompressionTechnique_Yuka.cs、KazamiYuka/localization/zhs/cards.json、powers.json、card_keywords.json、更新日志.txt
+内容：阳光收集改为1费获得4阳光并抽2张牌，升级后不再消耗。开伞改为每回合结束时，由每朵存活向日葵给予全体存活玩家2点格挡，升级后每朵给予3点；消耗4阳光，费用1，能力持续保留。自我牺牲每斩杀一朵向日葵额外获得1能量和1阳光。新增“向日葵牌”关键词悬浮说明，并挂到压缩技术。
+验证：本地化JSON解析通过；dotnet build KazamiYuka.csproj --no-restore成功，0个警告、0个错误，DLL已由原构建目标复制到游戏Mod目录。开伞持续性修订待复编验证；未修改csproj、未导出PCK。
+
+2026-10-17
+【修复战斗结束向日葵被重排到角色旁边】
+文件：Scripts/SunFlower/SunflowerManager.cs、Scripts/Patches/SunflowerPlacementPatch.cs、更新日志.txt
+内容：向日葵加入战斗场景后的延迟重排现在只允许在战斗进行中执行，并在等待一帧后再次确认战斗状态，避免战斗结束流程中仍存留的场景节点被重新定位到角色旁边。
+验证：dotnet build KazamiYuka.csproj --no-restore成功，0个警告、0个错误，DLL已由原构建目标复制到游戏Mod目录。未修改csproj、未导出PCK。
+
+2026-10-17
+【调整花语】
+文件：Scripts/cards/FlowerLanguage_Yuka.cs、Scripts/Powers/FlowerLanguagePower.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json、更新日志.txt
+内容：移除原有格挡效果，改为使自己的向日葵造成的伤害提高3点，升级后提高4点；打出时消耗1点阳光。增伤能力逐朵挂载到向日葵本体，沿用官方伤害修正链，可与增益、减益及其他伤害修正共同计算。
+验证：dotnet build KazamiYuka.csproj --no-restore成功，0个警告、0个错误，DLL已由原构建目标复制到游戏Mod目录。未修改csproj、未导出PCK。
+
+2026-10-17
+【能力牌统一触发Cast动画】
+文件：Scripts/Patches/YukaPowerCastAnimationHook.cs、Scripts/Entry.cs、更新日志.txt
+内容：通过RitsuLib的全局卡牌打出钩子，在幽香能力牌执行自身效果前触发角色的Cast动画；其他角色、其他模组卡牌和技能/攻击牌不受影响。
+参考：恋恋能力牌使用的CardOnPlayHook模式。
+验证：dotnet build KazamiYuka.csproj --no-restore成功，0个警告、0个错误，DLL已由原构建目标复制到游戏Mod目录。未修改csproj、未导出PCK。
+
+2026-10-17
+【接入幽香Spine种植、商店与火堆动画】
+文件：Scripts/KazamiYukaCharacter.cs、Scripts/SunFlower/SunflowerManager.cs、Scripts/Nodes/KazamiYukaMerchantCharacter.cs、mods/KazamiYuka/scenes/kazamiyuka_character.tscn、kazamiyuka_character_merchant.tscn、kazamiyuka_character_rest_site.tscn
+内容：统一在实际召唤向日葵时触发幽香Cast动画；满场转为提高生命上限时不触发。战斗动画沿用官方低血量待机、攻击、受击和施法状态，放松状态改用资源实际存在的idle_loop。商店与火堆改用Yuka.tres，商店等待Spine就绪后播放idle_loop，火堆由官方节点按幕播放overgrowth_loop/hive_loop/glory_loop。皮肤名改为资源实际使用的default，并修正火堆SelectionReticle节点名。
+参考：恋恋本地main分支的PremiumAnimation场景（character_2、merchant_2、rest_site_2），不使用旧beta分支或BaseLib。
+验证：dotnet build KazamiYuka.csproj --no-restore成功，0个警告、0个错误，DLL已由原构建目标复制到游戏Mod目录。Godot无头资源探针确认idle_loop、cast及三个火堆动作都有可见附件，cast返回idle正常；独立编辑器加载游戏派生C#节点仍出现TypeLoadException，未完成实际游戏场景验证。未修改csproj、导入缓存或导出PCK；场景变更需用户重新导出PCK。
+
+2026-10-17
+【修复战斗界面初始化空值警告】
+文件：Scripts/Patches/InjectSunlightCounterPatch.cs、更新日志.txt
+内容：在战斗界面初始化入口显式检查空战斗状态，状态为空时记录诊断并跳过初始化，避免将空值传入延迟初始化方法；正常战斗逻辑不变。
+验证：dotnet build KazamiYuka.csproj --no-restore成功，0个警告、0个错误；DLL已由构建目标复制到游戏Mod目录，未修改csproj、未导出PCK。
+
+2026-10-17
+【修复向日葵牌标签编译错误】
+文件：Scripts/SunflowerCardTags.cs、更新日志.txt
+内容：补充CardModel所属命名空间引用，修复新增向日葵牌标签后出现的CS0246编译错误。
+验证：dotnet build KazamiYuka.csproj --no-restore成功，0个错误、1个现有CS8604警告（InjectSunlightCounterPatch.cs第35行）；DLL已由构建目标复制到游戏Mod目录，未导出PCK。
+
+2026-10-08
+【整理公开版更新日志】
+文件：更新日志_公开版.txt、更新日志.txt
+内容：将公开版更新日志合并为今日单次更新，并按新增卡片、删除卡片、卡片调整、问题修复四类归纳，移除历史日期分段。
+验证：文本已整理；未编译、未导出PCK。
+
+2026-10-08
+【新增公开版更新日志】
+文件：更新日志_公开版.txt、更新日志.txt
+内容：新增面向其他玩家阅读的公开更新日志，仅保留新增卡片、卡片效果调整、删除卡片和问题修复，隐藏内部实现、文件路径与编译信息。
+验证：已生成公开版文本；未编译、未导出PCK。
+
+2026-10-08
+【新增向日葵牌标签】
+文件：Scripts/SunflowerCardTags.cs、Scripts/Powers/CompressionTechniquePower.cs、Scripts/cards/Sunshine_Yuka.cs、Scripts/cards/Fertilizer_Yuka.cs、Scripts/cards/FlowerBedProtection_Yuka.cs、Scripts/cards/Photosynthesis_Yuka.cs、更新日志.txt
+内容：按RitsuLib规范注册动态CardTag“向日葵牌”，为所有当前目标为向日葵的卡牌写入该标签；压缩技术改为通过统一判定识别向日葵牌，并保留目标类型兜底，方便后续效果按标签筛选。
+验证：未编译；未导出PCK。
+
+2026-10-03
+【修复压缩技术能力本地化】
+文件：KazamiYuka/localization/zhs/powers.json、更新日志.txt
+内容：补充压缩技术能力的中文标题和描述，避免能力悬浮框显示内部本地化键名。
+验证：`dotnet build KazamiYuka.csproj --no-restore` 成功，0个警告、0个错误；未导出PCK。
+
+2026-10-03
+【删除团结并新增压缩技术】
+文件：Scripts/cards/Unity_Yuka.cs、Scripts/Powers/UnityPower.cs、Scripts/cards/CompressionTechnique_Yuka.cs、Scripts/Powers/CompressionTechniquePower.cs、Scripts/Enchantments/SqueezeEnchantment.cs、Scripts/SqueezeManager.cs、Scripts/Patches/SqueezeTargetPatch.cs、Scripts/Patches/UITargetingVisualsPatch.cs、Scripts/SunFlower/SunflowerManager.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json、KazamiYuka/localization/zhs/enchantments.json、KazamiYuka/localization/zhs/card_keywords.json
+内容：删除团结卡及其能力；新增压缩技术。压缩技术每回合随机为手牌中的非攻击牌添加挤压附魔，挤压牌可安全指定向日葵，打出后按肥料效果提高3点生命上限并消耗，同时移除不可打出限制。
+验证：`dotnet build KazamiYuka.csproj --no-restore` 成功，0个警告、0个错误；未导出PCK。
+
+2026-10-02
+【卡牌效果调整】
+文件：Scripts/cards/GivingRose_Yuka.cs、Scripts/cards/Unity_Yuka.cs、Scripts/Powers/UnityPower.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json
+内容：赠人玫瑰改为烈阳4/8，使盟友正面增益增加层数，并保留2%概率生成余像；团结改为选择向日葵，使其他向日葵攻击时对同一目标追加3/4点伤害，支持能力攻击、卡牌攻击和群体攻击，追加伤害不会再次触发团结。
+验证：`dotnet build KazamiYuka.csproj --no-restore` 成功，0个警告、0个错误；未导出PCK。
+
+2026-10-02
+【卡牌效果调整】
+文件：Scripts/cards/Dismember_Yuka.cs、Scripts/Powers/DismemberPower.cs、Scripts/cards/SunlightDiffusion_Yuka.cs、Scripts/cards/FlowerNameSong_Yuka.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json
+内容：折肢断体改为造成11/15点伤害并施加独立的3回合力量降低实例；阳光扩散改为消耗2点阳光，随机向2/3次日葵各施加1层向阳并消耗；且听花名改为每朵向日葵攻击所有敌人。
+验证：`dotnet build KazamiYuka.csproj --no-restore` 成功，0个警告、0个错误；未导出PCK。
+
+2026-10-01
+【多人宝箱指向手势】
+文件：Scripts/KazamiYukaCharacter.cs
+内容：接入 `images/hands/zhi.png` 作为多人宝箱界面的指向手势图片，石头剪刀布图片和官方同步流程保持不变。
+验证：`dotnet build KazamiYuka.csproj --no-restore` 成功，0 个警告、0 个错误；未导出 PCK。
+
+2026-10-01
+【多人宝箱石头剪刀布】
+文件：Scripts/KazamiYukaCharacter.cs
+内容：接入多人宝箱石头、布、剪刀的自定义图片，沿用官方多人同步和宝箱流程；指向手势继续使用官方默认资源。
+验证：`dotnet build KazamiYuka.csproj --no-restore` 成功，0 个警告、0 个错误；未导出 PCK。
+
+2026-10-01
+【约束与文档】
+文件：PROJECT_CONSTRAINTS.local.md、更新日志.txt
+内容：新增规则，要求每次完成有意义的代码、玩法、UI、Bug 修复或新增物品后记录更新日志。
+验证：文档已创建，格式规则已写入项目约束。
+
+2026-10-01
+【日志文件名调整】
+文件：PROJECT_CONSTRAINTS.local.md、更新日志.txt
+内容：更新日志统一使用 TXT 文档，文件名改为“更新日志.txt”。
+验证：约束引用已同步更新，历史记录已保留。
+
+2026-10-01
+【免费打出与阳光费用】
+文件：Scripts/cards/KazamiYukaCard.cs、Scripts/Vars/SunlightCostVar.cs、Scripts/Interfaces/SunlightCardInterfaces.cs、Scripts/Patches/PhantasmagoriaofFlowerViewPaymentPatch.cs
+内容：统一识别官方将正能量费用降为0的免费打出效果。免费卡的固定阳光费用显示为0且不扣除；烈阳按当前阳光计算效果但不扣除阳光；普通非免费卡仍正常检查并支付阳光。
+验证：已通过 `dotnet build KazamiYuka.csproj --no-restore`，0 个警告，0 个错误。
+
+2026-10-01
+【暴君形态重做】
+文件：Scripts/cards/TyrantForm_Yuka.cs、Scripts/Powers/TyrantFormPower.cs、Scripts/Patches/UniversalTargetPatch.cs、Scripts/Patches/UITargetingVisualsPatch.cs、Scripts/Patches/TyrantFormTargetingPatch.cs、Scripts/SunFlower/SunflowerManager.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json
+内容：移除旧的打牌扣除向日葵生命上限效果；改为攻击牌可攻击向日葵，并使用官方 `AfterDamageGiven` 归因，仅由拥有暴君形态的玩家攻击牌斩杀向日葵时触发群体伤害；能力、敌人和向日葵伤害不会触发。
+验证：已通过 `dotnet build KazamiYuka.csproj --no-restore`，0 个警告，0 个错误；未导出 PCK。
+
+2026-10-01
+【修复暴君形态单体攻击目标扩散】
+文件：Scripts/Patches/TyrantFormTargetingPatch.cs
+内容：攻击目标池补丁现在跳过单体攻击命令，避免选中一朵向日葵后错误地对所有向日葵造成伤害；随机和全体攻击仍可按暴君形态规则包含向日葵。
+验证：已通过 `dotnet build KazamiYuka.csproj --no-restore`，0 个警告，0 个错误；未导出 PCK。
+
+2026-10-01
+【紫罗兰的信】
+文件：Scripts/cards/VioletsLetter_Yuka.cs、Scripts/Powers/VioletPower.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json
+内容：移除每回合降低敌人力量的效果，改为每回合开始让战斗中的所有玩家各抽1张牌；保留紫罗兰向日葵无法造成伤害的效果。多人模式不再筛选玩家。
+验证：已通过 `dotnet build KazamiYuka.csproj --no-restore`，0 个警告，0 个错误。
+
+2026-10-01
+【紫罗兰回合触发修复】
+文件：Scripts/Powers/VioletPower.cs、KazamiYuka/localization/zhs/powers.json
+内容：改用战斗侧回合开始钩子，避免能力挂在向日葵上时无法取得玩家身份；每层紫罗兰使所有玩家各抽1张牌，并在能力说明中显示层数。
+验证：已通过 `dotnet build KazamiYuka.csproj --no-restore`，0 个警告，0 个错误。
+
+2026-10-01
+【官方免费牌入口兼容】
+文件：Scripts/Patches/FreeCardTrackingPatch.cs、Scripts/cards/KazamiYukaCard.cs
+内容：跟踪官方 `SetToFreeThisTurn` 和 `SetToFreeThisCombat` 入口，覆盖生成牌、药水、能力和遗物造成的免费打出；单纯升级或局部降费到0不会被标记为免费。
+验证：已通过 `dotnet build KazamiYuka.csproj --no-restore`，0 个警告，0 个错误。
+
+2026-10-01
+【烈阳免费判定】
+文件：Scripts/cards/KazamiYukaCard.cs
+内容：免费判定改为比较最高费用与当前实际费用，避免卡牌升级或局部降费到0时误判为官方免费。烈阳卡在真正免费打出时按其最高烈阳数值计算。
+验证：已通过 `dotnet build KazamiYuka.csproj --no-restore`，0 个警告，0 个错误。
+2026-10-04
+- 修复向日葵场景引用自定义 SunflowerVisuals.cs 导致运行时无法实例化、模型显示为 Error 的问题。
+- 向官方场景规范对齐，向日葵场景改为直接引用 NCreatureVisuals；未修改 csproj，未导出 PCK。
+- 修正 Godot 导出预设：改为直接输出游戏实际加载的 KazamiYuka.pck，并关闭嵌入式 PCK，避免导出结果落到 .pck.exe 而游戏继续读取旧 PCK。
+- 恢复向日葵场景对项目内 SunflowerVisuals.cs 的本地引用；修正初始化顺序，先注册 Godot C# 脚本再执行 Harmony 补丁，避免脚本类尚未注册导致模型显示 Error。
+- 修正“挤压”实现：移除附魔系统路径，改为动态添加已注册的 CardKeyword，与官方“固有”等卡片关键词保持一致。
+- 确认并显式启用“挤压”关键词的卡牌悬浮说明；本地化位于 card_keywords.json 的 title/description 键。
+- 将“挤压”加入卡面关键词区域，并移除官方“消耗”关键词；只有实际对向日葵打出时才通过自定义逻辑移入消耗牌堆。
+2026-10-04
+- 修复“挤压”覆盖原卡目标类型的问题：新增挤压专用目标类型，保留原目标与向日葵目标；只有选中向日葵时执行肥料效果并手动消耗卡牌。
+- 将“挤压”关键词移动到卡面描述上方，与官方“固有”关键词的位置一致。
+2026-10-03
+- 为带有“挤压”关键词的手牌增加绿色边框闪光，沿用官方手牌高亮节点。
+2026-10-03
+- 修复无目标“挤压”牌错误允许指向玩家的问题；无目标牌现在只允许额外指向向日葵，未选择目标时仍保留原本的直接打出流程，并恢复向日葵选择面板。
+2026-10-03
+- 修复向日葵左侧血条依赖幽香遗物识别的问题：战斗界面激活时始终创建向日葵血条面板，阳光计数器仍按原角色条件显示。
+2026-10-04
+- 修复“挤压”通用 OnPlay 补丁因不同卡牌参数命名不一致而导致 Harmony 初始化失败的问题，避免整个 Mod 补丁中断并恢复向日葵血条面板。
+2026-10-04
+- 修复没有自定义 OnPlay 的官方牌（如“进阶之灾”）对向日葵使用后不消耗的问题；挤压补丁现在同时覆盖 CardModel 基础 OnPlay。
+2026-10-04
+- 修复原本就是向日葵目标的牌带有“挤压”时被错误改成通用目标的问题；现在只覆盖普通牌，原生向日葵目标牌保留原目标类型和筛选逻辑。
+2026-10-04
+- 修复原生自定义目标牌在没有标准 UI 过滤器时被错误拒绝的问题，恢复原本向日葵目标牌的选择。
+2026-10-06
+- 修复带有“挤压”的对群牌（所有敌人、所有队友等）被错误改成单体选择目标导致无法正常打出的问题；现在仅无目标和可选单体牌启用挤压目标。
+2026-10-06
+- 同步修复对群挤压牌的无目标合法性判断，保留官方对群牌的直接出牌流程。
+2026-10-06
+- 修复“压缩技术”把原本已经可以对向日葵使用的牌再次赋予“挤压”，导致其原生目标逻辑失效的问题；候选牌现在会排除原生向日葵目标牌。
+2026-10-08
+【旧日魔炮修改】文件：Scripts/cards/OldMagicCannon_Yuka.cs、KazamiYuka/localization/zhs/cards.json
+内容：移除上回合阳光记录与返还效果，改为对所有敌人造成13点伤害；加入无限升级。前5次升级按当前伤害增加30%，第6至10次增加22%，之后增加15%，每次向下取整且至少增加1点。
+2026-10-08
+【新增五件幽香专属遗物】文件：Scripts/Relics/SeedBag_Yuka.cs、YoukaiUmbrella_Yuka.cs、SunflowerHeadpiece_Yuka.cs、PoisonousDoll_Yuka.cs、VisitorTicket_Yuka.cs、Scripts/SunFlower/SunlightManager.cs、Scripts/SunFlower/SunflowerManager.cs、KazamiYuka/localization/zhs/relics.json
+内容：新增种子袋、妖怪阳伞、向日葵头饰、剧毒人偶和参观卷；分别实现战斗开始种植、阳光跨战斗保留、种植生命上限加成、向日葵伤害固定加成和每场战斗首次阳光返还。
+2026-10-08
+【修复种子袋进入战斗黑屏】文件：Scripts/Relics/SeedBag_Yuka.cs
+内容：将种子袋的种植时机从房间进入阶段改为官方战斗开始阶段的 `BeforeCombatStart`，避免战斗场景初始化期间添加向日葵导致场景创建竞态。
+2026-10-08
+【修复种子袋战斗黑屏】文件：Scripts/Relics/SeedBag_Yuka.cs
+内容：移除战斗初始化阶段的种植逻辑，改为计数为1的遗物；每场战斗首次玩家回合开始时消耗计数并种植一朵向日葵。
+2026-10-08
+【修复普通战斗进入黑屏】文件：Scripts/Patches/InjectSunlightCounterPatch.cs
+内容：恢复向日葵目标面板的挂载时机，在战斗计数器和多人血条初始化完成后再挂载，避免在 NCombatUi.Activate 早期阶段操作战斗 UI。
+2026-10-08
+【修复战斗进入黑屏】文件：Scripts/Patches/InjectSunlightCounterPatch.cs
+内容：将阳光计数器、多人阳光显示和向日葵目标面板延迟到战斗 UI 激活后的两帧执行，并隔离初始化异常，避免战斗 UI 初始化被自定义节点阻断。
+## 2026-10-08 战斗黑屏诊断日志
+
+- 文件：`Scripts/Patches/InjectSunlightCounterPatch.cs`、`Scripts/Patches/SunflowerPlacementPatch.cs`、`Scripts/Entry.cs`
+- 变更：为 Mod 初始化、`NCombatUi.Activate`、阳光重置、延迟 UI 初始化、向日葵布局等关键阶段增加诊断日志和入口异常捕获；不改变功能逻辑。
+- 验证：待重新编译 DLL 并使用最新日志确认最后成功阶段。
+
+## 2026-10-08 战斗房间入口诊断日志
+
+- 文件：`Scripts/Patches/CombatRoomTracePatch.cs`
+- 变更：增加 `NCombatRoom.Create`、`_Ready`、`OnCombatSetUp` 的前后阶段日志，用于定位战斗资源预加载后黑屏退出的位置；不改变功能逻辑。
+- 验证：待重新编译 DLL 并使用最新日志复现。
+
+## 2026-10-08 战斗生成阶段诊断日志
+
+- 文件：`Scripts/Patches/CombatRoomTracePatch.cs`
+- 变更：增加 `CombatRoom.StartCombat` 与 `CombatState.CreateCreature` 的阶段日志，继续区分敌人生成和战斗房间切换卡点；不改变功能逻辑。
+- 验证：待重新编译 DLL 并使用最新日志复现。
+## 2026-10-18 折肢断体持续时间修复
+
+- 文件：`Scripts/cards/Dismember_Yuka.cs`
+- 变更：升级后的折肢断体现在使用 4 回合持续时间；每次施加的折肢断体仍以独立能力实例计算，不会合并持续时间。
+- 验证：待重新编译 DLL。
+## 2026-10-18 折肢断体回合计数器
+
+- 文件：`Scripts/Powers/DismemberPower.cs`
+- 变更：为折肢断体能力图标增加右下角剩余回合数角标；原有力量降低数值显示保持不变，并在回合数递减时刷新角标。
+- 验证：待重新编译 DLL。
+## 2026-10-20 商店模型放大
+
+- 文件：`mods/KazamiYuka/scenes/kazamiyuka_character_merchant.tscn`
+- 变更：仅将商店 Spine 模型缩放从 `0.6` 调整为 `2.4`（当前尺寸的 4 倍，即增加 300%）；其他场景模型不变。
+- 验证：场景文本检查通过；未运行游戏内视觉验证。

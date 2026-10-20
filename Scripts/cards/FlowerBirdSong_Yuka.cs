@@ -15,7 +15,7 @@ public sealed class FlowerBirdSong_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new DynamicVar("MaxSunlight", 8m),
-        new SunlightCostVar(4m)
+        new SunlightCostVar(3m)
     ];
     public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust, KazamiYukaKeywords.FierceSun];
     public FlowerBirdSong_Yuka() : base(0, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true) { }

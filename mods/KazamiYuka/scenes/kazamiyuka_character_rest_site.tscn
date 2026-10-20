@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dnc40cfrjsljo"]
 
 [ext_resource type="Script" uid="uid://mi7ntder8aqp" path="res://Scripts/Nodes/KazamiYukaRestsiteCharacter.cs" id="1_a1u1y"]
-[ext_resource type="Texture2D" uid="uid://bwqm7fcyujn3w" path="res://mods/KazamiYuka/images/FUMOKAZAMIYUKA.png" id="1_evbp4"]
+[ext_resource type="SpineSkeletonDataResource" uid="uid://v70il1wrwb2s" path="res://mods/KazamiYuka/spine/Yuka.tres" id="1_evbp4"]
 [ext_resource type="PackedScene" uid="uid://clupltdc6dyqw" path="res://mods/KazamiYuka/scenes/selectionretic.tscn" id="3_idoar"]
 
 [node name="KoishiRestSite" type="Node2D"]
@@ -9,16 +9,18 @@ position = Vector2(-2, 42)
 scale = Vector2(0.760006, 0.760006)
 script = ExtResource("1_a1u1y")
 
-[node name="Visual" type="Sprite2D" parent="."]
+[node name="Visual" type="SpineSprite" parent="."]
 position = Vector2(11.8420105, -217.10358)
-scale = Vector2(0.6, 0.563)
-texture = ExtResource("1_evbp4")
+scale = Vector2(2, 1.8766667)
+skeleton_data_res = ExtResource("1_evbp4")
+preview_skin = "default"
+preview_animation = "overgrowth_loop"
 
 [node name="ControlRoot" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
 
-[node name="Selectionretic" parent="ControlRoot" instance=ExtResource("3_idoar")]
+[node name="SelectionReticle" parent="ControlRoot" instance=ExtResource("3_idoar")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 0.0

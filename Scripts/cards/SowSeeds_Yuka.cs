@@ -23,7 +23,7 @@ public class SowSeeds_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new HealVar(4)
+        new HealVar(6)
     ];
 
     public SowSeeds_Yuka() : base(0, CardType.Skill, CardRarity.Basic, TargetType.Self, true)
@@ -37,5 +37,5 @@ public class SowSeeds_Yuka : KazamiYukaCard
         await SunflowerManager.Summon(Owner, DynamicVars.Heal.BaseValue);
     }
 
-    protected override void OnUpgrade() => DynamicVars.Heal.UpgradeValueBy(3);
+    protected override void OnUpgrade() => DynamicVars.Heal.UpgradeValueBy(4);
 }

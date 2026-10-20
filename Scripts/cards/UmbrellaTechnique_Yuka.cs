@@ -20,9 +20,7 @@ public class UmbrellaTechnique_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
-    protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("SunflowerDamage", 3m)
-    ];
+    protected override IEnumerable<DynamicVar> CanonicalVars => [SunflowerDamageVar(3m)];
 
     public UmbrellaTechnique_Yuka() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, true)
     {
@@ -33,13 +31,20 @@ public class UmbrellaTechnique_Yuka : KazamiYukaCard
         var player = base.Owner;
         if (player == null || cardPlay.Target == null) return;
 
+        Creature? target = cardPlay.Target;
         foreach (Creature sunflower in SunflowerManager.GetSunflowers(player).Where(flower => flower.IsAlive))
         {
+            target = GetSunflowerDamageTarget(target);
+            if (target == null)
+            {
+                break;
+            }
+
             await CreatureCmd.Damage(
                 choiceContext,
-                cardPlay.Target,
+                target,
                 DynamicVars["SunflowerDamage"].BaseValue,
-                ValueProp.Unpowered | ValueProp.Move,
+                ValueProp.Move,
                 sunflower,
                 this,
                 cardPlay

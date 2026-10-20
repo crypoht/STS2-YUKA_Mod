@@ -1,0 +1,8 @@
+[gd_resource type="SpineSkeletonDataResource" load_steps=3 format=3 uid="uid://v70il1wrwb2s"]
+
+[ext_resource type="SpineAtlasResource" uid="uid://dheeb84q70hm" path="res://mods/KazamiYuka/spine/Yuka.atlas" id="1_mehtd"]
+[ext_resource type="SpineSkeletonFileResource" uid="uid://bnafrvpv72617" path="res://mods/KazamiYuka/spine/Yuka.skel" id="2_l7eur"]
+
+[resource]
+atlas_res = ExtResource("1_mehtd")
+skeleton_file_res = ExtResource("2_l7eur")

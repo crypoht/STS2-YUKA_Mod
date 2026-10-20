@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
+using STS2RitsuLib.CardTags;
 using STS2RitsuLib.Scaffolding.Content;
 using KazamiYuka.Scripts;
 using STS2RitsuLib.Keywords;
@@ -21,6 +22,8 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterArchaicToothTranscendence(typeof(Fantasy_Yuka))]
 public class Sunshine_Yuka : KazamiYukaCard, ICustomTargetValidator
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
@@ -78,6 +81,6 @@ public class Sunshine_Yuka : KazamiYukaCard, ICustomTargetValidator
 
     protected override void OnUpgrade()
     {
-        DynamicVars["MaxSunlight"].UpgradeValueBy(2m);
+        DynamicVars["MaxSunlight"].UpgradeValueBy(3m);
     }
 }

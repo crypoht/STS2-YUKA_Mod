@@ -2,8 +2,8 @@
   "id": "KazamiYuka",           
   "name": "KazamiYuka",
   "author": "UINYA",
-  "description": "我觉得我是职业mod制作者",
-  "version": "天黑了",
+  "description": "平衡？平衡！",
+  "version": "0.1.0",
   "has_pck": true,
   "has_dll": true,
   "dependencies": [

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using STS2RitsuLib.Scaffolding.Content;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -11,6 +12,16 @@ namespace KazamiYuka.Scripts.Cards;
 
 public abstract class KazamiYukaCard : ModCardTemplate
 {
+    protected MegaCrit.Sts2.Core.Entities.Creatures.Creature? GetLowestAliveEnemy() =>
+        CombatState?.Enemies
+            .Where(enemy => enemy.IsAlive)
+            .OrderBy(enemy => enemy.CurrentHp)
+            .FirstOrDefault();
+
+    protected MegaCrit.Sts2.Core.Entities.Creatures.Creature? GetSunflowerDamageTarget(
+        MegaCrit.Sts2.Core.Entities.Creatures.Creature? preferredTarget = null) =>
+        preferredTarget?.IsAlive == true ? preferredTarget : GetLowestAliveEnemy();
+
     private const string CardPortraitDirectory = "res://mods/KazamiYuka/images/cards";
     private const string TemporaryCardPortraitPath = $"{CardPortraitDirectory}/Temp_Yuka.png";
 
@@ -19,6 +30,15 @@ public abstract class KazamiYukaCard : ModCardTemplate
     protected CardAssetProfile DefaultCardAssetProfile => new(
         PortraitPath: ResolveCardPortraitPath()
     );
+
+    protected static MegaCrit.Sts2.Core.Localization.DynamicVars.DynamicVar SunflowerDamageVar(decimal baseValue) =>
+        STS2RitsuLib.Cards.DynamicVars.ModCardVars.ComputedDamage(
+            "SunflowerDamage",
+            baseValue,
+            (card, _) => card?.DynamicVars["SunflowerDamage"].BaseValue ?? baseValue,
+            card => card.Owner == null
+                ? null
+                : System.Linq.Enumerable.FirstOrDefault(SunflowerManager.GetSunflowers(card.Owner)));
 
     private string ResolveCardPortraitPath()
     {
@@ -40,8 +60,10 @@ public abstract class KazamiYukaCard : ModCardTemplate
     {
         var energy = card.EnergyCost;
         return energy != null
-            && energy.GetWithModifiers(CostModifiers.None) > 0
-            && energy.GetResolved() == 0;
+            && !energy.CostsX
+            && energy.GetWithModifiers(CostModifiers.All) == 0
+            && (Patches.FreeCardTracking.IsMarked(card)
+                || energy.GetWithModifiers(CostModifiers.None) > 0);
     }
 
     protected KazamiYukaCard(int cost, CardType type, CardRarity rarity, TargetType targetType, bool shouldShowInCardLibrary) 
@@ -55,7 +77,10 @@ public abstract class KazamiYukaCard : ModCardTemplate
         {
            if (!base.IsPlayable) return false;
 
-            if (this.IsSunlightFree) return true;
+            if (IsEnergyCostTemporarilyFree(this))
+            {
+                return true;
+            }
 
             if (DynamicVars.TryGetValue("SunlightCost", out var sunCostVar))
             {
@@ -77,27 +102,35 @@ public abstract class KazamiYukaCard : ModCardTemplate
     {
         if (cardPlay == null || cardPlay.Card?.EnergyCost == null) return false;
 
-        return cardPlay.Resources.EnergySpent == 0
-            && IsEnergyCostTemporarilyFree(cardPlay.Card);
+        return cardPlay.IsAutoPlay
+            || (cardPlay.Resources.EnergySpent == 0
+            && IsEnergyCostTemporarilyFree(cardPlay.Card));
     }
 
     protected bool TryPayFixedSunlight(Player player, int requiredAmount, CardPlay cardPlay)
     {
+        if (IsFreeFromReceipt(cardPlay))
+        {
+            return true;
+        }
+
         if (PhantasmagoriaofFlowerViewPayment.TryConsumeFixedSunlightPayment(this, requiredAmount))
         {
             return true;
         }
 
-        if (IsFreeFromReceipt(cardPlay)) return true;
         return SunlightManager.TrySpendSunlight(player, requiredAmount);
     }
 
     protected int ConsumeUpToMaxSunlight(Player player, int maxLimit, CardPlay cardPlay)
     {
-        if (IsFreeFromReceipt(cardPlay)) return maxLimit;
-
         int sunAvailable = SunlightManager.GetSunlight(player);
         int sunToSpend = Math.Min(sunAvailable, maxLimit);
+
+        if (IsFreeFromReceipt(cardPlay))
+        {
+            return maxLimit;
+        }
         
         if (sunToSpend > 0) SunlightManager.TrySpendSunlight(player, sunToSpend);
         

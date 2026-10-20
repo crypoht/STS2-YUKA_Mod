@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models.Cards;
 using STS2RitsuLib.Cards.DynamicVars;
 using STS2RitsuLib.Interop.AutoRegistration;
+using STS2RitsuLib.CardTags;
 using STS2RitsuLib.Scaffolding.Content;
 using KazamiYuka.Scripts.Cards;
 using KazamiYuka.Scripts.DynamicVars;
@@ -17,6 +18,8 @@ namespace KazamiYuka.Scripts;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public class Photosynthesis_Yuka : KazamiYukaCard, ICustomTargetValidator
 {
+    protected override HashSet<CardTag> CanonicalTags => [SunflowerCardTags.Sunflower];
+
     private const int energyCost = 1;
     private const CardType type = CardType.Skill;
     private const CardRarity rarity = CardRarity.Common;

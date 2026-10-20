@@ -2,6 +2,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using KazamiYuka.Scripts;
+using KazamiYuka.Scripts.Powers;
 
 namespace KazamiYuka.Patches;
 
@@ -11,7 +12,18 @@ public class UniversalTargetPatch
     public static void Postfix(CardModel __instance, Creature target, ref bool __result)
     {
 
-        if (!__result || target == null)
+        if (target == null)
+        {
+            return;
+        }
+
+        if (TyrantFormPower.AllowsSunflowerTarget(__instance, target))
+        {
+            __result = true;
+            return;
+        }
+
+        if (!__result)
         {
             return;
         }
