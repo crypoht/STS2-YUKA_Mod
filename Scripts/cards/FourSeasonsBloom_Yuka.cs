@@ -19,7 +19,7 @@ public sealed class FourSeasonsBloom_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new SunlightCostVar(2m),
+        new SunlightCostVar(4m),
         new PowerVar<FourSeasonsBloomPower>(1m),
         new DynamicVar("SpringAmount", 2m),
         new DynamicVar("SummerAmount", 4m),
@@ -28,7 +28,7 @@ public sealed class FourSeasonsBloom_Yuka : KazamiYukaCard
     ];
 
     public FourSeasonsBloom_Yuka()
-        : base(2, CardType.Power, CardRarity.Rare, TargetType.Self, true)
+        : base(4, CardType.Power, CardRarity.Rare, TargetType.Self, true)
     {
     }
 

@@ -78,8 +78,8 @@ public sealed class ForgetMeNotPower : ModPowerTemplate
 
         float weight = card.Rarity switch
         {
-            CardRarity.Basic => 20f,
-            CardRarity.Curse => 15f,
+            CardRarity.Basic => 40f,
+            CardRarity.Curse => 100f,
             CardRarity.Common => 10f,
             CardRarity.Uncommon or CardRarity.Rare => 5f,
             _ => 1f

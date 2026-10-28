@@ -21,15 +21,12 @@ public sealed class FertilizerMaking_Yuka : KazamiYukaCard
     protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip> AdditionalHoverTips => [
         HoverTipFactory.FromCard<Fertilizer_Yuka>(base.IsUpgraded)
     ];
-    public override IEnumerable<MegaCrit.Sts2.Core.Entities.Cards.CardKeyword> CanonicalKeywords => [
-        MegaCrit.Sts2.Core.Entities.Cards.CardKeyword.Exhaust
-    ];
     protected override IEnumerable<MegaCrit.Sts2.Core.Localization.DynamicVars.DynamicVar> CanonicalVars => [
         new SunlightCostVar(1m)
     ];
 
     public FertilizerMaking_Yuka()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
+        : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 

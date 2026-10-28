@@ -18,7 +18,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace KazamiYuka.Scripts.Powers;
 
 [RegisterPower]
-public sealed class DismemberPower : ModPowerTemplate, IPowerExtraIconAmountLabelsProvider
+public sealed class DismemberPower : ModPowerTemplate, IPowerExtraIconAmountLabelsProvider, ITemporaryPower
 {
     public override PowerAssetProfile AssetProfile => new(
         IconPath: "res://mods/KazamiYuka/images/powers/DismemberPower.png",
@@ -27,6 +27,9 @@ public sealed class DismemberPower : ModPowerTemplate, IPowerExtraIconAmountLabe
     public override PowerType Type => PowerType.Debuff;
     public override PowerStackType StackType => PowerStackType.None;
     public override PowerInstanceType InstanceType => PowerInstanceType.Instanced;
+
+    public AbstractModel OriginModel => ModelDb.Card<Dismember_Yuka>();
+    public PowerModel InternallyAppliedPower => ModelDb.Power<StrengthPower>();
 
     protected override object InitInternalData() => new Data();
 

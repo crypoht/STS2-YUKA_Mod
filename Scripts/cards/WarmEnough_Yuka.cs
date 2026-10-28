@@ -16,7 +16,7 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class WarmEnough_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new BlockVar(9m, ValueProp.Move),
+        new BlockVar(7m, ValueProp.Move),
         new CardsVar(1)
     ];
 
@@ -44,5 +44,5 @@ public sealed class WarmEnough_Yuka : KazamiYukaCard
         }
     }
 
-    protected override void OnUpgrade() => DynamicVars.Block.UpgradeValueBy(4m);
+    protected override void OnUpgrade() => DynamicVars.Block.UpgradeValueBy(3m);
 }

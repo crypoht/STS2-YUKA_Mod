@@ -70,7 +70,9 @@ public sealed class FinalMagicCannon_Yuka : KazamiYukaCard
         }
 
         Player owner = base.Owner;
-        int sunlightToConsume = SunlightManager.GetSunlight(owner);
+        int sunlightToConsume = play.IsFirstInSeries
+            ? SunlightManager.GetSunlight(owner)
+            : DynamicVars["LockedSunlight"].IntValue;
         if (sunlightToConsume <= 0)
         {
             return;
@@ -85,7 +87,10 @@ public sealed class FinalMagicCannon_Yuka : KazamiYukaCard
         DynamicVars["TotalDamage"].BaseValue =
             DynamicVars["Damage"].BaseValue * DynamicVars["HitCount"].BaseValue;
 
-        SunlightManager.SpendAllSunlight(owner);
+        if (!IsFreeFromReceipt(play))
+        {
+            SunlightManager.SpendAllSunlight(owner);
+        }
 
         if (hitCount <= 0)
         {

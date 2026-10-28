@@ -21,7 +21,7 @@ public sealed class FlowerLanguage_Yuka : KazamiYukaCard
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new SunlightCostVar(1m),
-        new PowerVar<FlowerLanguagePower>(3m)
+        new PowerVar<FlowerLanguagePower>(4m)
     ];
 
     public FlowerLanguage_Yuka()

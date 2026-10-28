@@ -47,7 +47,7 @@ public class SunflowerGuardPatch
         bool isMultiplayerCombat = combatState.Players.Count > 1;
         if (!target.IsPlayer ||
             player == null ||
-            (isMultiplayerCombat && player.Character is not KazamiYukaCharacter) ||
+            !phases.HasFlag(HpLossHookPhase.AfterOsty) ||
             __result <= 0 ||
             props.HasFlag(ValueProp.Unblockable))
         {
@@ -55,7 +55,8 @@ public class SunflowerGuardPatch
         }
 
         var guardianSunflowers = SunflowerManager.GetSunflowers(player)
-            .Where(c => c.IsAlive && c.Powers.Any(p => p is SunflowerGuardPower))
+            .Where(c => c.IsAlive && c.Powers.OfType<SunflowerGuardPower>()
+                .Any(power => !isMultiplayerCombat || power.Protects(player)))
             .OrderBy(c => c.CurrentHp) 
             .ToList();
         bool hasFacingSun = player.Creature.HasPower<FacingSunPower>();

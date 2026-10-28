@@ -25,12 +25,12 @@ public sealed class FlowerNameSong_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        SunflowerDamageVar(5m),
-        new SunlightCostVar(2m)
+        SunflowerDamageVar(3m),
+        new SunlightCostVar(8m)
     ];
 
     public FlowerNameSong_Yuka()
-        : base(2, CardType.Attack, CardRarity.Rare, TargetType.Self, true)
+        : base(0, CardType.Attack, CardRarity.Rare, TargetType.Self, true)
     {
     }
 
@@ -62,7 +62,7 @@ public sealed class FlowerNameSong_Yuka : KazamiYukaCard
                 choiceContext,
                 enemies,
                 damage,
-                ValueProp.Unpowered | ValueProp.Move,
+                ValueProp.Move,
                 sunflower,
                 this,
                 cardPlay);
@@ -71,6 +71,6 @@ public sealed class FlowerNameSong_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["SunflowerDamage"].UpgradeValueBy(2m);
+        DynamicVars["SunflowerDamage"].UpgradeValueBy(1m);
     }
 }

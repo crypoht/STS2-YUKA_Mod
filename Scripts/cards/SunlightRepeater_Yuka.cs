@@ -32,8 +32,8 @@ public class SunlightRepeater_Yuka : KazamiYukaCard
         get
         {
             DynamicVar[] array = new DynamicVar[4];
-            array[0] = new CalculationBaseVar(8m);      
-            array[1] = new ExtraDamageVar(2m);          
+            array[0] = new CalculationBaseVar(12m);      
+            array[1] = new ExtraDamageVar(3m);          
             array[2] = new DynamicVar("MaxSunConsume", 10m); 
             
             array[3] = new CalculatedDamageVar(ValueProp.Move).WithMultiplier((CardModel card, MegaCrit.Sts2.Core.Entities.Creatures.Creature? _) => 

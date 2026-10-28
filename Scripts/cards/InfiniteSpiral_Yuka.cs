@@ -36,12 +36,7 @@ public class InfiniteSpiral_Yuka : KazamiYukaCard
         if (player == null) return;
 
         int maxSunlight = DynamicVars["MaxSunConsume"].IntValue;
-        int availableSunlight = Math.Min(SunlightManager.GetSunlight(player), maxSunlight);
-        int consumedSunlight = availableSunlight;
-        if (consumedSunlight > 0)
-        {
-            SunlightManager.TrySpendSunlight(player, consumedSunlight);
-        }
+        int consumedSunlight = ConsumeUpToMaxSunlight(player, maxSunlight, cardPlay);
 
         int repeats = 1 + consumedSunlight;
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue * repeats, player, false);

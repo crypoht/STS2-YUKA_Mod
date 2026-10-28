@@ -15,7 +15,7 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class Heat_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Damage", 3m)];
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Damage", 4m)];
     public Heat_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {

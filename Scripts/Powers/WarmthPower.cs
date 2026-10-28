@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rooms;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
@@ -33,6 +34,13 @@ public sealed class WarmthPower : ModPowerTemplate
     {
         SunlightManager.SunlightSpent -= OnSunlightSpent;
         return Task.CompletedTask;
+    }
+
+    public override async Task AfterCombatEnd(CombatRoom room)
+    {
+        SunlightManager.SunlightSpent -= OnSunlightSpent;
+        _spent = 0;
+        await PowerCmd.Remove(this);
     }
 
     private void OnSunlightSpent(MegaCrit.Sts2.Core.Entities.Players.Player player, int amount)

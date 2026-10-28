@@ -9,6 +9,7 @@ using System.Reflection;
 using Godot;
 using KazamiYuka.Scripts.Formatters;
 using KazamiYuka.Scripts.Patches;
+using STS2RitsuLib.Audio;
 
 namespace KazamiYuka.Scripts;
 
@@ -24,6 +25,11 @@ public class Entry
     public static void Init()
     {
         GD.Print("[KazamiYuka][CombatTrace] Entry.Init begin.");
+        VirtualFmodEventRegistry.RegisterOneShot(
+            "event:/sfx/characters/kazamiyuka/select",
+            "res://mods/KazamiYuka/sound/Flower Land.mp3",
+            volume: 1.0f
+        );
         _ = KazamiYukaTargetTypes.Sunflower;
 
         KazamiYuka.Scripts.SunflowerManager.RegisterHealthListener(KazamiYuka.Scripts.Powers.FlowerGratitudePower.OnAnySunflowerHealthChanged);

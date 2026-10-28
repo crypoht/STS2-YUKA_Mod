@@ -37,5 +37,5 @@ public class SowSeeds_Yuka : KazamiYukaCard
         await SunflowerManager.Summon(Owner, DynamicVars.Heal.BaseValue);
     }
 
-    protected override void OnUpgrade() => DynamicVars.Heal.UpgradeValueBy(4);
+    protected override void OnUpgrade() => DynamicVars.Heal.UpgradeValueBy(3);
 }

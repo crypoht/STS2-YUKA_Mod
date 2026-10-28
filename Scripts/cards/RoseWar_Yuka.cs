@@ -20,12 +20,12 @@ public sealed class RoseWar_Yuka : KazamiYukaCard
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new BlockVar(12m, ValueProp.Move),
-        new SunlightCostVar(2m),
+        new SunlightCostVar(6m),
         new PowerVar<RoseWarPower>(1m)
     ];
 
     public RoseWar_Yuka()
-        : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
+        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 

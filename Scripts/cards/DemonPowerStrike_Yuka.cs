@@ -62,5 +62,5 @@ public sealed class DemonPowerStrike_Yuka : KazamiYukaCard
         }
     }
 
-    protected override void OnUpgrade() => DynamicVars.Damage.UpgradeValueBy(4m);
+    protected override void OnUpgrade() => DynamicVars.Damage.UpgradeValueBy(3m);
 }

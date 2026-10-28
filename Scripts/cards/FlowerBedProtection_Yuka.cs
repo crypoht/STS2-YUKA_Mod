@@ -31,7 +31,7 @@ public class FlowerBedProtection_Yuka : KazamiYukaCard, ICustomTargetValidator
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new SunlightCostVar(3m),
-        new DynamicVar("MaxHpGain", 4m)
+        new DynamicVar("MaxHpGain", 5m)
     ];
 
     public FlowerBedProtection_Yuka() : base(energyCost, type, rarity, KazamiYukaTargetTypes.Sunflower, shouldShowInCardLibrary)

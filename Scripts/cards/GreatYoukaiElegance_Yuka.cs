@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KazamiYuka.Scripts.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -7,6 +8,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
+using MegaCrit.Sts2.Core.HoverTips;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
@@ -20,10 +22,12 @@ public class GreatYoukaiElegance_Yuka : KazamiYukaCard
     public override bool GainsBlock => true;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new CalculationBaseVar(12m),
-        new CalculationExtraVar(3m),
-        new CalculatedBlockVar(ValueProp.Move).WithMultiplier((CardModel card, Creature? _) =>
-            SunflowerManager.GetSunflowers(card.Owner).Count)
+        new BlockVar(11m, ValueProp.Move),
+        new DynamicVar("OldPerSun", 2m)
+    ];
+
+    protected override IEnumerable<IHoverTip> AdditionalHoverTips => [
+        HoverTipFactory.FromPower<OldPower>()
     ];
 
     public GreatYoukaiElegance_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
@@ -34,16 +38,29 @@ public class GreatYoukaiElegance_Yuka : KazamiYukaCard
     {
         await CreatureCmd.GainBlock(
             base.Owner.Creature,
-            base.DynamicVars.CalculatedBlock.Calculate(cardPlay.Target),
-            base.DynamicVars.CalculatedBlock.Props,
+            DynamicVars.Block.BaseValue,
+            DynamicVars.Block.Props,
             cardPlay,
             false
         );
+
+        int sunlight = SunlightManager.GetSunlight(base.Owner);
+        if (sunlight > 0)
+        {
+            await PowerCmd.Apply<OldPower>(
+                choiceContext,
+                base.Owner.Creature,
+                sunlight * DynamicVars["OldPerSun"].BaseValue,
+                base.Owner.Creature,
+                this,
+                false
+            );
+        }
     }
 
     protected override void OnUpgrade()
     {
-        base.DynamicVars.CalculationBase.UpgradeValueBy(2m);
-        base.DynamicVars.CalculationExtra.UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(4m);
+        DynamicVars["OldPerSun"].UpgradeValueBy(1m);
     }
 }

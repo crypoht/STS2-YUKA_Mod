@@ -18,7 +18,7 @@ public class FacingSun_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new BlockVar(18m, ValueProp.Move),
+        new BlockVar(15m, ValueProp.Move),
         new SunlightCostVar(3m)
     ];
 
@@ -54,6 +54,6 @@ public class FacingSun_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(4m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

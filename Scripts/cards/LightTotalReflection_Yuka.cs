@@ -19,7 +19,7 @@ public sealed class LightTotalReflection_Yuka : KazamiYukaCard
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new DynamicVar("MaxSunConsume", 3m),
-        new BlockVar(6m, MegaCrit.Sts2.Core.ValueProps.ValueProp.Move)
+        new BlockVar(9m, MegaCrit.Sts2.Core.ValueProps.ValueProp.Move)
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Ethereal, KazamiYukaKeywords.FierceSun];
@@ -45,7 +45,7 @@ public sealed class LightTotalReflection_Yuka : KazamiYukaCard
     protected override void OnUpgrade()
     {
         DynamicVars["MaxSunConsume"].UpgradeValueBy(-1m);
-        DynamicVars.Block.UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 
 }

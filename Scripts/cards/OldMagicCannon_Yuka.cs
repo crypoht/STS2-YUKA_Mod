@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KazamiYuka.Scripts;
+using KazamiYuka.Scripts.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
-using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -17,37 +16,42 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class OldMagicCannon_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(13m, ValueProp.Move)
+        new DamageVar(13m, ValueProp.Move),
+        new DynamicVar("OldPerSun", 3m)
     ];
+
 
     public OldMagicCannon_Yuka() : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.AllEnemies, true)
     {
     }
 
-    public override int MaxUpgradeLevel => 514114514;
-
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
-        if (base.CombatState == null)
+        int sunlight = SunlightManager.GetSunlight(base.Owner);
+        if (base.CombatState != null)
         {
-            return;
+            await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+                .FromCard(this, play)
+                .TargetingAllOpponents(base.CombatState)
+                .Execute(context);
         }
 
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this, play)
-            .TargetingAllOpponents(base.CombatState)
-            .Execute(context);
+        if (sunlight > 0)
+        {
+            await PowerCmd.Apply<OldPower>(
+                context,
+                base.Owner.Creature,
+                sunlight * DynamicVars["OldPerSun"].BaseValue,
+                base.Owner.Creature,
+                this,
+                false
+            );
+        }
     }
 
-    protected override void OnUpgrade()
-    {
-        decimal multiplier = CurrentUpgradeLevel < 5
-            ? 0.3m
-            : CurrentUpgradeLevel < 10
-                ? 0.22m
-                : 0.15m;
-
-        decimal increase = Math.Floor(DynamicVars.Damage.BaseValue * multiplier);
-        DynamicVars.Damage.UpgradeValueBy(Math.Max(1m, increase));
+    protected override void OnUpgrade() 
+    { 
+        DynamicVars.Damage.UpgradeValueBy(4m);
+        DynamicVars["OldPerSun"].UpgradeValueBy(2m);
     }
 }

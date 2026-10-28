@@ -19,7 +19,7 @@ public class SunlightStrike_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(13m, ValueProp.Move),
+        new DamageVar(14m, ValueProp.Move),
         new SunlightCostVar(1m),
     ];
 

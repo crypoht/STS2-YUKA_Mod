@@ -18,9 +18,9 @@ public sealed class GreatYoukaiOppression_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new CalculationBaseVar(12m),
+        new CalculationBaseVar(9m),
         new ExtraDamageVar(2m),
-        new SunlightCostVar(5m),
+        new SunlightCostVar(7m),
         new CalculatedDamageVar(ValueProp.Move).WithMultiplier((card, _) =>
             card.Owner != null ? SunlightManager.GetSunlight(card.Owner) : 0m)
     ];
@@ -37,7 +37,7 @@ public sealed class GreatYoukaiOppression_Yuka : KazamiYukaCard
     }
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
         DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

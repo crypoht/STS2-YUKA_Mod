@@ -17,7 +17,7 @@ public sealed class TulipBubble_Yuka : KazamiYukaCard
     public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("SunlightGain", 10m),
+        new DynamicVar("SunlightGain", 12m),
         new DynamicVar("SunlightLoss", 2m)
     ];
 

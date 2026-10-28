@@ -13,7 +13,7 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class DutchFlowerBalance_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("Duration", 2m),
+        new DynamicVar("Duration", 3m),
         new DynamicVar("SunlightGain", 2m)
     ];
 

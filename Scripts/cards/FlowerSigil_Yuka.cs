@@ -18,7 +18,7 @@ public sealed class FlowerSigil_Yuka : KazamiYukaCard
         new DynamicVar("Summon", 6m)
     ];
 
-    public FlowerSigil_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true) { }
+    public FlowerSigil_Yuka() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true) { }
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSun, KazamiYukaKeywords.Grow];
 

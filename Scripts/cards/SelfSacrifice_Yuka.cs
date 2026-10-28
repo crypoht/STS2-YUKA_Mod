@@ -17,11 +17,11 @@ public sealed class SelfSacrifice_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("HpLoss", 8m),
+        new DynamicVar("HpLoss", 9m),
         new EnergyVar(1),
         new DynamicVar("SunlightGain", 1m)
     ];
-    public SelfSacrifice_Yuka() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.None, true) { }
+    public SelfSacrifice_Yuka() : base(0, CardType.Attack, CardRarity.Uncommon, TargetType.None, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
         List<(Creature Flower, decimal Damage)> contributions = [];
@@ -75,5 +75,5 @@ public sealed class SelfSacrifice_Yuka : KazamiYukaCard
             );
         }
     }
-    protected override void OnUpgrade() => base.EnergyCost.UpgradeBy(-1);
+    protected override void OnUpgrade() => base.AddKeyword(CardKeyword.Retain);
 }

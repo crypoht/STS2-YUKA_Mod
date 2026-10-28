@@ -1,4 +1,10 @@
 ﻿{
+    "KAZAMI_YUKA_RELIC_SUN_RAINCOAT_YUKA.title": "太阳雨衣",
+    "KAZAMI_YUKA_RELIC_SUN_RAINCOAT_YUKA.description": "所有[gold]向日葵[/gold]每回合额外生产{:sunlightIcons(1)}。",
+    "KAZAMI_YUKA_RELIC_SUN_RAINCOAT_YUKA.flavor": "看上去很暖和的雨衣，在雨天也可以找到一些花肥了。",
+    "KAZAMI_YUKA_RELIC_PLANTING_GLOVES_YUKA.title": "种植手套",
+    "KAZAMI_YUKA_RELIC_PLANTING_GLOVES_YUKA.description": "种植[gold]向日葵[/gold]时，获得{:sunlightIcons(2)}。",
+    "KAZAMI_YUKA_RELIC_PLANTING_GLOVES_YUKA.flavor": "大部分时间并不是用来种植而是用来掐断脖子。",
     "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.title":  "太阳草帽",
     "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.description":  "每场战斗中，前3株种植的[gold]向日葵[/gold]会每回合为你提供{:sunlightIcons(2)}。",
     "KAZAMI_YUKA_RELIC_KAZAMI_YUKA_STARTER_RELIC.flavor":  "“种植向日葵的必需之物，有害虫的时候可以防止血溅到头发。”",

@@ -26,7 +26,7 @@ public class AfternoonTea_Yuka : KazamiYukaCard
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
-    public AfternoonTea_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
+    public AfternoonTea_Yuka() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 

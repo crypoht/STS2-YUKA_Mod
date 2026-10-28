@@ -23,9 +23,9 @@ public sealed class Dismember_Yuka : KazamiYukaCard
     ];
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(11m, ValueProp.Move),
+        new DamageVar(10m, ValueProp.Move),
         new DynamicVar("StrengthLoss", 4m),
-        new DynamicVar("Duration", 3m)
+        new DynamicVar("Duration", 2m)
     ];
 
     public Dismember_Yuka()

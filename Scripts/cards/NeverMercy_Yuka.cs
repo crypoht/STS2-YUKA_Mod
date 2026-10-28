@@ -54,10 +54,16 @@ public sealed class NeverMercy_Yuka : KazamiYukaCard
             return;
         }
 
-        RefreshDynamicPreview(true);
+        if (cardPlay.IsFirstInSeries)
+        {
+            RefreshDynamicPreview(true);
+        }
         int hitCount = DynamicVars["HitCount"].IntValue;
         decimal damage = DynamicVars["SunflowerDamage"].BaseValue;
-        SunlightManager.SpendAllSunlight(base.Owner);
+        if (!IsFreeFromReceipt(cardPlay))
+        {
+            SunlightManager.SpendAllSunlight(base.Owner);
+        }
 
         if (hitCount <= 0 || damage <= 0m)
         {

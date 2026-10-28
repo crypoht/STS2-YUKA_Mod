@@ -28,7 +28,7 @@ public class Photosynthesis_Yuka : KazamiYukaCard, ICustomTargetValidator
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("MaxHpGain", 7m),
+        new DynamicVar("MaxHpGain", 8m),
         new SunlightCostVar(2m)
     ];
 

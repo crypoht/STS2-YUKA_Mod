@@ -20,7 +20,7 @@ public sealed class PlannedPlanting_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new SummonVar(11m),
+        new SummonVar(8m),
         new SunlightCostVar(2m),
     ];
 
@@ -47,6 +47,6 @@ public sealed class PlannedPlanting_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        base.EnergyCost.UpgradeBy(-1);
+        DynamicVars["Summon"].UpgradeValueBy(4m);
     }
 }

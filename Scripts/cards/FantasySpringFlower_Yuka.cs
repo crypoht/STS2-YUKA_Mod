@@ -17,7 +17,7 @@ public sealed class FantasySpringFlower_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new DynamicVar("Summon", 8m),
-        new DynamicVar("SpringAmount", 3m)
+        new DynamicVar("SpringAmount", 2m)
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.Grow];

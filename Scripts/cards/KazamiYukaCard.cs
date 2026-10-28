@@ -103,6 +103,7 @@ public abstract class KazamiYukaCard : ModCardTemplate
         if (cardPlay == null || cardPlay.Card?.EnergyCost == null) return false;
 
         return cardPlay.IsAutoPlay
+            || !cardPlay.IsFirstInSeries
             || (cardPlay.Resources.EnergySpent == 0
             && IsEnergyCostTemporarilyFree(cardPlay.Card));
     }

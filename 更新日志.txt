@@ -1,5 +1,185 @@
 KazamiYuka 更新日志
 
+2026-10-27
+【修正建筑师对话攻击时序】
+文件：KazamiYuka/localization/zhs/ancients.json、更新日志.txt、更新日志_公开版.txt
+内容：使用RitsuLib标准startattack/endattack配置。前两组对话结束后由幽香攻击，再由建筑师反击；魔炮组由幽香在首句对话前攻击，对话结束后由建筑师反击。移除将结束攻击者限定为Player的旧attack键，避免跳过建筑师攻击。不改对话正文、角色动画、工程文件，不新增补丁。
+验证：已核对RitsuLib解析器和官方TheArchitect.PlayCurrentLine/WinRun顺序，并确认当前0.107.1运行库包含起止配置键；三组JSON起止配置与旧键移除校验通过，本次修改文件git diff --check通过。dotnet build KazamiYuka.csproj --no-restore通过，0警告、0错误，DLL已复制到游戏Mod目录。未导出PCK；本次本地化资源需自行导出PCK后验证游戏内动画。全工作区另有旧日魔炮与阳光重发的既有行尾空白，本次不修改。
+
+2026-10-27
+【修复且听花名不受易伤影响】
+文件：Scripts/cards/FlowerNameSong_Yuka.cs、更新日志.txt、更新日志_公开版.txt
+内容：且听花名的对敌伤害错误携带Unpowered，导致官方VulnerablePower的IsPoweredAttack检查失败，同时跳过其他要求普通攻击的修正。移除该标记，保留Move、向日葵作为伤害来源、来源卡与逐株增益翻倍逻辑，使其走标准攻击修正。检查其他卡片的伤害调用，未发现其他直接对敌攻击同类误用；残暴、自我牺牲和无限螺旋的Unpowered用于扣血代价，保持不变。高照、炽热、夏及暴君形态的能力伤害仍使用Unpowered，本次不改变这些能力的伤害规则。
+验证：dotnet build KazamiYuka.csproj --no-restore 通过，0警告、0错误，已执行游戏Mod目录复制；git diff --check通过。依据官方VulnerablePower与ValuePropExtensions确认修正条件；未导出PCK，实战易伤交互待测。
+
+2026-10-27
+【新增太阳雨衣与种植手套】
+文件：Scripts/relics/SunRaincoat_Yuka.cs、Scripts/relics/PlantingGloves_Yuka.cs、Scripts/SunFlower/SunflowerManager.cs、KazamiYuka/localization/zhs/relics.json、更新日志.txt、更新日志_公开版.txt
+内容：两个遗物注册到幽香专属池。太阳雨衣为Rare，成功种植时额外给予新向日葵1层向阳，与草帽或睡帽独立叠加，不占前三株计数。种植手套为官方Shop稀有度，成功种植时给予种植者2点阳光。满槽成长不触发两者。不引入BaseLib、不修改csproj。暂无专属图标，分别暂用太阳草帽与向日葵头饰，补入同名PNG并导出资源后自动使用新图。
+验证：dotnet build KazamiYuka.csproj --no-restore 通过，0警告、0错误，DLL已复制到游戏Mod目录；relics.json解析及git diff --check通过。官方RelicGrabBag.Populate(Player,Rng)包含角色专属池，MerchantInventory使用RelicRarity.Shop抽取商店槽；注册沿用RitsuLib。不导出PCK，实战待测；已有存档的遗物池不保证补入新遗物，建议新开一局测试。
+
+2026-10-27
+【旧日增伤纳入阳光Y】
+文件：Scripts/Powers/OldPower.cs、更新日志.txt、更新日志_公开版.txt
+内容：旧日识别阳光消耗攻击牌时增加SunlightY变量判定，使从不悲悯每朵向日葵的每段攻击均可获得出牌者的旧日增伤。保留原有固定阳光、烈阳与烈阳无限判定，以及来源卡片拥有者匹配，避免多人共享向日葵时读取其他玩家的旧日。不新增标签、不改支付与卡牌效果。
+验证：dotnet build KazamiYuka.csproj --no-restore 通过，0 警告、0 错误，已执行游戏 mod 目录复制；git diff --check 通过。未导出 PCK，实战待测。
+
+2026-10-27
+【修复暴君抹杀翻倍未包含力量】
+文件：Scripts/cards/TyrantObliteration_Yuka.cs、更新日志.txt、更新日志_公开版.txt
+内容：此前先将基础伤害翻倍，再由官方流程增加力量，导致力量未参与翻倍。改用官方伤害乘法钩子，使力量等加法增伤先结算，再与烈阳倍率及其他乘法修正共同计算；卡面预览采用相同倍率。实际攻击锁定本次支付得到的倍率，攻击结束后清理，仍在伤害结算后给予力量。不改全局伤害与支付逻辑。
+验证：dotnet build KazamiYuka.csproj --no-restore 通过，0 警告、0 错误，已执行游戏 mod 目录复制；4组独立公式检查通过（包含力量、0至3阳光及额外倍率），git diff --check 通过。未导出 PCK，游戏内钩子与预览交互待测。
+
+2026-10-27
+【重做暴君抹杀】
+文件：Scripts/cards/TyrantObliteration_Yuka.cs、KazamiYuka/localization/zhs/cards.json、更新日志.txt、更新日志_公开版.txt
+内容：移除本场战斗叠加攻击次数的旧效果。改为烈阳3，造成3（4）点伤害，每消耗1点阳光，本次伤害翻倍；伤害结算完成后获得1点力量。保持2费、稀有攻击牌，补充力量悬浮说明，沿用烈阳支付与免费打出逻辑。
+验证：dotnet build KazamiYuka.csproj --no-restore 通过，0 个警告、0 个错误，构建目标已执行游戏 mod 目录复制；cards.json 解析通过。未导出 PCK，实战效果待测。
+
+2026-10-27
+【调整大妖怪的优雅并复用旧日增伤】
+文件：Scripts/cards/GreatYoukaiElegance_Yuka.cs、KazamiYuka/localization/zhs/cards.json、更新日志.txt、更新日志_公开版.txt
+内容：大妖怪的优雅改为获得11（15）点格挡，并按打出时身上阳光数量施加旧日层数，使之后消耗阳光的攻击牌对敌人造成的伤害每点阳光提高2%（升级后3%）。复用OldPower。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile 通过，0 个警告、0 个错误；cards.json 解析通过。未导出 PCK，实战效果待测。
+
+2026-10-27
+【更正旧日魔炮效果与文本】
+文件：Scripts/cards/OldMagicCannon_Yuka.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json、更新日志.txt、更新日志_公开版.txt
+内容：恢复旧日魔炮对所有敌人造成13点伤害。之后按打出时身上的阳光数量，使消耗阳光的攻击牌对敌人造成的伤害每点阳光提高4%（升级后6%）；每1%对应旧日能力1层。修正上一版误删伤害并把“每点阳光提高4%（6%）”错误写成授予4（6）层的卡面文本。
+验证：待编译与本地化 JSON 解析验证；未导出 PCK。
+
+2026-10-26
+【重做旧日魔炮并新增旧日能力】
+文件：Scripts/cards/OldMagicCannon_Yuka.cs、Scripts/Powers/OldPower.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json、更新日志.txt、更新日志_公开版.txt
+内容：旧日魔炮不再造成13点伤害或无限升级；打出时根据当前阳光数量获得旧日层数，每1点阳光获得4层，升级后每点阳光获得6层，并提供旧日能力悬浮说明。旧日每层使之后由该玩家打出的、带固定阳光消耗、烈阳或烈阳-无限标记的攻击牌伤害提高1%；判定基于来源卡牌，因此也包括卡牌触发的向日葵伤害。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile 通过，0 个警告、0 个错误；cards.json 与 powers.json 解析通过。未导出 PCK，实战倍率待测。
+
+2026-10-24
+【降低角色选择音效音量】
+文件：Scripts/Entry.cs、更新日志.txt
+内容：Flower Land 角色选择音效下调 11 dB，对应线性音量倍率约 0.282。
+验证：待编译验证。
+
+2026-10-24
+【设置幽香角色选择音效】
+文件：Scripts/Entry.cs、Scripts/KazamiYukaCharacter.cs、更新日志.txt
+内容：将 mods/KazamiYuka/sound/Flower Land.mp3 注册为 RitsuLib 虚拟 FMOD 单次音效事件，并配置到角色原生 CharacterSelectSfx 槽位；角色选择确认时播放该音效。
+验证：待编译验证。教程要求音效资源未经 Godot 导入处理或使用兼容资源加载方式；当前项目已有该 MP3，但尚未在游戏内确认打包后播放效果。
+
+2026-10-23
+【修复温暖跨战斗残留】
+文件：Scripts/Powers/WarmthPower.cs、更新日志.txt
+内容：温暖原本只在能力被移除时解除阳光消耗监听，但没有在战斗结束时移除能力；因此它可能跨战斗持续生效并保留旧监听。现在战斗结束时解除监听、清空本场累计值并移除温暖能力。
+验证：待编译验证；需进游戏确认战斗结束清除及累计消耗8点阳光获得1点能量。
+
+2026-10-23
+【修复寄生跨敌人重复放大伤害】
+文件：Scripts/Powers/ParasitePower.cs、更新日志.txt
+内容：寄生的伤害倍率钩子此前只检查伤害来源是否为向日葵，没有确认受击目标就是持有该寄生的敌人；因此多个敌人各自的寄生会对同一次向日葵攻击重复连乘。现按官方易伤的目标判定，仅当本次受击目标是该能力持有者时提高伤害。层数继续只表示持续时间，单份寄生的增伤保持 50%。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile 通过，0 个警告、0 个错误。完整构建的代码编译成功，但 DLL 复制因运行中的 SlayTheSpire2.exe 锁定目标文件失败；未部署、未导出 PCK。
+
+2026-10-23
+【修复幻想误入尘封魔典奖池】
+文件：Scripts/cards/Fantasy_Yuka.cs、更新日志.txt
+内容：移除 Fantasy_Yuka 上的 RegisterDustyTomeCard 注册。根据 RitsuLib 教程，此注册会把先古牌明确加入尘封魔典奖池；幻想是古老牙齿替换牌，保留普通卡池和古老牙齿映射，不应进入该奖池。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile 通过，0 个警告、0 个错误；确认古老牙齿映射仍保留。未导出 PCK。
+
+2026-10-23
+【修复幻想在零阳光时不攻击】
+文件：Scripts/cards/Fantasy_Yuka.cs、更新日志.txt
+内容：移除零阳光时提前结束出牌的逻辑。零阳光时不消耗阳光、不提高向日葵生命上限，但仍然由所有存活向日葵依次攻击当前存活敌人。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile 通过，0 个警告、0 个错误。完整构建的代码编译成功，但 DLL 复制因运行中的 SlayTheSpire2.exe 锁定目标文件失败；未部署、未导出 PCK。
+
+2026-10-23
+【修复烈日晴空格挡预览并配置建筑师攻击动作】
+文件：Scripts/cards/ClearSky_Yuka.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/ancients.json、更新日志.txt
+内容：烈日晴空改用计算型格挡动态变量，以打出前的当前阳光计算卡面最终格挡，并在扣除固定阳光后按同一数值结算；为幽香与建筑师的魔炮对话补充教程规定的 `-attack` 键，触发玩家攻击动作。
+验证：dotnet build KazamiYuka.csproj --no-restore 通过，0 个警告、0 个错误，DLL 复制成功；cards.json 与 ancients.json 解析通过。未导出 PCK；游戏内格挡预览、结算和建筑师动画待复测。
+
+2026-10-23
+【修复向日葵攻击牌不消耗超巨大化】
+文件：Scripts/Patches/SunflowerGigantificationPatch.cs、更新日志.txt
+内容：官方超巨大化通过AfterAttack消耗层数，但向日葵攻击牌以直接伤害命令结算，不会触发该钩子。现在在向日葵攻击牌结算后检查玩家超巨大化层数；若官方攻击钩子未消耗，则补扣1层，已由官方扣除时不重复扣。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile通过，0个警告、0个错误；未导出PCK。实战测试待进行。
+
+2026-10-23
+【恢复紫罗兰向日葵禁攻效果】
+文件：Scripts/Powers/VioletPower.cs、更新日志.txt
+内容：旧Git提交中未找到实际阻止向日葵造成伤害的实现；现将紫罗兰接入官方伤害修正钩子，仅当造成伤害的来源是持有该能力的向日葵时将伤害倍率设为0，不影响其他向日葵、玩家或敌人的伤害。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile通过，0个警告、0个错误；完整构建的代码编译成功，但DLL复制时被运行中的SlayTheSpire2.exe占用。未导出PCK；战斗内效果待测试。
+
+2026-10-23
+【补充紫罗兰的信力量悬浮说明】
+文件：Scripts/cards/VioletsLetter_Yuka.cs、更新日志.txt
+内容：为紫罗兰的信添加官方StrengthPower悬浮说明，使卡面上的力量效果可查看标准力量解释。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告、0个错误，DLL复制成功。
+
+2026-10-23
+【明确紫罗兰的信效果描述】
+文件：KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json、更新日志.txt
+内容：卡面明确说明效果会附着于所有向日葵，每朵向日葵每2回合各自使随机敌人失去1点力量；单朵向日葵的能力说明也明确以此向日葵为触发者。出牌后遍历并施加给所有存活向日葵的代码逻辑已存在，本次未改动。
+验证：cards.json与powers.json均通过JSON解析校验；无需编译（仅本地化修改）。
+
+2026-10-23
+【修复百科卡牌文本异常】
+文件：Scripts/cards/Breeze_Yuka.cs、更新日志.txt
+内容：吹拂使用计算型动态变量展示随向日葵数量变化的抽牌与能量，但缺少官方计算变量所需的CalculationExtra，导致百科卡牌网格格式化文本时反复抛出KeyNotFoundException并破坏列表渲染。补齐该变量，额外值为0，不改变卡牌效果。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告、0个错误，DLL复制成功；百科界面待游戏内复测。
+
+2026-10-23
+【调整吹拂与紫罗兰的信】
+文件：Scripts/cards/Breeze_Yuka.cs、Scripts/cards/VioletsLetter_Yuka.cs、Scripts/Powers/VioletPower.cs、本地化（cards.json、powers.json）、更新日志.txt
+内容：吹拂改为消耗5点阳光，按场上存活向日葵数量抽牌并获得等量能量，费用为3（升级后2）。紫罗兰的信改为2费；保留消耗、虚无词条及向日葵无法造成伤害效果，改为每2个玩家回合随机使一名存活敌人失去1点力量，并在能力图标右下角显示触发倒计时。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告、0个错误，DLL复制成功；未修改csproj，未导出PCK。游戏内效果待测试。
+
+2026-10-21
+【修复固定阳光牌与烈阳永久误判免费】
+文件：Scripts/Patches/FreeCardTrackingPatch.cs、更新日志.txt
+内容：免费状态此前只登记、不清理；费用原本为0的固定阳光牌在被设为本回合免费后，标记残留会令之后的打出也免除阳光费用。烈阳及其动态伤害预览共用该判定，因此同样会被误判。现将本回合与本场战斗的免费标记分开追踪，本回合标记在卡牌打出后或回合结束时清除，战斗标记在战斗结束时清除。
+验证：dotnet build KazamiYuka.csproj --no-restore -t:Compile通过，0个警告，0个错误。完整构建的代码编译成功，但自动复制DLL时因运行中的SlayTheSpire2.exe占用目标DLL而失败，尚未部署；未修改csproj，未导出PCK。固定阳光、烈阳与本回合/本场战斗免费效果待游戏内实测。
+
+2026-10-21
+【修复折肢断体被不安油灯重复翻倍】
+文件：Scripts/Powers/DismemberPower.cs、更新日志.txt
+内容：将折肢断体的独立持续减力能力接入官方ITemporaryPower临时能力接口，并声明其内部施加StrengthPower。不安油灯现在只翻倍折肢断体能力本身一次，不会再次翻倍其内部负力量；翻倍后会正确降低8点力量，并在持续时间结束时回复8点力量，不再遗留永久减力。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误，DLL已复制到游戏目录；未修改csproj，未导出PCK。游戏内与不安油灯、神器及多次独立施加的组合待实测。
+
+2026-10-21
+【修复复制药水重复消耗烈阳】
+文件：Scripts/cards/KazamiYukaCard.cs、Scripts/Interfaces/SunlightCardInterfaces.cs、Scripts/cards/InfiniteSpiral_Yuka.cs、Scripts/cards/FinalMagicCannon_Yuka.cs、Scripts/cards/Fantasy_Yuka.cs、Scripts/cards/NeverMercy_Yuka.cs、更新日志.txt
+内容：将同一次卡牌出牌系列中第二次及之后的重放识别为免费打出，复制药水不再重复支付烈阳或固定阳光。普通烈阳的免费重放按烈阳上限结算；烈阳-无限与阳光Y牌保留首次结算的阳光数值供后续重放使用，不再读取已被首次打出清空的阳光池。补齐此前直接扣除阳光、绕过统一支付助手的卡牌。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误，DLL已复制到游戏目录；未修改csproj，未导出PCK。复制药水、重放附魔及其他增加出牌次数效果待游戏内实测。
+
+2026-10-21
+【修复缓冲误触发向日葵守护】
+文件：Scripts/Patches/SunflowerGuardPatch.cs、更新日志.txt
+内容：向日葵守护改为仅在官方 AfterOsty 阶段读取最终生命损失。缓冲等免疫伤害效果会先将实际损失归零，因此不会再被错误判定为未被格挡伤害；文本保持不变。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误，DLL已复制到游戏目录；未修改csproj，未导出PCK。缓冲与多人守护待游戏内实测。
+
+2026-10-21
+【修复抽牌伤害预览卡死，补齐专属遗物宝箱奖池】
+文件：Scripts/Patches/SunflowerDamageDealerCompatibilityPatch.cs、Scripts/Patches/KazamiYukaRelicGrabBagPatch.cs、更新日志.txt
+内容：修复钢笔尖兼容补丁在没有向日葵、伤害预览来源为空时抛出空引用异常，导致抽牌中断战斗回合循环的问题。保留RitsuLib的角色专属遗物注册；新开游戏且队伍含幽香时，将已解锁的普通、罕见、稀有专属遗物去重加入官方宝箱公共奖池，不加入初始及先古遗物，不影响没有幽香的队伍。增加[RelicPool]日志，分别报告宝箱入池列表与个人奖励/商店奖池实际包含的专属遗物，便于继续核实“完全见不到”的反馈。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误，DLL已复制到游戏目录；未修改csproj，未导出PCK。依据新日志异常栈及官方奖池源码修复，游戏内抽牌和遗物获取待实测。旧存档会继续使用已保存的遗物队列，本次不重置旧队列，以免重新加入已获得的遗物；请用新开游戏验证宝箱奖池。
+
+2026-10-20
+【复核花冢受伤回能】
+文件：Scripts/Powers/FlowerMoundPower.cs、Scripts/cards/FlowerMound_Yuka.cs、相关本地化（仅检查）、更新日志.txt
+内容：确认向日葵正数伤害事件给予每位拥有花冢的玩家1点能量，保留原有阳光收益；零伤害、治疗和生命上限变化不触发。本次未改玩法代码，保留工作区现有3费及3/4阳光数值。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误，本次复制DLL到游戏目录成功；未导出PCK，游戏内触发待实测。
+
+2026-10-20
+【花冢追加受伤回能】
+文件：Scripts/Powers/FlowerMoundPower.cs、KazamiYuka/localization/zhs/cards.json、KazamiYuka/localization/zhs/powers.json、更新日志.txt
+内容：保留花冢原有阳光收益及升级规则；每次向日葵实际失去生命时，拥有花冢的玩家额外获得固定1点能量，不随阳光层数增加。治疗、生命上限变化和零伤害不触发。同步卡牌和能力描述。
+验证：C#编译成功生成DLL，两个本地化JSON解析及git diff --check通过；完整构建在复制到游戏目录时失败，原因是运行中的SlayTheSpire2.exe占用旧DLL。尚未部署，游戏内触发及多人表现待实测，未导出PCK。
+
+2026-10-20
+【守护按施加来源保护多人队友】
+文件：Scripts/Powers/SunflowerGuardPower.cs、Scripts/Patches/SunflowerGuardPatch.cs、KazamiYuka/localization/zhs/powers.json、更新日志.txt
+内容：单人守护规则不变；多人守护始终保护风见幽香，并通过官方施加者参数和能力变化钩子累计保护为该向日葵施加守护的其他玩家。来源按玩家去重，能力描述动态显示受保护的非幽香玩家名单。
+验证：dotnet build KazamiYuka.csproj --no-restore通过，0个警告，0个错误；未导出PCK。多人游戏内挡伤及悬浮文本待实测。
+
 2026-10-20
 【修复钢笔尖不作用于向日葵伤害】
 文件：Scripts/Patches/SunflowerDamageDealerCompatibilityPatch.cs、更新日志.txt

@@ -19,8 +19,8 @@ public sealed class FlowerFinal_Yuka : KazamiYukaCard
     protected override bool ShouldGlowGoldInternal => IsPlayable;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(150m, ValueProp.Move),
-        new DynamicVar("HpThreshold", 60m)
+        new DamageVar(75m, ValueProp.Move),
+        new DynamicVar("HpThreshold", 40m)
     ];
 
     public FlowerFinal_Yuka()
@@ -60,6 +60,6 @@ public sealed class FlowerFinal_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(50m);
+        DynamicVars.Damage.UpgradeValueBy(25m);
     }
 }

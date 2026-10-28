@@ -20,7 +20,7 @@ public sealed class FlowingWind_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(4m, ValueProp.Move),
+        new DamageVar(6m, ValueProp.Move),
         new SunlightCostVar(1m)
         ];
     public FlowingWind_Yuka() : base(0, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, true) { }

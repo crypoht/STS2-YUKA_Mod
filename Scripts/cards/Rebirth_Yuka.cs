@@ -20,7 +20,7 @@ public sealed class Rebirth_Yuka : KazamiYukaCard
     public override bool GainsBlock => true;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new SummonVar(6m),
+        new SummonVar(7m),
         new BlockVar(8m, ValueProp.Move)
     ];
 
@@ -39,7 +39,7 @@ public sealed class Rebirth_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Summon"].UpgradeValueBy(2m);
-        DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars["Summon"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(2m);
     }
 }

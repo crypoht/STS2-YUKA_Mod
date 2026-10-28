@@ -15,7 +15,7 @@ public sealed class SimpleMagicCannon_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(5m, ValueProp.Move),
+        new DamageVar(6m, ValueProp.Move),
         new DynamicVar("HitCount", 3m)
     ];
 

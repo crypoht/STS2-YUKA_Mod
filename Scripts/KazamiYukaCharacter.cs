@@ -73,7 +73,7 @@ public class KazamiYukaCharacter : ModCharacterTemplate<KazamiYukaCardPool, Kaza
                 // 死亡音效
                 // DeathSfx: null,
                 // 角色选择音效
-                // CharacterSelectSfx: null,
+                CharacterSelectSfx: "event:/sfx/characters/kazamiyuka/select"
                 // 过渡音效
                 // CharacterTransitionSfx: "event:/sfx/ui/wipe_ironclad"
             ),

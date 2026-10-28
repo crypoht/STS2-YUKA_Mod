@@ -32,7 +32,7 @@ public sealed class ParasitePower : ModPowerTemplate
         CardModel? cardSource,
         CardPlay? cardPlay)
     {
-        if (dealer?.Monster is not KazamiYukaSunflower)
+        if (target != base.Owner || dealer?.Monster is not KazamiYukaSunflower)
         {
             return 1m;
         }

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -17,13 +18,13 @@ public sealed class FlowerMoundPower : ModPowerTemplate
         BigIconPath: "res://mods/KazamiYuka/images/powers/FlowerMoundPower.png"
     );
 
-    public static Task OnAnySunflowerHealthChanged(
+    public static async Task OnAnySunflowerHealthChanged(
         MegaCrit.Sts2.Core.GameActions.Multiplayer.PlayerChoiceContext ctx,
         Creature sunflower,
         FlowerHealthEvent eventType,
         decimal amount)
     {
-        if (eventType != FlowerHealthEvent.Damage) return Task.CompletedTask;
+        if (eventType != FlowerHealthEvent.Damage || amount <= 0m) return;
 
         foreach (var player in SunflowerManager.GetCombatPlayers(sunflower))
         {
@@ -31,9 +32,9 @@ public sealed class FlowerMoundPower : ModPowerTemplate
             if (power != null)
             {
                 SunlightManager.GainSunlight(player, power.Amount);
+                await PlayerCmd.GainEnergy(1m, player);
             }
         }
 
-        return Task.CompletedTask;
     }
 }

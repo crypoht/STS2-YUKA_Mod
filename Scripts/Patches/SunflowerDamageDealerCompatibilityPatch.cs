@@ -25,15 +25,15 @@ public static class SunflowerPenNibDamagePatch
 {
     public static void Postfix(
         PenNib __instance,
-        Creature target,
+        Creature? target,
         ValueProp props,
-        Creature dealer,
-        CardModel cardSource,
-        CardPlay cardPlay,
+        Creature? dealer,
+        CardModel? cardSource,
+        CardPlay? cardPlay,
         ref decimal __result)
     {
         if (__result != 1m || !props.IsPoweredAttack() || cardSource == null ||
-            dealer.Monster is not KazamiYukaSunflower || cardSource.Owner != __instance.Owner)
+            dealer?.Monster is not KazamiYukaSunflower || cardSource.Owner != __instance.Owner)
         {
             return;
         }

@@ -17,7 +17,7 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class NightmareStrike_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(9m, ValueProp.Move)
+        new DamageVar(11m, ValueProp.Move)
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
@@ -55,6 +55,6 @@ public sealed class NightmareStrike_Yuka : KazamiYukaCard
 
      protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4);
+        DynamicVars.Damage.UpgradeValueBy(5);
     }
 }

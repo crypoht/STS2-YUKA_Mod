@@ -37,7 +37,7 @@ public class Brutality_Yuka : KazamiYukaCard
 
             return totalDamage * card.DynamicVars["DamageMultiplier"].BaseValue;
         }),
-        new DynamicVar("DamageMultiplier", 2m)
+        new DynamicVar("DamageMultiplier", 3m)
     ];
 
     public Brutality_Yuka() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AllEnemies, true)

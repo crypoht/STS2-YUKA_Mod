@@ -204,7 +204,9 @@ public static class SunflowerManager
 
         if (newFlower != null)
         {
-            decimal xiangYangAmount = relicXiangYangBonus + DoubleHeadedSunflowerPower.GetExtraXiangYang(summoner);
+            decimal xiangYangAmount = relicXiangYangBonus
+                + DoubleHeadedSunflowerPower.GetExtraXiangYang(summoner)
+                + Relics.SunRaincoat_Yuka.GetExtraXiangYang(summoner);
             if (xiangYangAmount > 0m)
             {
                 await PowerCmd.Apply<XiangYangPower>(
@@ -228,6 +230,10 @@ public static class SunflowerManager
                 );
             }
 
+            foreach (var gloves in summoner.Relics.OfType<Relics.PlantingGloves_Yuka>().ToList())
+            {
+                gloves.OnSunflowerPlanted();
+            }
         }
     }
 

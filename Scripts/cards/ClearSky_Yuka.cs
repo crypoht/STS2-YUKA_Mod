@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using KazamiYuka.Scripts.DynamicVars;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
@@ -19,9 +20,13 @@ public class ClearSky_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new BlockVar(7m, ValueProp.Move),
-        new DynamicVar("SunlightPerBlock", 4m),
-        new DynamicVar("BlockPerThreshold", 1m),
+        new CalculationBaseVar(7m),
+        new CalculationExtraVar(1m),
+        new CalculatedBlockVar(ValueProp.Move).WithMultiplier((CardModel card, Creature? _) =>
+            card.Owner == null
+                ? 0m
+                : Math.Floor(SunlightManager.GetSunlight(card.Owner) / 3m)),
+        new DynamicVar("SunlightPerBlock", 3m),
         new SunlightCostVar(2m)
     ];
 
@@ -36,18 +41,20 @@ public class ClearSky_Yuka : KazamiYukaCard
         var player = base.Owner;
         if (player == null) return;
 
-        int sunlightBeforePayment = SunlightManager.GetSunlight(player);
+        decimal block = DynamicVars.CalculatedBlock.Calculate(cardPlay.Target);
         if (!TryPayFixedSunlight(player, DynamicVars["SunlightCost"].IntValue, cardPlay)) return;
 
-        decimal block = DynamicVars.Block.BaseValue
-            + Math.Floor(sunlightBeforePayment / DynamicVars["SunlightPerBlock"].BaseValue)
-            * DynamicVars["BlockPerThreshold"].BaseValue;
-        await CreatureCmd.GainBlock(player.Creature, block, DynamicVars.Block.Props, cardPlay, false);
+        await CreatureCmd.GainBlock(
+            player.Creature,
+            block,
+            DynamicVars.CalculatedBlock.Props,
+            cardPlay,
+            false);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(3);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 
 }

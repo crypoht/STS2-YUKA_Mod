@@ -17,8 +17,8 @@ public sealed class MakeItStruggle_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(21m, ValueProp.Move),
-        SunflowerDamageVar(4m)
+        new DamageVar(22m, ValueProp.Move),
+        SunflowerDamageVar(3m)
     ];
 
     public MakeItStruggle_Yuka()
@@ -60,7 +60,7 @@ public sealed class MakeItStruggle_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4m);
+        DynamicVars.Damage.UpgradeValueBy(5m);
         DynamicVars["SunflowerDamage"].UpgradeValueBy(2m);
     }
 }
