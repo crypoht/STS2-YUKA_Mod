@@ -26,10 +26,6 @@ public class GreatYoukaiElegance_Yuka : KazamiYukaCard
         new DynamicVar("OldPerSun", 2m)
     ];
 
-    protected override IEnumerable<IHoverTip> AdditionalHoverTips => [
-        HoverTipFactory.FromPower<OldPower>()
-    ];
-
     public GreatYoukaiElegance_Yuka() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.Self, true)
     {
     }

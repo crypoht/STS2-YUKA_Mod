@@ -23,6 +23,12 @@ public static class SqueezeTargetTypePatch
                 SqueezeManager.RememberOriginalTargetType(__instance, __result);
             }
 
+            if (SqueezeManager.UsesOriginalTargetType(__instance))
+            {
+                __result = SqueezeManager.GetOriginalTargetType(__instance);
+                return;
+            }
+
             if (SqueezeManager.GetOriginalTargetType(__instance) ==
                     KazamiYukaTargetTypes.Sunflower ||
                 !SqueezeManager.ShouldUseSqueezeTargetType(__instance))
@@ -38,10 +44,12 @@ public static class SqueezeTargetTypePatch
 [HarmonyPatch(typeof(CardModel), nameof(CardModel.IsValidTarget))]
 public static class SqueezeValidTargetPatch
 {
+    [HarmonyPriority(Priority.Last)]
     public static void Postfix(CardModel __instance, Creature target, ref bool __result)
     {
         if (SqueezeManager.IsSqueezed(__instance) &&
-            SqueezeManager.ShouldUseSqueezeTargetType(__instance))
+            SqueezeManager.ShouldUseSqueezeTargetType(__instance) &&
+            !SqueezeManager.UsesOriginalTargetType(__instance))
         {
             __result = SqueezeManager.IsValidOriginalOrSunflowerTarget(__instance, target);
         }

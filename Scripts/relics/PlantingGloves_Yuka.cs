@@ -21,8 +21,10 @@ public sealed class PlantingGloves_Yuka : ModRelicTemplate
             ? "res://mods/KazamiYuka/images/relics/PlantingGloves_Yuka.png"
             : "res://mods/KazamiYuka/images/relics/SunflowerHeadpiece_Yuka.png";
 
+    private const string OutlinePath = "res://mods/KazamiYuka/images/relics/PlantingGloves_Yuka_outline.png";
+
     public override RelicAssetProfile AssetProfile => new(
-        IconPath: ResolvedIconPath,
+        IconPath: ResourceLoader.Exists(OutlinePath) ? OutlinePath : ResolvedIconPath,
         IconOutlinePath: ResolvedIconPath,
         BigIconPath: ResolvedIconPath
     );

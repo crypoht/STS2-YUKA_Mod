@@ -25,7 +25,7 @@ public sealed class FinalMagicCannon_Yuka : KazamiYukaCard
         new DynamicVar("HitCount", 0m),
         new FinalMagicCannonTotalDamageVar(),
         new DynamicVar("LockedSunlight", 0m),
-        new DynamicVar("SunlightDivisor", 4m)
+        new DynamicVar("SunlightDivisor", 3m)
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.FierceSunInfinite];
@@ -53,7 +53,7 @@ public sealed class FinalMagicCannon_Yuka : KazamiYukaCard
         Player? owner = base.Owner;
         DynamicVars["LockedSunlight"].BaseValue = owner == null
             ? 0m
-            : SunlightManager.GetSunlight(owner);
+            : SunlightManager.GetFierceSunlight(owner);
         int damage = (int)Math.Floor(
             DynamicVars["LockedSunlight"].BaseValue / DynamicVars["SunlightDivisor"].BaseValue);
         DynamicVars["Damage"].BaseValue = damage;
@@ -71,7 +71,7 @@ public sealed class FinalMagicCannon_Yuka : KazamiYukaCard
 
         Player owner = base.Owner;
         int sunlightToConsume = play.IsFirstInSeries
-            ? SunlightManager.GetSunlight(owner)
+            ? SunlightManager.GetFierceSunlight(owner)
             : DynamicVars["LockedSunlight"].IntValue;
         if (sunlightToConsume <= 0)
         {

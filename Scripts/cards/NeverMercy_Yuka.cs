@@ -25,10 +25,9 @@ public sealed class NeverMercy_Yuka : KazamiYukaCard
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new DynamicVar("SunlightY", 0m),
-        SunflowerDamageVar(0m),
+        SunflowerDamageVar(6m),
         new DynamicVar("HitCount", 0m),
-        new DynamicVar("HitBonus", 0m),
-        new DynamicVar("SunlightDivisor", 3m)
+        new DynamicVar("SunlightDivisor", 4m)
     ];
 
     public NeverMercy_Yuka()
@@ -96,7 +95,7 @@ public sealed class NeverMercy_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["HitBonus"].UpgradeValueBy(1m);
+        DynamicVars["SunlightDivisor"].UpgradeValueBy(-1m);
     }
 
     private void RefreshDynamicPreview(bool useCapturedEnergy)
@@ -110,11 +109,11 @@ public sealed class NeverMercy_Yuka : KazamiYukaCard
         int rawSunlight = owner == null ? 0 : SunlightManager.GetSunlight(owner);
         int sunlightY = ResolveYValue(rawSunlight);
         DynamicVars["SunlightY"].BaseValue = sunlightY;
-        DynamicVars["SunflowerDamage"].BaseValue = Math.Floor(sunlightY / DynamicVars["SunlightDivisor"].BaseValue);
         int energyX = useCapturedEnergy
             ? ResolveEnergyXValue()
             : ResolveEnergyXPreview();
-        DynamicVars["HitCount"].BaseValue = energyX + DynamicVars["HitBonus"].BaseValue;
+        DynamicVars["HitCount"].BaseValue = energyX +
+            Math.Floor(sunlightY / DynamicVars["SunlightDivisor"].BaseValue);
     }
 
     private int ResolveYValue(int rawSunlight)

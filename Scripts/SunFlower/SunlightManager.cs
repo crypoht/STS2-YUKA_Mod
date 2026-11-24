@@ -33,7 +33,7 @@ public static class SunlightManager
 		if (player == null) return 0;
 		int actualSunlight = GetSunlight(player);
 		if (actualSunlight > 0) return actualSunlight;
-		return IsYukaPlayer(player) ? 0 : 3;
+		return player.Character is KazamiYukaCharacter ? 0 : 3;
 	}
 
 	public static void ResetForCombat()
@@ -76,11 +76,8 @@ public static class SunlightManager
 	{
 		if (player == null) return;
 		
-		if (!_playerSunlight.ContainsKey(player))
-			_playerSunlight[player] = 0;
-
-		int oldPersonal = _playerSunlight[player];
-		_playerSunlight[player] += amount;
+		int oldPersonal = GetSunlight(player);
+		SetSunlight(player, oldPersonal + amount);
 
 		if (amount <= 0) return;
 
@@ -100,12 +97,7 @@ public static class SunlightManager
 	{
 		if (player == null) return false;
 
-		if (!_playerSunlight.ContainsKey(player))
-		{
-			return amount <= 0; 
-		}
-
-		return _playerSunlight[player] >= amount;
+		return GetSunlight(player) >= amount;
 	}
 
 	public static int GetSunlight(Player player)
@@ -115,7 +107,28 @@ public static class SunlightManager
 			return 0;
 		}
 
-		return _playerSunlight.TryGetValue(player, out int amount) ? amount : 0;
+		if (_playerSunlight.TryGetValue(player, out int amount))
+		{
+			return amount;
+		}
+
+		YoukaiUmbrella_Yuka? umbrella = player.Relics.OfType<YoukaiUmbrella_Yuka>().FirstOrDefault();
+		if (umbrella == null)
+		{
+			return 0;
+		}
+
+		_playerSunlight[player] = umbrella.StoredSunlight;
+		return umbrella.StoredSunlight;
+	}
+
+	private static void SetSunlight(Player player, int amount)
+	{
+		_playerSunlight[player] = amount;
+		foreach (YoukaiUmbrella_Yuka umbrella in player.Relics.OfType<YoukaiUmbrella_Yuka>())
+		{
+			umbrella.StoredSunlight = amount;
+		}
 	}
 
 	public static int SpendAllSunlight(Player player)
@@ -133,15 +146,10 @@ public static class SunlightManager
 	{
 		if (player == null) return false;
 
-		if (!_playerSunlight.ContainsKey(player))
+		int oldPersonal = GetSunlight(player);
+		if (oldPersonal >= amount)
 		{
-			_playerSunlight[player] = 0;
-		}
-
-		if (_playerSunlight[player] >= amount)
-		{
-			int oldPersonal = _playerSunlight[player];
-			_playerSunlight[player] -= amount;
+			SetSunlight(player, oldPersonal - amount);
 #pragma warning disable CS0618
 			int old = CurrentSunlight;
 			CurrentSunlight -= amount;

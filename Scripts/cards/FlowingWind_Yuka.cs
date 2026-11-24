@@ -11,7 +11,6 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
-using KazamiYuka.Scripts.DynamicVars;
 
 namespace KazamiYuka.Scripts.Cards;
 
@@ -20,8 +19,7 @@ public sealed class FlowingWind_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(6m, ValueProp.Move),
-        new SunlightCostVar(1m)
+        new DamageVar(5m, ValueProp.Move)
         ];
     public FlowingWind_Yuka() : base(0, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, true) { }
 

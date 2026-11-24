@@ -71,7 +71,7 @@ public class ViolentArt_Yuka : KazamiYukaCard
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(4m);
-        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }
 

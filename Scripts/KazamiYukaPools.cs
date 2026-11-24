@@ -1,10 +1,11 @@
 using Godot;
+using STS2RitsuLib.Scaffolding.Characters;
 using STS2RitsuLib.Scaffolding.Content;
 using STS2RitsuLib.Utils;
 
 namespace KazamiYuka.Scripts;
 
-public class KazamiYukaCardPool : TypeListCardPoolModel
+public class KazamiYukaCardPool : TypeListCardPoolModel, IModColorfulPhilosophersCardPool
 {
     public override string Title => "KazamiYuka";
     public override string EnergyColorName => "KazamiYukaColor";

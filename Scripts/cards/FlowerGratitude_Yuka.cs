@@ -25,7 +25,7 @@ public class FlowerGratitude_Yuka : KazamiYukaCard
         new SunlightCostVar(4m),
     ];
 
-    public FlowerGratitude_Yuka() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)
+    public FlowerGratitude_Yuka() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 

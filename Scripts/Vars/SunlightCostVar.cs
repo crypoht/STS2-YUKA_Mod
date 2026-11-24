@@ -26,6 +26,5 @@ public class SunlightCostVar : DynamicVar
         base.PreviewValue = GetRealTimeDisplayCost();
     }
 
-    protected override decimal GetBaseValueForIConvertible() => GetRealTimeDisplayCost();
     public override string ToString() => GetRealTimeDisplayCost().ToString();
 }

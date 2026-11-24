@@ -17,6 +17,8 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public sealed class CompulsoryCourse_Yuka : KazamiYukaCard
 {
+    private const string KoishiCharacterId = "KOMEIJIKOISHI-KOISHI_CHARACTER";
+
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     public override CardMultiplayerConstraint MultiplayerConstraint =>
@@ -28,7 +30,7 @@ public sealed class CompulsoryCourse_Yuka : KazamiYukaCard
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new DamageVar(15m, ValueProp.Move),
-        new PowerVar<StrengthPower>(2m)
+        new PowerVar<StrengthPower>(4m)
     ];
 
     public CompulsoryCourse_Yuka()
@@ -43,6 +45,7 @@ public sealed class CompulsoryCourse_Yuka : KazamiYukaCard
         List<Creature> targets = base.CombatState?.Creatures
             .Where(creature =>
                 creature != base.Owner.Creature &&
+                creature.Player?.Character.Id.Entry != KoishiCharacterId &&
                 creature.IsHittable)
             .ToList() ?? [];
 

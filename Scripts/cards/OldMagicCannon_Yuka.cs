@@ -52,6 +52,6 @@ public sealed class OldMagicCannon_Yuka : KazamiYukaCard
     protected override void OnUpgrade() 
     { 
         DynamicVars.Damage.UpgradeValueBy(4m);
-        DynamicVars["OldPerSun"].UpgradeValueBy(2m);
+        DynamicVars["OldPerSun"].UpgradeValueBy(1m);
     }
 }

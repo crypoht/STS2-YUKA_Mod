@@ -35,6 +35,11 @@ public sealed class FlowerAllergy_Yuka : KazamiYukaCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (!TryPayFixedSunlight(base.Owner, DynamicVars["SunlightCost"].IntValue, cardPlay))
+        {
+            return;
+        }
+
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, base.Owner, false);
 
         if (base.CombatState?.HittableEnemies is not { } enemies)

@@ -30,8 +30,7 @@ public sealed class OldPower : ModPowerTemplate
     {
         if (base.Owner.Player == null ||
             cardSource?.Owner != base.Owner.Player ||
-            cardSource.Type != CardType.Attack ||
-            !HasSunlightCost(cardSource))
+            !AppliesTo(cardSource))
         {
             return 1m;
         }
@@ -39,9 +38,10 @@ public sealed class OldPower : ModPowerTemplate
         return 1m + base.Amount / 100m;
     }
 
-    private static bool HasSunlightCost(CardModel card) =>
-        card.DynamicVars.ContainsKey("SunlightCost") ||
+    internal static bool AppliesTo(CardModel card) =>
+        card.Type == CardType.Attack &&
+        (card.DynamicVars.ContainsKey("SunlightCost") ||
         card.DynamicVars.ContainsKey("SunlightY") ||
         card.Keywords.Contains(KazamiYukaKeywords.FierceSun) ||
-        card.Keywords.Contains(KazamiYukaKeywords.FierceSunInfinite);
+        card.Keywords.Contains(KazamiYukaKeywords.FierceSunInfinite));
 }

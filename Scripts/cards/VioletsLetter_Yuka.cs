@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KazamiYuka.Scripts.Powers;
 using KazamiYuka.Scripts;
@@ -7,7 +8,6 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
-using MegaCrit.Sts2.Core.Models.Powers;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
@@ -24,35 +24,57 @@ public sealed class VioletsLetter_Yuka : KazamiYukaCard
         [CardKeyword.Exhaust, CardKeyword.Ethereal];
 
     protected override IEnumerable<IHoverTip> AdditionalHoverTips => [
-        HoverTipFactory.FromPower<StrengthPower>(null)
+        HoverTipFactory.FromPower<XiangYangPower>(null),
+        HoverTipFactory.FromPower<AutumnBloomPower>(null)
     ];
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("Turns", 2m),
-        new PowerVar<StrengthPower>(1m)
+        new DynamicVar("SunlightMultiplier", 2m),
+        new PowerVar<XiangYangPower>(1m)
     ];
 
     public VioletsLetter_Yuka()
-        : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self, true)
+        : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self, true)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        foreach (var sunflower in SunflowerManager.GetSunflowers(base.Owner))
+        foreach (var sunflower in SunflowerManager.GetSunflowers(base.Owner).ToList())
         {
             if (!sunflower.IsAlive)
             {
                 continue;
             }
 
-            await PowerCmd.Apply<VioletPower>(
-                choiceContext,
-                sunflower,
-                1m,
-                base.Owner.Creature,
-                this,
-                false);
+            int currentSunlight = sunflower.GetPower<XiangYangPower>()?.Amount ?? 0;
+            int autumnSunlight = sunflower.GetPower<AutumnBloomPower>()?.Amount ?? 0;
+            decimal additionalMultiplier = DynamicVars["SunlightMultiplier"].BaseValue - 1m;
+            decimal addedSunlight = currentSunlight > 0
+                ? currentSunlight * additionalMultiplier
+                : autumnSunlight > 0 ? 0m : DynamicVars["XiangYangPower"].BaseValue;
+
+            if (addedSunlight > 0m)
+            {
+                await PowerCmd.Apply<XiangYangPower>(
+                    choiceContext,
+                    sunflower,
+                    addedSunlight,
+                    base.Owner.Creature,
+                    this,
+                    false);
+            }
+
+            if (autumnSunlight > 0)
+            {
+                await PowerCmd.Apply<AutumnBloomPower>(
+                    choiceContext,
+                    sunflower,
+                    autumnSunlight * additionalMultiplier,
+                    base.Owner.Creature,
+                    this,
+                    false);
+            }
         }
     }
 

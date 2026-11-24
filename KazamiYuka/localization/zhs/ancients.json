@@ -1,4 +1,10 @@
 {
+  "KAZAMI_YUKA_EVENT_KAZAMI_YUKA_ANCIENT_YUKA.title": "风见幽香",
+  "KAZAMI_YUKA_EVENT_KAZAMI_YUKA_ANCIENT_YUKA.epithet": "花之暴君",
+  "KAZAMI_YUKA_EVENT_KAZAMI_YUKA_ANCIENT_YUKA.pages.INITIAL.description": "",
+  "KAZAMI_YUKA_EVENT_KAZAMI_YUKA_ANCIENT_YUKA.pages.DONE.description": "",
+  "KAZAMI_YUKA_EVENT_KAZAMI_YUKA_ANCIENT_YUKA.talk.firstVisitEver.0-0.ancient": "你看起来并不弱，但我现在也不想打架。",
+  "KAZAMI_YUKA_EVENT_KAZAMI_YUKA_ANCIENT_YUKA.talk.ANY.0-0r.ancient": "你看起来并不弱，但我现在也不想打架。",
   "DARV.talk.KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.0-0.ancient": "那个美丽的小姐,你在找什么",
   "DARV.talk.KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.0-0.next": "继续",
   "DARV.talk.KAZAMI_YUKA_CHARACTER_KAZAMI_YUKA_CHARACTER.0-1.char": "一些花，打你一顿可以拿到吗？",

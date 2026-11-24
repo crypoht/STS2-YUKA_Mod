@@ -15,8 +15,6 @@ namespace KazamiYuka.Scripts.Cards;
 [RegisterCard(typeof(KazamiYukaCardPool))]
 public sealed class LightTotalReflection_Yuka : KazamiYukaCard
 {
-    private int _consumedSunlight;
-
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new DynamicVar("MaxSunConsume", 3m),
         new BlockVar(9m, MegaCrit.Sts2.Core.ValueProps.ValueProp.Move)
@@ -30,10 +28,10 @@ public sealed class LightTotalReflection_Yuka : KazamiYukaCard
 
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
-        _consumedSunlight = ConsumeUpToMaxSunlight(base.Owner, DynamicVars["MaxSunConsume"].IntValue, play);
+        ConsumeUpToMaxSunlight(base.Owner, DynamicVars["MaxSunConsume"].IntValue, play, out int actualSunlightSpent);
         await CreatureCmd.GainBlock(base.Owner.Creature, DynamicVars.Block, play, false);
 
-        if (_consumedSunlight > 0 &&
+        if (actualSunlightSpent > 0 &&
             base.Pile != null &&
             base.Pile.Type != PileType.Hand &&
             base.Pile.Type != PileType.Exhaust)

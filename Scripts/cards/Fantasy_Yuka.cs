@@ -30,7 +30,7 @@ public sealed class Fantasy_Yuka : KazamiYukaCard
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
         int consumedSunlight = play.IsFirstInSeries
-            ? SunlightManager.GetSunlight(base.Owner)
+            ? SunlightManager.GetFierceSunlight(base.Owner)
             : DynamicVars["LockedSunlight"].IntValue;
 
         DynamicVars["LockedSunlight"].BaseValue = consumedSunlight;

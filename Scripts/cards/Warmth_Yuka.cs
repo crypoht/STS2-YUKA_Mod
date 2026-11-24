@@ -14,7 +14,10 @@ namespace KazamiYuka.Scripts.Cards;
 public sealed class Warmth_Yuka : KazamiYukaCard
 {
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("SunlightThreshold", 8m)];
+    protected override IEnumerable<DynamicVar> CanonicalVars => [
+        new DynamicVar("SunlightThreshold", WarmthPower.SunlightThreshold),
+        new EnergyVar(1)
+    ];
     public Warmth_Yuka() : base(1, CardType.Power, CardRarity.Rare, TargetType.Self, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {

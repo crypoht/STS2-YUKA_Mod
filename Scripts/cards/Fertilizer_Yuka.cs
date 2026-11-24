@@ -46,5 +46,9 @@ public sealed class Fertilizer_Yuka : KazamiYukaCard, ICustomTargetValidator
         await CardPileCmd.Draw(context, DynamicVars.Cards.BaseValue, base.Owner, false);
     }
 
-    protected override void OnUpgrade() => DynamicVars["MaxHpGain"].UpgradeValueBy(1m);
+    protected override void OnUpgrade()
+    {
+        DynamicVars["MaxHpGain"].UpgradeValueBy(1m);
+        DynamicVars.Cards.UpgradeValueBy(1m);
+    }
 }

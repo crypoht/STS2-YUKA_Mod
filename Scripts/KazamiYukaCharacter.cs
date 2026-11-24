@@ -8,27 +8,23 @@ using MegaCrit.Sts2.Core.Models.Relics;
 using STS2RitsuLib.Data.Models;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Characters;
-using MegaCrit.Sts2.Core.Nodes; // 🌟 修复之前报错的 NCreatureVisuals 引用
+using MegaCrit.Sts2.Core.Nodes; 
 using STS2RitsuLib.Utils;
 using MegaCrit.Sts2.Core.Nodes.Combat;
-using STS2RitsuLib.Scaffolding.Godot; // 🌟 修复之前报错的 RitsuGodotNodeFactories 引用
+using STS2RitsuLib.Scaffolding.Godot; 
 
 namespace KazamiYuka.Scripts;
 
 [RegisterCharacter]
 public class KazamiYukaCharacter : ModCharacterTemplate<KazamiYukaCardPool, KazamiYukaRelicPool, KazamiYukaPotionPool>
 {
-    // 角色名称颜色 (#00cc00 纯绿)
     public override Color NameColor => new(0f, 0.8f, 0f);
-    // 能量图标轮廓颜色
+    public override Color DreadNameColor => new("00CC00C0");
     public override Color EnergyLabelOutlineColor => new(0.654f, 0.333f, 0.345f);
-    // 地图绘制颜色
     public override Color MapDrawingColor => new(0f, 0.8f, 0f);
 
-    // 人物性别（幽香是女性）
     public override CharacterGender Gender => CharacterGender.Feminine;
 
-    // 初始血量和金币
     public override int StartingHp => 84;
     public override int StartingGold => 99;
 
@@ -36,29 +32,17 @@ public class KazamiYukaCharacter : ModCharacterTemplate<KazamiYukaCardPool, Kaza
         CharacterAssetProfiles.Ironclad(),
         new(
             Scenes: new(
-                // 人物模型tscn路径。
                 VisualsPath: "res://mods/KazamiYuka/scenes/kazamiyuka_character.tscn",
-                // 能量表盘tscn路径。
                 EnergyCounterPath: "res://mods/KazamiYuka/scenes/kazamiyuka_energy_counter.tscn",
-                // 商店人物场景。
                 MerchantAnimPath: "res://mods/KazamiYuka/scenes/kazamiyuka_character_merchant.tscn",
-                // 篝火休息场景。
-                 RestSiteAnimPath: "res://mods/KazamiYuka/scenes/kazamiyuka_character_rest_site.tscn"
+                RestSiteAnimPath: "res://mods/KazamiYuka/scenes/kazamiyuka_character_rest_site.tscn"
             ),
             Ui: new(
-                // 人物头像路径。
                 IconTexturePath: "res://mods/KazamiYuka/images/kazamiyuka_icon.png",
-                // 人物头像2号。
                 IconPath: "res://mods/KazamiYuka/scenes/icon.tscn",
-                // 人物选择背景。
                 CharacterSelectBgPath: "res://mods/KazamiYuka/scenes/kazamiyuka_bg.tscn",
-                // 人物选择图标。
                 CharacterSelectIconPath: "res://mods/KazamiYuka/images/char_select_kazamiyuka.png",
-                // 人物选择图标-锁定状态。
                 CharacterSelectLockedIconPath: "res://mods/KazamiYuka/images/char_select_kazamiyuka.png",
-                // 人物选择过渡动画。
-                // CharacterSelectTransitionPath: "res://materials/transitions/ironclad_transition_mat.tres",
-                // 地图上的角色标记图标、表情轮盘上的角色头像
                 MapMarkerPath:"res://mods/KazamiYuka/images/kazamiyuka_icon.png"
             ),
             Vfx: new(

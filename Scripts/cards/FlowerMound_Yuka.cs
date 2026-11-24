@@ -16,7 +16,8 @@ public class FlowerMound_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("SunlightGain", 3m)
+        new DynamicVar("SunlightGain", FlowerMoundPower.SunlightPerStack),
+        new EnergyVar(FlowerMoundPower.EnergyPerStack)
     ];
 
     public FlowerMound_Yuka() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)
@@ -31,7 +32,7 @@ public class FlowerMound_Yuka : KazamiYukaCard
         await PowerCmd.Apply<FlowerMoundPower>(
             choiceContext,
             player.Creature,
-            DynamicVars["SunlightGain"].BaseValue,
+            1m,
             player.Creature,
             this,
             false
@@ -40,6 +41,6 @@ public class FlowerMound_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["SunlightGain"].UpgradeValueBy(1m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

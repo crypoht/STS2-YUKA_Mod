@@ -124,8 +124,12 @@ public abstract class KazamiYukaCard : ModCardTemplate
     }
 
     protected int ConsumeUpToMaxSunlight(Player player, int maxLimit, CardPlay cardPlay)
+        => ConsumeUpToMaxSunlight(player, maxLimit, cardPlay, out _);
+
+    protected int ConsumeUpToMaxSunlight(Player player, int maxLimit, CardPlay cardPlay, out int actualSunlightSpent)
     {
-        int sunAvailable = SunlightManager.GetSunlight(player);
+        actualSunlightSpent = 0;
+        int sunAvailable = SunlightManager.GetFierceSunlight(player);
         int sunToSpend = Math.Min(sunAvailable, maxLimit);
 
         if (IsFreeFromReceipt(cardPlay))
@@ -133,7 +137,13 @@ public abstract class KazamiYukaCard : ModCardTemplate
             return maxLimit;
         }
         
-        if (sunToSpend > 0) SunlightManager.TrySpendSunlight(player, sunToSpend);
+        if (sunToSpend > 0 && SunlightManager.GetSunlight(player) > 0)
+        {
+            if (SunlightManager.TrySpendSunlight(player, sunToSpend))
+            {
+                actualSunlightSpent = sunToSpend;
+            }
+        }
         
         return sunToSpend;
     }

@@ -13,7 +13,7 @@ public sealed class SunflowerHeadpiece_Yuka : ModRelicTemplate
     public override RelicRarity Rarity => RelicRarity.Uncommon;
 
     public override RelicAssetProfile AssetProfile => new(
-        IconPath: "res://mods/KazamiYuka/images/relics/SunflowerHeadpiece_Yuka.png",
+        IconPath: "res://mods/KazamiYuka/images/relics/SunflowerHeadpiece_Yuka_outline.png",
         IconOutlinePath: "res://mods/KazamiYuka/images/relics/SunflowerHeadpiece_Yuka.png",
         BigIconPath: "res://mods/KazamiYuka/images/relics/SunflowerHeadpiece_Yuka.png"
     );

@@ -20,8 +20,8 @@ public sealed class Rebirth_Yuka : KazamiYukaCard
     public override bool GainsBlock => true;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new SummonVar(7m),
-        new BlockVar(8m, ValueProp.Move)
+        new SummonVar(8m),
+        new BlockVar(9m, ValueProp.Move)
     ];
 
     public Rebirth_Yuka()

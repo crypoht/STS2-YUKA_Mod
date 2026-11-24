@@ -63,7 +63,8 @@ public static class PhantasmagoriaofFlowerViewPayment
     public static bool TryCreatePlan(CardModel? card, out Plan? plan)
     {
         plan = null;
-        if (card == null || card.IsCanonical || card.EnergyCost.CostsX)
+        if (card == null || card.IsCanonical || card.EnergyCost.CostsX ||
+            SqueezeManager.IsFertilizerPlay(card))
         {
             return false;
         }

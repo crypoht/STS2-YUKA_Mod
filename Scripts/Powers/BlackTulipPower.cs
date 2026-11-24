@@ -22,8 +22,29 @@ public sealed class BlackTulipPower : ModPowerTemplate
     public override PowerStackType StackType => PowerStackType.Counter;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new BlackTulipDamagePercentVar()
+        new DynamicVar("DamagePercent", 50m)
     ];
+
+    public override Task AfterApplied(Creature? applier, CardModel? cardSource)
+    {
+        DynamicVars["DamagePercent"].BaseValue = GetDamagePercent(Amount);
+        return Task.CompletedTask;
+    }
+
+    public override Task AfterPowerAmountChanged(
+        PlayerChoiceContext choiceContext,
+        PowerModel power,
+        decimal amount,
+        Creature? applier,
+        CardModel? cardSource)
+    {
+        if (power == this)
+        {
+            DynamicVars["DamagePercent"].BaseValue = GetDamagePercent(Amount);
+        }
+
+        return Task.CompletedTask;
+    }
 
     public override PowerAssetProfile AssetProfile => new(
         IconPath: "res://mods/KazamiYuka/images/powers/BlackTulipPower.png",
@@ -64,7 +85,7 @@ public sealed class BlackTulipPower : ModPowerTemplate
                 continue;
             }
 
-            await CreatureCmd.LoseMaxHp(choiceContext, sunflower, maxHpLoss, false);
+            await CreatureCmd.LoseMaxHp(choiceContext, sunflower, maxHpLoss, null);
             await SunflowerManager.NotifyMaxHpDecrease(choiceContext, sunflower, maxHpLoss);
         }
     }
@@ -74,22 +95,4 @@ public sealed class BlackTulipPower : ModPowerTemplate
         return amount * 25m;
     }
 
-    private sealed class BlackTulipDamagePercentVar : DynamicVar
-    {
-        public BlackTulipDamagePercentVar() : base("DamagePercent", 50m)
-        {
-        }
-
-        protected override decimal GetBaseValueForIConvertible()
-        {
-            return _owner is BlackTulipPower power
-                ? GetDamagePercent(power.Amount)
-                : base.GetBaseValueForIConvertible();
-        }
-
-        public override string ToString()
-        {
-            return ((int)GetBaseValueForIConvertible()).ToString();
-        }
-    }
 }

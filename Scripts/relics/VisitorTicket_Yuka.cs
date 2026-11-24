@@ -17,7 +17,7 @@ public sealed class VisitorTicket_Yuka : ModRelicTemplate
     public override RelicRarity Rarity => RelicRarity.Uncommon;
 
     public override RelicAssetProfile AssetProfile => new(
-        IconPath: "res://mods/KazamiYuka/images/relics/VisitorTicket_Yuka.png",
+        IconPath: "res://mods/KazamiYuka/images/relics/VisitorTicket_Yuka_outline.png",
         IconOutlinePath: "res://mods/KazamiYuka/images/relics/VisitorTicket_Yuka.png",
         BigIconPath: "res://mods/KazamiYuka/images/relics/VisitorTicket_Yuka.png"
     );

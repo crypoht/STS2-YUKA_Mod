@@ -15,7 +15,7 @@ namespace KazamiYuka.Scripts.Cards;
 public class AfternoonTea_Yuka : KazamiYukaCard
 {
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DynamicVar("SunlightPerHeal", 5m),
+        new DynamicVar("SunlightPerHeal", 3m),
         new DynamicVar("HealingPerThreshold", 1m)
     ];
 

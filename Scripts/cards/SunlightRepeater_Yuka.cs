@@ -59,7 +59,8 @@ public class SunlightRepeater_Yuka : KazamiYukaCard
 
         int actualSpent = base.ConsumeUpToMaxSunlight(player, maxSunLimit, cardPlay);
 
-        decimal finalDamage = base.DynamicVars.CalculatedDamage.PreviewValue;
+        decimal finalDamage = DynamicVars.CalculationBase.BaseValue +
+            DynamicVars.ExtraDamage.BaseValue * actualSpent;
 
         await DamageCmd.Attack(finalDamage)
             .FromCard(this, cardPlay)
@@ -70,7 +71,6 @@ public class SunlightRepeater_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["MaxSunConsume"].UpgradeValueBy(3m);
-        base.DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars["MaxSunConsume"].UpgradeValueBy(5m);
     }
 }

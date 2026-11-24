@@ -46,9 +46,9 @@ namespace KazamiYuka.Scripts.Interfaces
                 return max;
             }
 
-            int actualSpent = Math.Min(SunlightManager.GetSunlight(player), max);
+            int actualSpent = Math.Min(SunlightManager.GetFierceSunlight(player), max);
             
-            if (actualSpent > 0)
+            if (actualSpent > 0 && SunlightManager.GetSunlight(player) > 0)
             {
                 SunlightManager.TrySpendSunlight(player, actualSpent);
             }

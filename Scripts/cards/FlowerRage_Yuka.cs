@@ -29,6 +29,11 @@ public sealed class FlowerRage_Yuka : KazamiYukaCard
     public FlowerRage_Yuka() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AllEnemies, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
+        if (!TryPayFixedSunlight(base.Owner, DynamicVars["SunlightCost"].IntValue, play))
+        {
+            return;
+        }
+
         if (CombatState?.HittableEnemies is not { } enemies) return;
         await PowerCmd.Apply<VulnerablePower>(context, enemies, 3m, base.Owner.Creature, this, false);
         await PowerCmd.Apply<ParasitePower>(context, enemies, 3m, base.Owner.Creature, this, false);

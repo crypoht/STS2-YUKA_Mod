@@ -20,24 +20,28 @@ public sealed class GreatYoukaiOppression_Yuka : KazamiYukaCard
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new CalculationBaseVar(9m),
         new ExtraDamageVar(2m),
-        new SunlightCostVar(7m),
+        new SunlightCostVar(8m),
         new CalculatedDamageVar(ValueProp.Move).WithMultiplier((card, _) =>
             card.Owner != null ? SunlightManager.GetSunlight(card.Owner) : 0m)
     ];
     public GreatYoukaiOppression_Yuka() : base(1, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy, true) { }
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
-        if (play.Target == null || !TryPayFixedSunlight(base.Owner, DynamicVars["SunlightCost"].IntValue, play))
+        if (play.Target == null)
         {
             return;
         }
 
-        decimal damage = DynamicVars.CalculatedDamage.PreviewValue;
+        decimal damage = DynamicVars.CalculatedDamage.Calculate(play.Target);
+        if (!TryPayFixedSunlight(base.Owner, DynamicVars["SunlightCost"].IntValue, play))
+        {
+            return;
+        }
+
         await DamageCmd.Attack(damage).FromCard(this, play).Targeting(play.Target).Execute(context);
     }
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
         DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

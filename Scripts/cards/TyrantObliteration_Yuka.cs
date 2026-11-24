@@ -69,7 +69,7 @@ public class TyrantObliteration_Yuka : KazamiYukaCard
         int maxConsume = (int)DynamicVars["MaxConsume"].BaseValue;
         int sunlight = IsSunlightFree
             ? maxConsume
-            : Math.Min(SunlightManager.GetSunlight(Owner), maxConsume);
+            : Math.Min(SunlightManager.GetFierceSunlight(Owner), maxConsume);
         return GetDamageMultiplier(sunlight);
     }
 

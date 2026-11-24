@@ -41,8 +41,9 @@ public sealed class FlowerShooting_Yuka : KazamiYukaCard
     protected override async Task OnPlay(PlayerChoiceContext context, CardPlay play)
     {
         if (play.Target == null) return;
-        ConsumeUpToMaxSunlight(base.Owner, DynamicVars["MaxSunConsume"].IntValue, play);
-        decimal damage = DynamicVars.CalculatedDamage.PreviewValue;
+        int actualSpent = ConsumeUpToMaxSunlight(base.Owner, DynamicVars["MaxSunConsume"].IntValue, play);
+        decimal damage = DynamicVars.CalculationBase.BaseValue +
+            DynamicVars.ExtraDamage.BaseValue * actualSpent;
         await DamageCmd.Attack(damage)
             .FromCard(this, play)
             .Targeting(play.Target)

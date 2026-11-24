@@ -21,7 +21,7 @@ public class Surround_Yuka : KazamiYukaCard
         new DynamicVar("BonusMaxHp", 3m)
     ];
 
-    public Surround_Yuka() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)
+    public Surround_Yuka() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 

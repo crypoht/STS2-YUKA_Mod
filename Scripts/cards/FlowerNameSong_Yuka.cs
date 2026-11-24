@@ -26,11 +26,11 @@ public sealed class FlowerNameSong_Yuka : KazamiYukaCard
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         SunflowerDamageVar(3m),
-        new SunlightCostVar(8m)
+        new SunlightCostVar(5m)
     ];
 
     public FlowerNameSong_Yuka()
-        : base(0, CardType.Attack, CardRarity.Rare, TargetType.Self, true)
+        : base(0, CardType.Attack, CardRarity.Uncommon, TargetType.Self, true)
     {
     }
 
@@ -71,6 +71,6 @@ public sealed class FlowerNameSong_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["SunflowerDamage"].UpgradeValueBy(1m);
+        DynamicVars["SunflowerDamage"].UpgradeValueBy(2m);
     }
 }

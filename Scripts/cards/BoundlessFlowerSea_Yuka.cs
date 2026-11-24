@@ -20,8 +20,7 @@ public sealed class BoundlessFlowerSea_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new SunlightCostVar(1m),
-        new PowerVar<BoundlessFlowerSeaPower>(8m)
+        new PowerVar<BoundlessFlowerSeaPower>(6m)
     ];
 
     public override IEnumerable<CardKeyword> CanonicalKeywords => [KazamiYukaKeywords.Grow];
@@ -33,10 +32,6 @@ public sealed class BoundlessFlowerSea_Yuka : KazamiYukaCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!TryPayFixedSunlight(base.Owner, DynamicVars["SunlightCost"].IntValue, cardPlay))
-        {
-            return;
-        }
 
         await PowerCmd.Apply<BoundlessFlowerSeaPower>(
             choiceContext,
@@ -50,6 +45,6 @@ public sealed class BoundlessFlowerSea_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["BoundlessFlowerSeaPower"].UpgradeValueBy(4m);
+        DynamicVars["BoundlessFlowerSeaPower"].UpgradeValueBy(3m);
     }
 }

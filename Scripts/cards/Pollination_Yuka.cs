@@ -24,9 +24,10 @@ public sealed class Pollination_Yuka : KazamiYukaCard
     public override CardAssetProfile AssetProfile => DefaultCardAssetProfile;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
-        new DamageVar(4m, ValueProp.Move),
+        new DamageVar(3m, ValueProp.Move),
         new PowerVar<ParasitePower>(1m),
-        new DynamicVar("MaxSunlight", 6m),
+        new DynamicVar("MaxSunlight", 4m),
+        new DynamicVar("SunlightPerRepeat", 1m),
         new CalculationBaseVar(1m),
         new CalculationExtraVar(1m),
         new CalculatedVar("HitCount").WithMultiplier((CardModel card, Creature? _) =>
@@ -34,8 +35,8 @@ public sealed class Pollination_Yuka : KazamiYukaCard
             bool isFree = IsEnergyCostTemporarilyFree(card);
             int availableSunlight = isFree
                 ? (int)card.DynamicVars["MaxSunlight"].BaseValue
-                : (card.Owner != null ? Math.Min(SunlightManager.GetSunlight(card.Owner), (int)card.DynamicVars["MaxSunlight"].BaseValue) : 0);
-            return availableSunlight / 3;
+                : (card.Owner != null ? Math.Min(SunlightManager.GetFierceSunlight(card.Owner), (int)card.DynamicVars["MaxSunlight"].BaseValue) : 0);
+            return availableSunlight / card.DynamicVars["SunlightPerRepeat"].IntValue;
         })
     ];
 
@@ -62,7 +63,7 @@ public sealed class Pollination_Yuka : KazamiYukaCard
             DynamicVars["MaxSunlight"].IntValue,
             cardPlay
         );
-        int hitCount = 1 + consumedSunlight / 2;
+        int hitCount = 1 + consumedSunlight / DynamicVars["SunlightPerRepeat"].IntValue;
 
         for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
         {
@@ -85,6 +86,6 @@ public sealed class Pollination_Yuka : KazamiYukaCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.Damage.UpgradeValueBy(1m);
     }
 }

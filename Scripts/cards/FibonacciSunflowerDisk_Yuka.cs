@@ -52,7 +52,7 @@ public sealed class FibonacciSunflowerDisk_Yuka : KazamiYukaCard
     }
 
     public FibonacciSunflowerDisk_Yuka()
-        : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self, true)
+        : base(3, CardType.Skill, CardRarity.Rare, TargetType.Self, true)
     {
     }
 

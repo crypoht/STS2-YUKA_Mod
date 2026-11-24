@@ -16,7 +16,7 @@ public class KazamiYukaSunflower : ModMonsterTemplate
 {
     public override int MinInitialHp => 10;
     public override int MaxInitialHp => 10;
-    public override bool IsHealthBarVisible => Creature.IsAlive;
+    public override bool IsInteractable => Creature.IsAlive;
 
     public override MonsterAssetProfile AssetProfile => new(
         $"res://mods/KazamiYuka/scenes/{GetType().Name}.tscn"

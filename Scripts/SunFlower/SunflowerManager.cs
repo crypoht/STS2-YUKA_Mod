@@ -74,6 +74,20 @@ public static class SunflowerManager
             .ToList() ?? new List<Creature>();
     }
 
+    public static List<Creature> GetSunflowersInSacrificeOrder(Player player)
+    {
+        foreach (Creature sunflower in GetSunflowers(player))
+        {
+            RegisterSunflowerSlot(sunflower);
+        }
+
+        return _sunflowerSlots
+            .AsEnumerable()
+            .Reverse()
+            .Where(flower => flower.IsAlive && flower.CombatState == player.Creature.CombatState)
+            .ToList();
+    }
+
     public static IReadOnlyList<Player> GetCombatPlayers(Creature creature)
     {
         return creature.CombatState?.Players ?? Array.Empty<Player>();
@@ -179,11 +193,6 @@ public static class SunflowerManager
         }
 
         decimal newFlowerMaxHp = initialHp + surroundBonusMaxHp + headpieceBonusMaxHp;
-        if (grantDegraded)
-        {
-            newFlowerMaxHp = Math.Min(newFlowerMaxHp, 1m);
-        }
-
         await CreatureCmd.SetMaxHp(newFlower, newFlowerMaxHp);
         await CreatureCmd.Heal(newFlower, newFlowerMaxHp, true);
 
@@ -207,6 +216,16 @@ public static class SunflowerManager
             decimal xiangYangAmount = relicXiangYangBonus
                 + DoubleHeadedSunflowerPower.GetExtraXiangYang(summoner)
                 + Relics.SunRaincoat_Yuka.GetExtraXiangYang(summoner);
+            if (summoner.Character is not KazamiYukaCharacter &&
+                summoner.RunState.Rng.CombatCardGeneration.NextFloat(1f) < 0.5f)
+            {
+                xiangYangAmount += 1m;
+                if (summoner.RunState.Rng.CombatCardGeneration.NextFloat(1f) < 0.1f)
+                {
+                    xiangYangAmount += 1m;
+                }
+            }
+
             if (xiangYangAmount > 0m)
             {
                 await PowerCmd.Apply<XiangYangPower>(
@@ -349,12 +368,11 @@ public static class SunflowerManager
                 continue;
             }
 
-            // 使用向日葵固定槽号定位；不按当前存活数量重新编号。
             int slotIndex = _sunflowerSlotByCreature.GetValueOrDefault(flower);
             Vector2 offset = SunflowerSlotOffsets[slotIndex % SunflowerSlotOffsets.Length];
             flowerNode.Position = playerRelativeOrigin + offset;
             SetSunflowerLayer(flowerNode, playerNode, slotIndex);
-            room.SetCreatureIsInteractable(flower, true);
+            flowerNode.SetIsInteractable(true, true);
 
             if (flowerNode.Visuals?.Bounds != null)
             {
@@ -780,7 +798,6 @@ public static class SunflowerManager
             return;
         }
 
-        // 优先复用最近死亡向日葵释放的槽位，否则分配下一个新槽位。
         int slot;
         if (_freeSunflowerSlots.Count > 0)
         {
@@ -803,7 +820,6 @@ public static class SunflowerManager
             return;
         }
 
-        // 死亡只释放原槽位，不移动存活向日葵，也不压缩它们的编号。
         _freeSunflowerSlots.Push(slot);
         _sunflowerSlots.Remove(sunflower);
         sunflower.Died -= OnSunflowerDied;
@@ -827,7 +843,6 @@ public static class SunflowerManager
         _sunflowerRearrangeQueued = true;
         try
         {
-            // 官方死亡流程可能还会继续修改宠物节点；等待一帧后再恢复固定槽位。
             await room.ToSignal(room.GetTree(), SceneTree.SignalName.ProcessFrame);
             if (CombatManager.Instance is not { IsInProgress: true, IsOverOrEnding: false })
             {
@@ -1032,7 +1047,7 @@ public static class SunflowerManager
 
             if (sunflower.GetPowerAmount<DegradedPower>() > 0)
             {
-                totalAmount = Math.Min(totalAmount, Math.Max(0m, 1m - sunflower.MaxHp));
+                totalAmount = Math.Min(totalAmount, 1m);
             }
 
             if (totalAmount > 0m)

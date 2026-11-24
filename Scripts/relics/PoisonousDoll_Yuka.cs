@@ -15,7 +15,7 @@ public sealed class PoisonousDoll_Yuka : ModRelicTemplate
     public override RelicRarity Rarity => RelicRarity.Rare;
 
     public override RelicAssetProfile AssetProfile => new(
-        IconPath: "res://mods/KazamiYuka/images/relics/PoisonousDoll_Yuka.png",
+        IconPath: "res://mods/KazamiYuka/images/relics/PoisonousDoll_Yuka_outline.png",
         IconOutlinePath: "res://mods/KazamiYuka/images/relics/PoisonousDoll_Yuka.png",
         BigIconPath: "res://mods/KazamiYuka/images/relics/PoisonousDoll_Yuka.png"
     );

@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using KazamiYuka.Scripts.Cards;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Rooms;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -16,6 +18,10 @@ namespace KazamiYuka.Scripts.Powers;
 [RegisterPower]
 public sealed class ForgetMeNotPower : ModPowerTemplate
 {
+    protected override IEnumerable<DynamicVar> CanonicalVars => [
+        new DynamicVar("MaxHpGain", 2m)
+    ];
+
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
@@ -28,14 +34,19 @@ public sealed class ForgetMeNotPower : ModPowerTemplate
     {
         if (base.Owner.Player != null)
         {
-            await RemoveCards(base.Owner.Player, base.Amount, false);
+            await RemoveCards(
+                base.Owner.Player,
+                base.Amount,
+                false,
+                base.DynamicVars["MaxHpGain"].BaseValue);
         }
     }
 
     public static async Task RemoveCards(
         MegaCrit.Sts2.Core.Entities.Players.Player player,
         decimal amount,
-        bool prioritizeLowerRarity)
+        bool prioritizeLowerRarity,
+        decimal maxHpGain)
     {
         if (amount <= 0m)
         {
@@ -45,20 +56,23 @@ public sealed class ForgetMeNotPower : ModPowerTemplate
         for (int index = 0; index < (int)amount; index++)
         {
             List<CardModel> candidates = player.Deck.Cards
-                .Where(card => card is not ForgetMeNot_Yuka)
+                .Where(card => card.IsRemovable && card is not ForgetMeNot_Yuka)
                 .ToList();
             if (candidates.Count == 0)
             {
                 break;
             }
 
-            IEnumerable<CardModel> weightedCandidates = candidates
-                .Where(card => GetWeight(card, prioritizeLowerRarity) > 0);
-            CardModel? selected = weightedCandidates.Any()
-                ? player.RunState.Rng.CombatCardSelection.WeightedNextItem(
-                    weightedCandidates,
-                    card => GetWeight(card, prioritizeLowerRarity))
-                : player.RunState.Rng.CombatCardSelection.NextItem(candidates);
+            List<CardModel> eligibleCandidates = candidates;
+            if (prioritizeLowerRarity)
+            {
+                int priority = candidates.Min(GetDeletionPriority);
+                eligibleCandidates = candidates
+                    .Where(card => GetDeletionPriority(card) == priority)
+                    .ToList();
+            }
+
+            CardModel? selected = player.RunState.Rng.CombatCardSelection.NextItem(eligibleCandidates);
 
             if (selected == null)
             {
@@ -66,37 +80,44 @@ public sealed class ForgetMeNotPower : ModPowerTemplate
             }
 
             await CardPileCmd.RemoveFromDeck(selected, true);
+            await CreatureCmd.GainMaxHp(player.Creature, maxHpGain);
         }
     }
 
-    private static float GetWeight(CardModel? card, bool prioritizeLowerRarity)
+    private static int GetDeletionPriority(CardModel card)
     {
-        if (card == null)
+        if (card.Rarity == CardRarity.Curse)
         {
-            return 0f;
+            return 0;
         }
 
-        float weight = card.Rarity switch
+        if (card.Rarity == CardRarity.Basic &&
+            (card.Tags.Contains(CardTag.Strike) || card.Tags.Contains(CardTag.Defend)))
         {
-            CardRarity.Basic => 40f,
-            CardRarity.Curse => 100f,
-            CardRarity.Common => 10f,
-            CardRarity.Uncommon or CardRarity.Rare => 5f,
-            _ => 1f
-        };
-
-        if (prioritizeLowerRarity && card.IsUpgraded)
-        {
-            weight = System.Math.Max(0f, weight - 5f);
+            return 1;
         }
 
-        return weight;
+        if (card.Rarity is CardRarity.Common or CardRarity.Basic)
+        {
+            return 2;
+        }
+
+        if (card.Rarity is CardRarity.Uncommon or CardRarity.Rare)
+        {
+            return 3;
+        }
+
+        return 4;
     }
 }
 
 [RegisterPower]
 public sealed class ForgetMeNotUpgradedPower : ModPowerTemplate
 {
+    protected override IEnumerable<DynamicVar> CanonicalVars => [
+        new DynamicVar("MaxHpGain", 2m)
+    ];
+
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
@@ -109,7 +130,11 @@ public sealed class ForgetMeNotUpgradedPower : ModPowerTemplate
     {
         if (base.Owner.Player != null)
         {
-            await ForgetMeNotPower.RemoveCards(base.Owner.Player, base.Amount, true);
+            await ForgetMeNotPower.RemoveCards(
+                base.Owner.Player,
+                base.Amount,
+                true,
+                base.DynamicVars["MaxHpGain"].BaseValue);
         }
     }
 }

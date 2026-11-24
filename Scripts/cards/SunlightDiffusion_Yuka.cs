@@ -24,7 +24,7 @@ public sealed class SunlightDiffusion_Yuka : KazamiYukaCard
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new SunlightCostVar(2m),
         new PowerVar<XiangYangPower>(1m),
-        new DynamicVar("TargetCount", 2m)
+        new DynamicVar("TargetCount", 3m)
     ];
 
     public SunlightDiffusion_Yuka()

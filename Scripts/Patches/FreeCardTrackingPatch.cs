@@ -59,8 +59,8 @@ public static class FreeCardTracking
 [HarmonyPatch(typeof(CardModel), nameof(CardModel.SetToFreeThisTurn))]
 public static class SetCardFreeThisTurnPatch
 {
-    [HarmonyPostfix]
-    public static void Postfix(CardModel __instance)
+    [HarmonyPrefix]
+    public static void Prefix(CardModel __instance)
     {
         FreeCardTracking.MarkThisTurn(__instance);
     }
@@ -69,8 +69,8 @@ public static class SetCardFreeThisTurnPatch
 [HarmonyPatch(typeof(CardModel), nameof(CardModel.SetToFreeThisCombat))]
 public static class SetCardFreeThisCombatPatch
 {
-    [HarmonyPostfix]
-    public static void Postfix(CardModel __instance)
+    [HarmonyPrefix]
+    public static void Prefix(CardModel __instance)
     {
         FreeCardTracking.MarkThisCombat(__instance);
     }
