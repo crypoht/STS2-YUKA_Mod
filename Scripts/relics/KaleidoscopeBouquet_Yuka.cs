@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Extensions;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Models.RelicPools;
@@ -14,6 +15,8 @@ namespace KazamiYuka.Scripts.Relics;
 [RegisterRelic(typeof(EventRelicPool))]
 public sealed class KaleidoscopeBouquet_Yuka : YukaAncientRelic
 {
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("CardsToPlay", 4)];
+
     private bool _usedThisCombat;
 
     public override Task BeforeCombatStart()
@@ -39,7 +42,7 @@ public sealed class KaleidoscopeBouquet_Yuka : YukaAncientRelic
                 card.IsAllowedInRun(player.RunState) && !card.CanonicalKeywords.Contains(CardKeyword.Unplayable))
             .DistinctBy(card => card.Id)
             .OrderBy(card => card.Id.Entry, StringComparer.Ordinal);
-        CardModel[] selected = candidates.TakeRandom(3, player.RunState.Rng.CombatCardGeneration).ToArray();
+        CardModel[] selected = candidates.TakeRandom(DynamicVars["CardsToPlay"].IntValue, player.RunState.Rng.CombatCardGeneration).ToArray();
 
         if (selected.Length == 0)
             return;

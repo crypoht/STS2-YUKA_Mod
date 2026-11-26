@@ -2,7 +2,7 @@
     "KAZAMI_YUKA_CARD_FLOWER_MAGIC_CANNON_YUKA.title": "花之魔炮",
     "KAZAMI_YUKA_CARD_FLOWER_MAGIC_CANNON_YUKA.description": "对所有敌人造成{Damage:diff()}点伤害。",
     "KAZAMI_YUKA_CARD_DAISY_YUKA.title": "雏菊",
-    "KAZAMI_YUKA_CARD_DAISY_YUKA.description": "此牌在你的手牌中时，打出本回合第[blue]2[/blue]张攻击牌时，[gold]消耗[/gold]此牌。\n此牌在你的[gold]消耗牌堆[/gold]中时，你的回合开始时失去{energyPrefix:energyIcons(1)}。",
+    "KAZAMI_YUKA_CARD_DAISY_YUKA.description": "此牌在你的手牌中，并打出本回合第2张[gold]攻击牌[/gold]时，[gold]消耗[/gold]此牌。\n当此牌在你的[gold]消耗牌堆[/gold]中，你的回合开始时失去{energyPrefix:energyIcons(1)}。",
     "KAZAMI_YUKA_CARD_STRIKE_YUKA.title":  "打击",
     "KAZAMI_YUKA_CARD_STRIKE_YUKA.description":  "造成 {Damage:diff()} 点伤害。",
     "KAZAMI_YUKA_CARD_DEFEND_YUKA.title":  "防御",

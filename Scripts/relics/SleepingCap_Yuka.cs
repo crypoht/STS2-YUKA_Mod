@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using STS2RitsuLib.Interop.AutoRegistration;
 
@@ -12,6 +13,8 @@ namespace KazamiYuka.Scripts.Relics;
 [RegisterRelic(typeof(EventRelicPool))]
 public sealed class SleepingCap_Yuka : YukaAncientRelic
 {
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("EmptyTurns", 2)];
+
     private bool _playedCard;
     private bool _healed;
     private int _consecutiveEmptyTurns;
@@ -53,7 +56,7 @@ public sealed class SleepingCap_Yuka : YukaAncientRelic
             return;
 
         _consecutiveEmptyTurns = _playedCard ? 0 : _consecutiveEmptyTurns + 1;
-        if (_consecutiveEmptyTurns < 2)
+        if (_consecutiveEmptyTurns < DynamicVars["EmptyTurns"].IntValue)
         {
             InvokeDisplayAmountChanged();
             return;

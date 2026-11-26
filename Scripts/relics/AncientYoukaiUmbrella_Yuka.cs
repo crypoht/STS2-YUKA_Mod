@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -14,11 +15,12 @@ namespace KazamiYuka.Scripts.Relics;
 [RegisterRelic(typeof(EventRelicPool))]
 public sealed class AncientYoukaiUmbrella_Yuka : YukaAncientRelic
 {
-    private const int HitLimit = 5;
+    private const int HitLimit = 4;
     private int _hits;
 
     public override bool ShowCounter => true;
     public override int DisplayAmount => _hits;
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("HitLimit", HitLimit)];
 
     public override Task BeforeCombatStart()
     {
@@ -43,12 +45,12 @@ public sealed class AncientYoukaiUmbrella_Yuka : YukaAncientRelic
             : decimal.MaxValue;
     }
 
-    internal void CountUnblockedHit(PlayerChoiceContext choiceContext, DamageResult result,
+    internal void CountHit(PlayerChoiceContext choiceContext, DamageResult result,
         Creature? dealer, CardModel? cardSource)
     {
         Creature target = result.Receiver;
         if (target != Owner.Creature || !CombatManager.Instance.IsInProgress ||
-            result.UnblockedDamage <= 0 || _hits >= HitLimit)
+            result.TotalDamage <= 0 || _hits >= HitLimit)
             return;
 
         PowerModel? power = choiceContext.LastInvolvedModel as PowerModel;

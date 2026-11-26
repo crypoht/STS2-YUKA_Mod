@@ -3,7 +3,7 @@
   "name": "KazamiYuka",
   "author": "UINYA",
   "description": "四季之主，花之暴君，优雅的，来自旧日的，应该是妖精控的，对人类友好度低的，鄙视弱者的，喜欢睡眠的，大妖怪",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "has_pck": true,
   "has_dll": true,
   "dependencies": [
@@ -13,5 +13,5 @@
     }
   ],
   "affects_gameplay": true,
-  "min_game_version": "0.111.0"
+  "min_game_version": "0.114.0"
 }

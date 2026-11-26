@@ -31,8 +31,8 @@ internal static class AncientUmbrellaDamageCountPatch
     private static void Prefix(PlayerChoiceContext choiceContext, DamageResult results,
         Creature? dealer, CardModel? cardSource)
     {
-        if (results.UnblockedDamage > 0 &&
+        if (results.TotalDamage > 0 &&
             results.Receiver.Player?.GetRelic<AncientYoukaiUmbrella_Yuka>() is { IsMelted: false } umbrella)
-            umbrella.CountUnblockedHit(choiceContext, results, dealer, cardSource);
+            umbrella.CountHit(choiceContext, results, dealer, cardSource);
     }
 }

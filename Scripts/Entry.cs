@@ -25,6 +25,7 @@ public class Entry
     public static void Init()
     {
         GD.Print("[KazamiYuka][CombatTrace] Entry.Init begin.");
+        YukaSettingsRegistration.Register();
         VirtualFmodEventRegistry.RegisterOneShot(
             "event:/sfx/characters/kazamiyuka/select",
             "res://mods/KazamiYuka/sound/Flower Land.mp3",

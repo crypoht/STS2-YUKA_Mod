@@ -2,6 +2,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Extensions;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 using MegaCrit.Sts2.Core.Models.RelicPools;
@@ -12,6 +13,8 @@ namespace KazamiYuka.Scripts.Relics;
 [RegisterRelic(typeof(EventRelicPool))]
 public sealed class SowingBag_Yuka : YukaAncientRelic
 {
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("CardsToEnchant", 6)];
+
     public override bool HasUponPickupEffect => true;
 
     protected override IEnumerable<IHoverTip> AdditionalHoverTips => HoverTipFactory.FromEnchantment<Sown>(1);
@@ -20,7 +23,7 @@ public sealed class SowingBag_Yuka : YukaAncientRelic
     {
         Sown enchantment = ModelDb.Enchantment<Sown>();
         foreach (CardModel card in PileType.Deck.GetPile(Owner).Cards
-                     .Where(enchantment.CanEnchant).TakeRandom(6, Owner.PlayerRng.Rewards))
+                     .Where(enchantment.CanEnchant).TakeRandom(DynamicVars["CardsToEnchant"].IntValue, Owner.PlayerRng.Rewards))
             CardCmd.Enchant<Sown>(card, 1m);
 
         return Task.CompletedTask;

@@ -13,7 +13,7 @@ public sealed class FlowerMagicCannon_Yuka : KazamiYukaCard
 {
     public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new DamageVar(40m, ValueProp.Move)];
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DamageVar(45m, ValueProp.Move)];
 
     public FlowerMagicCannon_Yuka() : base(0, CardType.Attack, CardRarity.Ancient, TargetType.AllEnemies, true)
     {

@@ -3,7 +3,6 @@ using Godot;
 using HarmonyLib;
 using KazamiYuka.Scripts.Relics;
 using MegaCrit.Sts2.Core.Events;
-using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -12,14 +11,16 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace KazamiYuka.Scripts.Ancients;
 
 [RegisterSharedAncient]
-public sealed class KazamiYukaAncient_Yuka : ModAncientEventTemplate
+public sealed class KazamiYukaAncient_Yuka : ModAncientEventTemplate, ICollaborationAncient
 {
-    private const string KoishiModId = "Komeiji_Koishi";
+    private static readonly IReadOnlyList<string> RequiredCollaborationModIds =
+        Array.AsReadOnly(new[] { Entry.ModId, "Komeiji_Koishi" });
     private const string MapIconAssetPath = "res://mods/KazamiYuka/images/ancient/ancient_icon.png";
     private const string RunHistoryIconAssetPath = "res://mods/KazamiYuka/images/ancient/icon_64.png";
 
-    internal static bool IsCollaborationEnabled => ModManager.GetLoadedMods().Any(mod =>
-        string.Equals(mod.manifest?.id, KoishiModId, StringComparison.OrdinalIgnoreCase));
+    IReadOnlyList<string> ICollaborationAncient.RequiredModIds => RequiredCollaborationModIds;
+
+    internal static bool IsCollaborationEnabled => AncientCollaboration.AreModsLoaded(RequiredCollaborationModIds);
 
     public override bool IsValidForAct(ActModel act) => IsCollaborationEnabled;
 
@@ -79,7 +80,12 @@ internal static class KazamiYukaAncientPartyPatch
 {
     private static void Prefix(RunState runState, List<AncientEventModel>? ____sharedAncientSubset)
     {
-        if (runState.Players.Any(player => player.Character is KazamiYukaCharacter))
-            ____sharedAncientSubset?.RemoveAll(ancient => ancient is KazamiYukaAncient_Yuka);
+        if (____sharedAncientSubset is not { Count: > 0 })
+            return;
+
+        if (!YukaSettingsRegistration.AreSpecialAncientsEnabled(runState)
+            || !KazamiYukaAncient_Yuka.IsCollaborationEnabled
+            || runState.Players.Any(player => player.Character is KazamiYukaCharacter))
+            ____sharedAncientSubset.RemoveAll(ancient => ancient is KazamiYukaAncient_Yuka);
     }
 }
